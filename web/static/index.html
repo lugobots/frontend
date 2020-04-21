@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en-US" id="lugobot-view">
+<head id="lugobot-head">
+  <meta charset="UTF-8">
+  <meta name="robots" content="index, follow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <!-- Color for header of browsers mobiles -->
+  <meta name="theme-color" content="#59585D">
+	<meta name="apple-mobile-web-app-status-bar-style" content="#59585D">
+  <meta name="msapplication-navbutton-color" content="#59585D">
+  <link rel="Shortcut Icon" href="http://lugobot.startcriativo.com/favicon.png">
+  <meta name="description" content="Lugo is game played by bots. Your goal is developing a bot able to play Lugo.">
+
+  <!-- Share link -->
+  <meta property="og:description" content="Lugo is game played by bots. Your goal is developing a bot able to play Lugo.">
+  <meta property="og:image" content="http://lugobot.startcriativo.com/src/img/share/facebook.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <meta property="og:title" content="Lugobot">
+  <meta property="og:site_name" content="Lugobot">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="http://lugobot.startcriativo.com/">
+  <link rel="canonical" href="http://lugobot.startcriativo.com/">
+ 
+  <link type="text/css" href="https://fonts.googleapis.com/css?family=Oswald:200,300,400|Titillium+Web:400,700&display=swap"rel="stylesheet">
+  <link type="text/css" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css" rel="stylesheet">
+  <link type="text/css" href="src/css/style.css"rel="stylesheet">
+  
+  <title>Lugobot</title>
+</head>
+<body id="lugobot-page">
+  <section id="loading">
+    <span id="load-content">
+        <img id="lugo-logo" src="/src/img/lugo-logo.png" alt="Logo Lugobot">
+        <span id="progress"></span>
+    </span>
+  </section>
+  
+  <!-- Score board and team infos  -->
+  <header id="lugobot-header" class="container">  
+    <section id="game-panel">
+      <div id="teams-info">
+        <span id="home-team" class="team">
+          <span id="profile-home-team" class="profile-team">
+            <span id="picture-home-team" class="picture-team">
+              <img src="src/img/teams/profile-team-home.jpg" alt="Team Home photography">
+            </span>
+            <span id="home-team-name" class="name-team">
+              <h3>Home</h3>
+            </span>      
+          </span>
+          <span id="flag-home-team" class="flag-team">
+            <span id="flag-color-1" class="flag-color"></span>
+            <span id="flag-color-2" class="flag-color"></span>
+          </span>
+
+        </span>
+        <span id="away-team" class="team">
+            <span id="profile-away-team" class="profile-team">
+              <span id="picture-away-team" class="picture-team">
+                <img src="src/img/teams/profile-team-away.jpg" alt="Team Away photography">
+              </span>
+              <span id="name-away-team" class="name-team">
+                <h3>Away</h3>
+              </span>      
+            </span>
+            <span id="flag-away-team" class="flag-team">
+              <span id="flag-color-1" class="flag-color"></span>
+              <span id="flag-color-2" class="flag-color"></span>
+            </span>
+
+        </span>
+      </div>
+      <div id="game-info">
+        <span id="score-info">
+          <span id="score-home-team" class="score-team">1</span>
+          <span id="timer">
+            <span id="remaining">5:00</span>
+            <span id="buffering">
+              <span class="label">Buffering</span> 
+              <span class="percent">50%</span>
+              <span class="progress"></span>
+            </span>
+          </span>
+          <span id="score-away-team" class="score-team">0</span>
+        </span>
+      </div>
+    </section>
+  </header>
+
+  <main id="lugobot-stadium" class="container">
+    <div id="field">
+
+      <span id="ball"></span>
+
+      <!-- Team 1 -->
+      <span id="player-home-team-1" class="player player-home-team goalkeeper goalkeeper-home-team">
+        <span class="player-direction"></span>
+        <span class="player-number">1</span>
+      </span>
+      <span id="player-home-team-2" class="player player-home-team">
+        <span class="player-direction"></span>
+        <span class="player-number">2</span>
+      </span>
+      <span id="player-home-team-3" class="player player-home-team">
+        <span class="player-direction"></span>
+        <span class="player-number">3</span>
+      </span>
+      <span id="player-home-team-4" class="player player-home-team">
+        <span class="player-direction"></span>
+        <span class="player-number">4</span>
+      </span>
+      <span id="player-home-team-5" class="player player-home-team">
+        <span class="player-direction"></span>
+        <span class="player-number">5</span>
+      </span>
+      <span id="player-home-team-6" class="player player-home-team">
+        <span class="player-direction"></span>
+        <span class="player-number">6</span>
+      </span>
+      <span id="player-home-team-7" class="player player-home-team">
+        <span class="player-direction"></span>
+        <span class="player-number">7</span>
+      </span>
+      <span id="player-home-team-8" class="player player-home-team">
+        <span class="player-direction"></span>
+        <span class="player-number">8</span>
+      </span>
+      <span id="player-home-team-9" class="player player-home-team">
+        <span class="player-direction"></span>
+        <span class="player-number">9</span>
+      </span>
+      <span id="player-home-team-10" class="player player-home-team active-player">
+        <span class="player-direction"></span>
+        <span class="player-number">10</span>
+      </span>
+      <span id="player-home-team-11" class="player player-home-team">
+        <span class="player-direction"></span>
+        <span class="player-number">11</span>
+      </span>
+
+      <!-- Team 2 -->
+      
+      <span id="player-away-team-1" class="player player-away-team goalkeeper goalkeeper-away-team">
+          <span class="player-direction"></span>
+          <span class="player-number">1</span>
+      </span>
+      <span id="player-away-team-2" class="player player-away-team">
+        <span class="player-direction"></span>
+        <span class="player-number">2</span>
+      </span>
+      <span id="player-away-team-3" class="player player-away-team">
+        <span class="player-direction"></span>
+        <span class="player-number">3</span>
+      </span>
+      <span id="player-away-team-4" class="player player-away-team">
+        <span class="player-direction"></span>
+        <span class="player-number">4</span>
+      </span>
+      <span id="player-away-team-5" class="player player-away-team">
+        <span class="player-direction"></span>
+        <span class="player-number">5</span>
+      </span>
+      <span id="player-away-team-6" class="player player-away-team">
+        <span class="player-direction"></span>
+        <span class="player-number">6</span>
+      </span>
+      <span id="player-away-team-7" class="player player-away-team">
+        <span class="player-direction"></span>
+        <span class="player-number">7</span>
+      </span>
+      <span id="player-away-team-8" class="player player-away-team">
+        <span class="player-direction"></span>
+        <span class="player-number">8</span>
+      </span>
+      <span id="player-away-team-9" class="player player-away-team">
+        <span class="player-direction"></span>
+        <span class="player-number">9</span>
+      </span>
+      <span id="player-away-team-10" class="player player-away-team active-player">
+        <span class="player-direction"></span>
+        <span class="player-number">10</span>
+      </span>
+      <span id="player-away-team-11" class="player player-away-team">
+        <span class="player-direction"></span>
+        <span class="player-number">11</span>
+      </span>
+    </div>
+
+  </main>
+
+  <!-- Admin panel  -->
+  <span id="login-area" class="container user-mode"><button id="btn-login" class="btn btn-main" onclick="admin_panel('login')" title="Action">Login</button></span>
+
+  <footer id="lugobot-admin-panel" class="container">
+    <nav id="tabs-panel-link">
+      <li class="tab-link active-tab-link" onclick=" open_tab_panel(event,0);">
+        <a href="javascript:;">DEBUG</a>
+      </li>
+      <li class="tab-link" onclick=" open_tab_panel(event,1);" >
+        <a href="javascript:;">EVENTS</a>
+      </li>
+      <li class="tab-link" onclick=" open_tab_panel(event,2);" >
+        <a href="javascript:;">OTHERS</a>
+      </li>
+      <li class="bg-tab"><a href="javascript:;"></a>BG TAB</a></li>
+    </nav>
+    <section id="tabs-panel-content">
+      <div id="0" class="tab-content debug-tab active-tab-content">
+        <span id="status-conection" class="conected" title="Status Conection"></span>
+        <button id="btn-resume" class="btn btn-main">Resume</button>
+        <button id="btn-next-order" class="btn">Next Order</button>
+        <button id="btn-next-cycle" class="btn">Next Cycle</button>
+        <button id="btn-rearrange" class="btn">Rearrange</button>
+        <button id="btn-save-positions" class="btn">Save Positions</button>
+        <span id="choose-preset">
+          <label for="preset">Choose a pre-set Arrangement</label>          
+          <select name="preset">
+            <option value="default">Choose a pre-set Arrangement</option> 
+            <option value="preset-1">Pre-set 1</option>
+            <option value="preset-2">Pre-set 2</option>
+            <option value="preset-3">Pre-set 3</option>
+          </select>
+        </span>
+        <span id="coordenates">
+          <span id="axis">
+            <span id="axis-x" class="axis">X:<span class="value-x">1059.65</span></span>
+            <span id="axis-y" class="axis">Y:<span class="value-y">1397.17</span></span>
+          </span>
+          <span id="icon"></span>
+        </span>
+      </div>
+      <div id="1" class="tab-content events-tab">
+        <button id="btn-game-over" class="btn" onclick="modal_game_over();"  title="Modal">Game Over</button>
+        <button id="btn-winner" class="btn" onclick="modal_winner('home');" title="Modal" >Winner</button>
+        <button id="btn-home-goal" class="btn" onclick="event_goal('home');" title="Modal" >Home Goal</button>
+        <button id="btn-away-goal" class="btn" onclick="event_goal('away');" title="Modal" >Away Goal</button>
+        <button id="btn-loading" class="btn" onclick="loading('open');" title="Screen">Load</button>
+        <button id="btn-logoff" class="btn" onclick="admin_panel('logoff')"  title="Action">Logoff</button>
+      </div>
+      <div id="2" class="tab-content others-tab"></div>
+    </section>
+
+  </footer>
+
+  <!-- Modals  -->
+  <section id="event-view">
+    <!-- Modal Game Over  -->
+    <div id="modal-game-over" class="modal modal-bg">
+      <span class="close-modal" title="Close modal"><i class="fas fa-times"></i></span>
+      <span class="modal-content">
+        <h2 class="modal-title">Game Over</h2>
+        <p class="modal-content">Sorry guys, the game was interrupted</p>
+      </span>
+      <span class="modal-action">
+        <button id="btn-quit-game" class="btn">Quit Game</button>
+        <button id="btn-retry" class="btn btn-main">Retry</button>
+      </span>
+    </div>
+
+    <!-- Modal Final Scoreboard -->
+    <div id="modal-winner" class="modal modal-bg">
+      <span class="close-modal" title="Close modal"><i class="fas fa-times"></i></span>
+      <span class="modal-content">
+        <img id="icon-trophy" class="icon-modal" src="/src/img/bg/modals/icon-trophy.png" alt="Icon trophy">
+        <h2 class="modal-title">Final Scoreboard</h2>
+      </span>
+
+      <section class="game-panel">
+          <div id="teams-info">
+            <span id="home-team" class="team">
+              <span id="profile-home-team" class="profile-team">
+                <span id="picture-home-team" class="picture-team">
+                  <img src="src/img/teams/profile-team-home.jpg" alt="Team Home photography">
+                </span>    
+              </span>    
+            </span>
+            <span id="away-team" class="team">
+                <span id="profile-away-team" class="profile-team">
+                  <span id="picture-away-team" class="picture-team">
+                    <img src="src/img/teams/profile-team-away.jpg" alt="Team Away photography">
+                  </span>    
+            </span>
+          </div>
+          <div id="modal-game-info">
+            <span id="score-info">
+              <span id="score-home-team" class="score-team">2</span>
+              <span id="score-away-team" class="score-team">1</span>
+            </span>
+          </div>
+        </section>
+
+      <span class="modal-action">
+        <button id="btn-exit-game" class="btn">Exit Game</button>
+        <button id="btn-re-match" class="btn btn-main">Re-Match</button>
+      </span>
+    </div>
+
+    <!-- Modal Goal  -->
+    <div id="event-goal" >
+
+      <!-- <span class="close-modal" title="Close modal"><i class="fas fa-times"></i></span> -->
+      <span id="balls">
+        <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>  <div class="snow"></div>
+      </span>
+
+        <h2 class="legend-goal">
+          <span>G</span><span>O</span><span>O</span><span>A</span><span>A</span><span>L</span><span>!</span>
+        </h2>
+      <span class="soccer-crowd"></span>
+    </div>
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" id="filter_blur">
+      <filter id="blur"> <feGaussianBlur stdDeviation="6" /></filter>
+    </svg>
+  </section>
+
+  <!-- Scripts files  -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="/src/js/main.js"></script>
+
+</body>
+</html>

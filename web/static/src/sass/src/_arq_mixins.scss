@@ -1,0 +1,113 @@
+//> Mixin para inserção de Estrutura flex
+@mixin model-flex($flow:row, $wrap:nowrap, $align: false, $justify: false){
+  display: flex;
+  flex-flow: $flow $wrap;
+  @if $align != false{ align-items: $align;}
+  @if $justify != false{ justify-content: $justify;}
+}
+
+
+@mixin model-border($side:all, $size:1, $type: solid, $color:#000 ){
+  
+  @if $side == all{
+    border: #{$size + px } #{$type} #{$color};
+  }
+  @if $side == x{
+    border-left: #{$size + px } #{$type} #{$color};
+    border-right: #{$size + px } #{$type} #{$color};
+  }
+  @if $side == y{
+    border-top: #{$size + px } #{$type} #{$color};
+    border-bottom: #{$size + px } #{$type} #{$color};
+  }
+  @if $side == notop{
+    border-left: #{$size + px } #{$type} #{$color};
+    border-right: #{$size + px } #{$type} #{$color};
+    border-bottom: #{$size + px } #{$type} #{$color};
+  }
+  @if $side == nobottom{
+    border-left: #{$size + px } #{$type} #{$color};
+    border-right: #{$size + px } #{$type} #{$color};
+    border-top: #{$size + px } #{$type} #{$color};
+  }
+  @if $side == noleft{
+    border-bottom: #{$size + px } #{$type} #{$color};
+    border-right: #{$size + px } #{$type} #{$color};
+    border-top: #{$size + px } #{$type} #{$color};
+  }
+  @if $side == noright{
+    border-left: #{$size + px } #{$type} #{$color};
+    border-bottom: #{$size + px } #{$type} #{$color};
+    border-top: #{$size + px } #{$type} #{$color};
+  }
+}
+
+@mixin model-display($display:block, $position:false){
+  display: #{$display};
+  @if $position != false{ position: #{$position}; }
+}
+
+@mixin model-square($size:50px) {
+  width: #{$size};
+  height: #{$size}; 
+}
+
+//> Modelo de Imagens
+@mixin model-img($model:contain){
+  display: block;
+
+  @if $model = contain{ max-width: 100%; height: auto; }
+  @else if $model = height{ width: auto; height: 100%; }
+
+  @else if $model = cover{
+      position: absolute;
+      left:50%;
+      top:50%;
+      width: auto;
+      height: auto;
+      min-width: 100%;
+      min-height: 100%;
+      transform: translate(-50%,-50%);
+  }
+}
+
+//> Mixin de font size
+@mixin font-size($font-min-size: $font-min-size, $font-max-size:$font-max-size){
+  font-size: calc(#{$font-min-size + px} + (#{$font-max-size} - #{$font-min-size}) * ((100vw - 320px) / (1920 - 320)));
+  line-height: calc((#{$font-min-size + px} + (#{$font-max-size} - #{$font-min-size}) * ((100vw - 320px) / (1920 - 320))) * 1.5);  
+}
+
+//> Mixin de icon size
+@mixin icon-size($font-min-size: $font-min-size, $font-max-size:$font-max-size){
+  font-size: calc(#{$font-min-size + px} + (#{$font-max-size} - #{$font-min-size}) * ((100vw - 320px) / (1920 - 320)));
+  line-height: calc((#{$font-min-size + px} + (#{$font-max-size} - #{$font-min-size}) * ((100vw - 320px) / (1920 - 320))));  
+}
+
+// Mixin font awesome
+@mixin font-awesome($font:regular, $size:24 ){
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1; 
+
+  @if $font == regular{
+      font-family: $font-icon;
+      font-weight: 400;
+      font-size: $size + px;
+      line-height: $size  + px;
+  }
+  @if $font == solid{
+      font-family: $font-icon;
+      font-weight: 900;
+      font-size: $size  + px;
+      line-height: $size  + px;
+  }
+  @if $font == brand{
+      font-family: $font-icon-brand;
+      font-size: $size  + px;
+      line-height: $size  + px;
+  }
+}

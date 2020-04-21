@@ -1,0 +1,48 @@
+/* #region -> Reset do HTML */
+
+	// Remove estilos pré-definidos
+	a {	text-decoration: none;color: #000;}
+	ol,ul {	list-style: none; }
+
+	html, body, div, span, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, a, em, img, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, article, footer, header, nav, section, main {
+		margin: 0;
+		padding: 0;
+		border: 0;
+		vertical-align: baseline;
+	}
+
+	h1, h2, h3, h4, h5, h6 {
+		text-transform: uppercase;
+		margin-bottom: 1em;
+		font-family: $font-primary;
+		font-weight: bold;
+		color: unset;
+		font-size: calc(#{$font-title-min-size + px} + (#{$font-title-max-size} - #{$font-title-min-size}) * ((100vw - 320px) / (1920 - 320)));
+		line-height: calc((#{$font-title-min-size + px} + (#{$font-title-max-size} - #{$font-title-min-size}) * ((100vw - 320px) / (1920 - 320))) * 1.5);
+	}
+
+	p, a, ul { font-size: 1em; font-weight: normal;	color: unset; }
+
+	p {
+		justify-content: justify;
+		text-justify: distribute;
+		font-size: calc(#{$font-min-size + px} + (#{$font-max-size} - #{$font-min-size}) * ((100vw - 320px) / (1920 - 320)));
+		line-height: calc((#{$font-min-size + px} + (#{$font-max-size} - #{$font-min-size}) * ((100vw - 320px) / (1920 - 320))) * 1.5);
+		margin-bottom: 1.2em;
+		font-family: $font-secondary;
+	}
+	img{display: block;}
+
+	button{ background: none; border:none;}
+	li{ list-style: none;}
+
+	*, *::before, *::after { box-sizing: border-box; }
+
+	* {	
+		-webkit-font-smoothing: antialiased;
+		font-family: $font-secondary; 
+	}
+
+	*::selection { background: $secondary;	color: $white;	} 
+
+/* #endregion -> Fim > Reset do HTML */
