@@ -3,7 +3,9 @@ package app
 import (
 	"github.com/gin-gonic/gin"
 	"html/template"
+	"log"
 	"net/http"
+	"path"
 )
 
 var html = template.Must(template.New("https").Parse(`
@@ -18,26 +20,25 @@ var html = template.Must(template.New("https").Parse(`
 </html>
 `))
 
-func Newhandler() *gin.Engine {
+func Newhandler(whereAmI string) *gin.Engine {
 	r := gin.Default()
 	r.SetHTMLTemplate(html)
 	v1 := r.Group("/")
 	{
+		//fs := http.FileServer(http.Dir("./static"))
+
+		//http.Handle("/static/", http.StripPrefix("/static/", fs))
 		v1.Static("/assets", "./assets")
+		v1.Static("/static", path.Join(whereAmI, "/static"))
 		v1.GET("/", func(c *gin.Context) {
-			//if pusher := c.Writer.Pusher(); pusher != nil {
-			//	// use pusher.Push() to do server push
-			//	if err := pusher.Push("/assets/app.js", nil); err != nil {
-			//		log.Printf("Failed to push: %v", err)
-			//	}
-			//	go func() {
-			//		time.Sleep(10 * time.Second)
-			//		if err := pusher.Push("/assets/app2.js", nil); err != nil {
-			//			log.Printf("Failed to push: %v", err)
-			//		}
-			//
-			//	}()
-			//}
+			if pusher := c.Writer.Pusher(); pusher != nil {
+				// use pusher.Push() to do server push
+				if err := pusher.Push("/assets/app.js", nil); err != nil {
+					log.Printf("Failed to push: %v", err)
+				} else {
+					log.Printf("PUUUUUSHED")
+				}
+			}
 			c.HTML(200, "https", gin.H{
 				"status": "success",
 			})
