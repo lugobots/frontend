@@ -7,15 +7,7 @@
 /* ###################### DEFINITIONS ###################### */
 
 /* #region -- Section  Root */
-:root {
-  /* Colors Team Home */
-  --team-home-color-primary: 10, 36, 133;
-  --team-home-color-secondary: 240, 209, 0;
 
-  /* Colors Team Away */
-  --team-away-color-primary: 188, 75, 55;
-  --team-away-color-secondary: 180, 189, 191;
-}
   
 // Variables Sass
 
@@ -110,7 +102,7 @@ $team-away-color-2 : var(--team-away-color-secondary);
  
 /* #region -- Section   Header */
 #lugobot-header {
-  transform:translateY(-100%);
+//   transform:translateY(-100%);
   transition: max-width 2s ease-in-out, transform 1s ease-in 1s;
   transform-origin: center top;
   z-index: 500;
