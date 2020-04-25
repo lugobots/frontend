@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script>
+
+      const evtSource = new EventSource("https://localhost:8080/stream");
+
+      evtSource.addEventListener("ping", function(event) {
+        console.log("aqui", event.data)
+      });
+
+      // addEventListener version
+      evtSource.addEventListener('open', (e) => {
+        console.log("The connection has been established.");
+      });
+      EventSource.onopen = function() {
+        console.log("Connection to server opened.");
+      };
+
+      evtSource.onerror = function() {
+        console.log("EventSource failed.");
+      };
+
+    </script>
+</head>
+<body>
+
+</body>
+</html>

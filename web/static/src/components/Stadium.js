@@ -1,14 +1,18 @@
 import React from 'react';
 import Panel from "./Panel";
+import axios from 'axios';
 
 class Stadium extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      isConnected: false,
+      isLoaded: false,
+      error: null,
       game: {
         homeTeam: {
           name: "Rubens",
-          avatar: "src/img/teams/profile-team-home.jpg",
+          avatar: "external/profile-team-home.jpg",
           score: 0,
           colors: {
             a: [0, 250, 0],
@@ -17,7 +21,7 @@ class Stadium extends React.Component {
         },
         awayTeam: {
           name: "Outro",
-          avatar: "src/img/teams/profile-team-away.jpg",
+          avatar: "external/profile-team-away.jpg",
           score: 3,
           colors: {
             a: [0, 0, 200],
@@ -26,30 +30,65 @@ class Stadium extends React.Component {
         },
       }
     };
+  }
 
-    document.documentElement.style.setProperty('--team-home-color-primary', this.state.game.homeTeam.colors.a);
-    document.documentElement.style.setProperty('--team-home-color-secondary',this.state.game.homeTeam.colors.b);
-    document.documentElement.style.setProperty('--team-away-color-primary',this.state.game.awayTeam.colors.a);
-    document.documentElement.style.setProperty('--team-away-color-secondary',this.state.game.awayTeam.colors.b);
+  componentDidMount() {
+
+    const me = this;
+    const evtSource = new EventSource("https://localhost:8080/stream");
+
+    evtSource.addEventListener("setup", function (event) {
+      console.log("PING.", event.data);
+      me.setState(state => {
+        let s = state;
+        s.game = JSON.parse(event.data)
+        s.isLoaded = true;
+        return s;
+      })
+    });
+
+    // addEventListener version
+    evtSource.addEventListener('open', (e) => {
+      console.log("Connection to server opened.");
+      me.setState(state => {
+        let s = state;
+        s.isConnected = true;
+        return s;
+      })
+    });
+
+
+    evtSource.onerror = function () {
+      console.log("EventSource failed.");
+      me.setState(state => {
+        let s = state;
+        s.isConnected = false;
+        s.isLoaded = false;
+        return s;
+      })
+    };
   }
 
   render() {
-    const me = this;
-    setTimeout(function () {
 
-      me.setState(state => {
-        let s = state;
-        s.game.homeTeam.name = "Championgs";
-        return s;
-      })
-
-      console.log("mudou")
-    }, 3000)
-    return <span>
+    const {error, isLoaded, isConnected} = this.state;
+    if (error) {
+      return <div>Error: {error.message}</div>;
+    } else if (!isConnected) {
+      return <div>Connecting...</div>;
+    } else if (!isLoaded) {
+      return <div>Loading...</div>;
+    } else {
+      document.documentElement.style.setProperty('--team-home-color-primary', this.state.game.homeTeam.colors.a);
+      document.documentElement.style.setProperty('--team-home-color-secondary', this.state.game.homeTeam.colors.b);
+      document.documentElement.style.setProperty('--team-away-color-primary', this.state.game.awayTeam.colors.a);
+      document.documentElement.style.setProperty('--team-away-color-secondary', this.state.game.awayTeam.colors.b);
+      return <span>
       <header id="lugobot-header" className="container">
         <Panel game={this.state.game}/>
       </header>
     </span>;
+    }
   }
 }
 

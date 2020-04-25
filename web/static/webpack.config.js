@@ -10,8 +10,9 @@ module.exports = {
         // the output of the webpack build will be in /dist directory
         path: path.resolve(__dirname, 'dist'),
         // the filename of the JS bundle will be bundle.js
-        filename: 'bundle.js'
+        filename: 'js/bundle.js'
     },
+    watch: true,
     module: {
         rules: [
             {
@@ -41,9 +42,10 @@ module.exports = {
             { test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "url-loader" },
             {
                 test: /\.(png|svg|jpg|gif)$/,
-                use: [
-                    'file-loader',
-                ],
+                loader: 'file-loader',
+                options: {
+                    outputPath: 'images',
+                },
             },
         ]
     },
