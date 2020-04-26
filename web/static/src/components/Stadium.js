@@ -12,6 +12,7 @@ class Stadium extends React.Component {
       isLoaded: false,
       error: null,
       game: {
+        timeRemaining: "00:00",
         homeTeam: {
           name: "Rubens",
           avatar: "external/profile-team-home.jpg",

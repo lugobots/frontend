@@ -50,8 +50,9 @@ func (s *Service) StreamEventsTo(uuid string) chan FrontEndUpdate {
 
 func (s *Service) GetGameConfig() Configuration {
 	return Configuration{
-		DevMode:   false,
-		StartMode: "",
+		DevMode:       false,
+		StartMode:     "",
+		TimeRemaining: "5:00",
 		HomeTeam: TeamConfiguration{
 			Name:   "My team",
 			Avatar: "external/profile-team-home.jpg",
@@ -93,10 +94,13 @@ func Newhandler(whereAmI, gameID string, srv *Service) *gin.Engine {
 	}
 
 	r.SetHTMLTemplate(t)
-	r.Static("/assets", "./assets")
+	//r.Static("/assets", "./assets")
 	r.Static("/js", path.Join(whereAmI, "/static/dist/js"))
 	r.Static("/images", path.Join(whereAmI, "/static/dist/images"))
 	r.Static("/external", path.Join(whereAmI, "/static/external"))
+
+	//velho
+	r.Static("/velho", path.Join(whereAmI, "/static/"))
 
 	uquiner := Uinquer{}
 

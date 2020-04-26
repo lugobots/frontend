@@ -17,12 +17,14 @@ func (c Color) MarshalJSON() ([]byte, error) {
 type TeamConfiguration struct {
 	Name   string           `json:"name"`
 	Avatar string           `json:"avatar"`
+	Score  int              `json:"score"`
 	Colors map[string]Color `json:"colors"`
 }
 
 type Configuration struct {
-	DevMode   bool              `json:"dev_mode"`
-	StartMode string            `json:"start_mode"`
-	HomeTeam  TeamConfiguration `json:"homeTeam"`
-	AwayTeam  TeamConfiguration `json:"awayTeam"`
+	DevMode       bool              `json:"dev_mode"`
+	StartMode     string            `json:"start_mode"`
+	TimeRemaining string            `json:"time_remaining"`
+	HomeTeam      TeamConfiguration `json:"homeTeam"`
+	AwayTeam      TeamConfiguration `json:"awayTeam"`
 }
