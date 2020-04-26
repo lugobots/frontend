@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	srv := app.Service{}
-	server := app.Newhandler("/home/rubens/go/src/bitbucket.org/makeitplay/lugo-frontend/web", srv)
+	srv := &app.Service{}
+	server := app.Newhandler("/home/rubens/go/src/bitbucket.org/makeitplay/lugo-frontend/web", "local", srv)
 	http.Handle("/", server)
 	log.Fatal(http.ListenAndServeTLS(":8080",
 		"testdata/server.pem",

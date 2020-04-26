@@ -1,6 +1,8 @@
 import React from 'react';
 import Panel from "./Panel";
-import axios from 'axios';
+
+
+const BackEndPoint = "https://localhost:8080"
 
 class Stadium extends React.Component {
   constructor(props) {
@@ -33,33 +35,26 @@ class Stadium extends React.Component {
   }
 
   componentDidMount() {
-
     const me = this;
-    const evtSource = new EventSource("https://localhost:8080/stream");
+    const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}`);
 
-    evtSource.addEventListener("setup", function (event) {
-      console.log("PING.", event.data);
-      me.setState(state => {
-        let s = state;
-        s.game = JSON.parse(event.data)
-        s.isLoaded = true;
-        return s;
-      })
+    evtSource.addEventListener("ping", function (event) {
+      console.log("ping", event.data);
     });
 
     // addEventListener version
     evtSource.addEventListener('open', (e) => {
-      console.log("Connection to server opened.");
       me.setState(state => {
         let s = state;
         s.isConnected = true;
         return s;
       })
+      me.setup()
     });
 
 
     evtSource.onerror = function () {
-      console.log("EventSource failed.");
+      console.debug("EventSource failed.");
       me.setState(state => {
         let s = state;
         s.isConnected = false;
@@ -70,7 +65,6 @@ class Stadium extends React.Component {
   }
 
   render() {
-
     const {error, isLoaded, isConnected} = this.state;
     if (error) {
       return <div>Error: {error.message}</div>;
@@ -89,6 +83,29 @@ class Stadium extends React.Component {
       </header>
     </span>;
     }
+  }
+
+  setup() {
+    fetch(`${BackEndPoint}/setup/${gameID}/${uuid}`)
+      .then(res => res.json())
+      .then(
+        (result) => {
+          console.log(result)
+          this.setState({
+            isLoaded: true,
+            game: result
+          });
+        },
+        // Note: it's important to handle errors here
+        // instead of a catch() block so that we don't swallow
+        // exceptions from actual bugs in components.
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      )
   }
 }
 

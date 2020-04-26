@@ -6,17 +6,10 @@
     <link rel="Shortcut Icon" href="favicon.png">
     <meta name="description" content="Lugo is game played by bots. Your goal is developing a bot able to play Lugo.">
     <title>Hello world App</title>
-    <style>
-        :root {
-            /* Colors Team Home */
-            --team-home-color-primary: 200, 36, 133;
-            --team-home-color-secondary: 240, 50, 0;
-
-            /* Colors Team Away */
-            --team-away-color-primary: 188, 75, 100;
-            --team-away-color-secondary: 180, 100, 191;
-        }
-    </style>
+    <script>
+      const uuid = {{ .uuid}};
+      const gameID = {{ .gameID}};
+    </script>
 </head>
 <body id="lugobot-page">
 <div id="app"></div>

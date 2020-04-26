@@ -1,11 +1,12 @@
 package app
 
 import (
-	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"io"
 	"log"
+	"net/http"
 	"path"
 	"time"
 )
@@ -22,13 +23,33 @@ var html = template.Must(template.New("https").Parse(`
 </html>
 `))
 
-type Service struct {
+type FrontEndUpdate struct {
+	Type string
+	Data string
 }
 
-func Newhandler(whereAmI string, srv Service) *gin.Engine {
-	r := gin.Default()
+type Service struct {
+	Clients []string
+}
 
-	config := Configuration{
+func (s *Service) StreamEventsTo(uuid string) chan FrontEndUpdate {
+
+	clientChan := make(chan FrontEndUpdate)
+
+	go func() {
+		for {
+			time.Sleep(1 * time.Second)
+			clientChan <- FrontEndUpdate{
+				Type: "ping",
+				Data: "legal",
+			}
+		}
+	}()
+	return clientChan
+}
+
+func (s *Service) GetGameConfig() Configuration {
+	return Configuration{
 		DevMode:   false,
 		StartMode: "",
 		HomeTeam: TeamConfiguration{
@@ -60,6 +81,10 @@ func Newhandler(whereAmI string, srv Service) *gin.Engine {
 			},
 		},
 	}
+}
+
+func Newhandler(whereAmI, gameID string, srv *Service) *gin.Engine {
+	r := gin.Default()
 
 	f := path.Join(whereAmI, "/static/dist/index.html")
 	t, err := template.New("a").ParseFiles(f)
@@ -73,40 +98,49 @@ func Newhandler(whereAmI string, srv Service) *gin.Engine {
 	r.Static("/images", path.Join(whereAmI, "/static/dist/images"))
 	r.Static("/external", path.Join(whereAmI, "/static/external"))
 
+	uquiner := Uinquer{}
+
 	r.GET("/", func(c *gin.Context) {
-		//if pusher := c.Writer.Pusher(); pusher != nil {
-		//	// use pusher.Push() to do server push
-		//	if err := pusher.Push("/assets/app.js", nil); err != nil {
-		//		log.Printf("Failed to push: %v", err)
-		//	} else {
-		//		log.Printf("PUUUUUSHED")
-		//	}
-		//}
-		c.HTML(200, "index.html", gin.H{})
+
+		uuid, err := uquiner.New()
+		if err != nil {
+			c.String(http.StatusServiceUnavailable, "wow! Looks like we reached the limits of the connections. I am proud of it. Uh hoo!")
+			return
+		}
+
+		uuid = fmt.Sprintf("%s_%d", uuid, time.Now().Nanosecond()%10000)
+
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"uuid":   uuid,
+			"gameID": gameID,
+		})
 	})
 
-	r.GET("/game-config", func(ctx *gin.Context) {
+	r.GET("/setup/:gameID/:uuid/", makeSetupHander(srv))
+	r.GET("/game-state/:gameID/:uuid/", makeGameStateHander(srv))
+	return r
+}
 
-		ctx.JSON(200, config)
-	})
+func makeSetupHander(srv *Service) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.JSON(http.StatusOK, srv.GetGameConfig())
+	}
+}
 
-	r.GET("/stream", func(c *gin.Context) {
+func makeGameStateHander(srv *Service) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		clientGone := c.Writer.CloseNotify()
+		uuid := c.Param("uuid")
 		c.Stream(func(w io.Writer) bool {
 			select {
 			case <-clientGone:
 				log.Println("Closed")
 				return false
-			case <-time.After(2 * time.Second):
-				c.SSEvent("ping", "o que eh isso")
-				log.Println("Send")
-
-				if jjj, err := json.Marshal(config); err == nil {
-					c.SSEvent("setup", string(jjj))
-				}
-				return true
+			case m := <-srv.StreamEventsTo(uuid):
+				log.Printf("Sending type %s: %s", m.Type, m.Data)
+				c.SSEvent(m.Type, m.Data)
 			}
+			return true
 		})
-	})
-	return r
+	}
 }
