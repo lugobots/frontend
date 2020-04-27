@@ -1,5 +1,6 @@
 import React from 'react';
 import Panel from "./Panel";
+import Field from "./Field";
 
 
 const BackEndPoint = "https://localhost:8080"
@@ -44,7 +45,7 @@ class Stadium extends React.Component {
     });
 
     // addEventListener version
-    evtSource.addEventListener('open', (e) => {
+    evtSource.addEventListener('open', () => {
       me.setState(state => {
         let s = state;
         s.isConnected = true;
@@ -78,11 +79,15 @@ class Stadium extends React.Component {
       document.documentElement.style.setProperty('--team-home-color-secondary', this.state.game.homeTeam.colors.b);
       document.documentElement.style.setProperty('--team-away-color-primary', this.state.game.awayTeam.colors.a);
       document.documentElement.style.setProperty('--team-away-color-secondary', this.state.game.awayTeam.colors.b);
-      return <span>
+      return <div>
       <header id="lugobot-header" className="container">
         <Panel game={this.state.game}/>
       </header>
-    </span>;
+
+      <main id="lugobot-stadium" className="container">
+        <Field game={this.state.game}/>
+      </main>
+    </div>;
     }
   }
 

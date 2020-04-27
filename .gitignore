@@ -1,3 +1,4 @@
 .idea
 web/static/dist
 web/static/node_modules
+cmd/frontend/Run
