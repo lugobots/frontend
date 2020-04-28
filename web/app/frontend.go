@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"path"
 	"time"
+
+	"github.com/lugobots/lugo4go/v2/lugo"
 )
 
 var html = template.Must(template.New("https").Parse(`
@@ -25,7 +27,7 @@ var html = template.Must(template.New("https").Parse(`
 
 type FrontEndUpdate struct {
 	Type string
-	Data string
+	Data interface{}
 }
 
 type Service struct {
@@ -36,12 +38,52 @@ func (s *Service) StreamEventsTo(uuid string) chan FrontEndUpdate {
 
 	clientChan := make(chan FrontEndUpdate)
 
+	sn := &lugo.GameSnapshot{
+		State: lugo.GameSnapshot_WAITING,
+		Turn:  12,
+		HomeTeam: &lugo.Team{
+			Players: []*lugo.Player{{
+				Number: 1,
+				Position: &lugo.Point{
+					X: 100,
+					Y: 100,
+				},
+				Velocity:     nil,
+				TeamSide:     0,
+				InitPosition: nil,
+			},
+			},
+			Name:  "Eu",
+			Score: 0,
+			Side:  lugo.Team_HOME,
+		},
+		AwayTeam: &lugo.Team{
+			Players: []*lugo.Player{{
+				Number: 1,
+				Position: &lugo.Point{
+					X: 100,
+					Y: 100,
+				},
+				Velocity:     nil,
+				TeamSide:     0,
+				InitPosition: nil,
+			},
+			},
+			Name:  "Eu",
+			Score: 0,
+			Side:  lugo.Team_AWAY,
+		},
+		Ball:      &lugo.Ball{},
+		ShotClock: nil,
+	}
+
 	go func() {
 		for {
 			time.Sleep(1 * time.Second)
+			sn.Turn = uint32(time.Now().Second())
 			clientChan <- FrontEndUpdate{
 				Type: "ping",
-				Data: "legal",
+				Data: sn,
 			}
 		}
 	}()
@@ -120,18 +162,18 @@ func Newhandler(whereAmI, gameID string, srv *Service) *gin.Engine {
 		})
 	})
 
-	r.GET("/setup/:gameID/:uuid/", makeSetupHander(srv))
-	r.GET("/game-state/:gameID/:uuid/", makeGameStateHander(srv))
+	r.GET("/setup/:gameID/:uuid/", makeSetupHandler(srv))
+	r.GET("/game-state/:gameID/:uuid/", makeGameStateHandler(srv))
 	return r
 }
 
-func makeSetupHander(srv *Service) gin.HandlerFunc {
+func makeSetupHandler(srv *Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, srv.GetGameConfig())
 	}
 }
 
-func makeGameStateHander(srv *Service) gin.HandlerFunc {
+func makeGameStateHandler(srv *Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientGone := c.Writer.CloseNotify()
 		uuid := c.Param("uuid")

@@ -10,8 +10,8 @@ class Panel extends React.Component {
 
   render() {
     return <section id="game-panel">
-        <PanelTeamsInfo game={this.props.game} />
-        <PanelGameInfo game={this.props.game} />
+      <PanelTeamsInfo game={this.props.game} setup={this.props.setup}/>
+      <PanelGameInfo game={this.props.game} setup={this.props.setup}/>
     </section>;
   }
 }

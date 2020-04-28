@@ -25,6 +25,6 @@ type Configuration struct {
 	DevMode       bool              `json:"dev_mode"`
 	StartMode     string            `json:"start_mode"`
 	TimeRemaining string            `json:"time_remaining"`
-	HomeTeam      TeamConfiguration `json:"homeTeam"`
-	AwayTeam      TeamConfiguration `json:"awayTeam"`
+	HomeTeam      TeamConfiguration `json:"home_team"`
+	AwayTeam      TeamConfiguration `json:"away_team"`
 }

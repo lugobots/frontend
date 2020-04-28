@@ -12,28 +12,41 @@ class Stadium extends React.Component {
       isConnected: false,
       isLoaded: false,
       error: null,
-      game: {
-        timeRemaining: "00:00",
-        homeTeam: {
+      setup: {
+        dev_mode: false,
+        start_mode: "normal",
+        turn_duration: 50,//milliseconds
+        time_remaining: "5:00",
+        home_team: {
           name: "Rubens",
           avatar: "external/profile-team-home.jpg",
-          score: 0,
           colors: {
             a: [0, 250, 0],
             b: [250, 200, 0]
           },
         },
-        awayTeam: {
+        away_team: {
           name: "Outro",
           avatar: "external/profile-team-away.jpg",
-          score: 3,
           colors: {
             a: [0, 0, 200],
             b: [50, 100, 200]
           },
         },
+      },
+      game: {
+        turn: 0,
+        home_team: {
+          players: [],
+          score: 0,
+        },
+        away_team: {
+          players: [],
+          score: 0,
+        },
+        ball: {}
       }
-    };
+    }
   }
 
   componentDidMount() {
@@ -41,7 +54,11 @@ class Stadium extends React.Component {
     const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}`);
 
     evtSource.addEventListener("ping", function (event) {
-      console.log("ping", event.data);
+      const g = JSON.parse(event.data);
+      console.log(g)
+      me.setState({
+        game: g
+      });
     });
 
     // addEventListener version
@@ -75,19 +92,19 @@ class Stadium extends React.Component {
     } else if (!isLoaded) {
       return <div>Loading...</div>;
     } else {
-      document.documentElement.style.setProperty('--team-home-color-primary', this.state.game.homeTeam.colors.a);
-      document.documentElement.style.setProperty('--team-home-color-secondary', this.state.game.homeTeam.colors.b);
-      document.documentElement.style.setProperty('--team-away-color-primary', this.state.game.awayTeam.colors.a);
-      document.documentElement.style.setProperty('--team-away-color-secondary', this.state.game.awayTeam.colors.b);
+      document.documentElement.style.setProperty('--team-home-color-primary', this.state.setup.home_team.colors.a);
+      document.documentElement.style.setProperty('--team-home-color-secondary', this.state.setup.home_team.colors.b);
+      document.documentElement.style.setProperty('--team-away-color-primary', this.state.setup.away_team.colors.a);
+      document.documentElement.style.setProperty('--team-away-color-secondary', this.state.setup.away_team.colors.b);
       return <div>
-      <header id="lugobot-header" className="container">
-        <Panel game={this.state.game}/>
-      </header>
+        <header id="lugobot-header" className="container">
+          <Panel game={this.state.game} setup={this.state.setup}/>
+        </header>
 
-      <main id="lugobot-stadium" className="container">
-        <Field game={this.state.game}/>
-      </main>
-    </div>;
+        <main id="lugobot-stadium" className="container">
+          <Field game={this.state.game}/>
+        </main>
+      </div>;
     }
   }
 
@@ -99,7 +116,7 @@ class Stadium extends React.Component {
           console.log(result)
           this.setState({
             isLoaded: true,
-            game: result
+            setup: result
           });
         },
         // Note: it's important to handle errors here
