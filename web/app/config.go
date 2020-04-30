@@ -1,6 +1,9 @@
 package app
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 type Color struct {
 	R int `json:"r"`
@@ -17,14 +20,16 @@ func (c Color) MarshalJSON() ([]byte, error) {
 type TeamConfiguration struct {
 	Name   string           `json:"name"`
 	Avatar string           `json:"avatar"`
-	Score  int              `json:"score"`
+	Score  uint32           `json:"score"`
 	Colors map[string]Color `json:"colors"`
 }
 
 type Configuration struct {
-	DevMode       bool              `json:"dev_mode"`
-	StartMode     string            `json:"start_mode"`
-	TimeRemaining string            `json:"time_remaining"`
-	HomeTeam      TeamConfiguration `json:"home_team"`
-	AwayTeam      TeamConfiguration `json:"away_team"`
+	DevMode           bool              `json:"dev_mode"`
+	StartMode         string            `json:"start_mode"`
+	TimeRemaining     string            `json:"time_remaining"`
+	GameDuration      uint32            `json:"-"`
+	ListeningDuration time.Duration     `json:"-"`
+	HomeTeam          TeamConfiguration `json:"home_team"`
+	AwayTeam          TeamConfiguration `json:"away_team"`
 }

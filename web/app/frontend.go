@@ -126,7 +126,7 @@ func (s *Service) GetGameConfig() Configuration {
 	}
 }
 
-func Newhandler(whereAmI, gameID string, srv *Service) *gin.Engine {
+func Newhandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 	r := gin.Default()
 
 	f := path.Join(whereAmI, "/static/dist/index.html")
@@ -144,7 +144,7 @@ func Newhandler(whereAmI, gameID string, srv *Service) *gin.Engine {
 	//velho
 	r.Static("/velho", path.Join(whereAmI, "/static/"))
 
-	uquiner := Uinquer{}
+	uquiner := Uniquer{}
 
 	r.GET("/", func(c *gin.Context) {
 
@@ -167,13 +167,13 @@ func Newhandler(whereAmI, gameID string, srv *Service) *gin.Engine {
 	return r
 }
 
-func makeSetupHandler(srv *Service) gin.HandlerFunc {
+func makeSetupHandler(srv EventsBroker) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, srv.GetGameConfig())
 	}
 }
 
-func makeGameStateHandler(srv *Service) gin.HandlerFunc {
+func makeGameStateHandler(srv EventsBroker) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientGone := c.Writer.CloseNotify()
 		uuid := c.Param("uuid")

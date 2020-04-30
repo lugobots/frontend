@@ -9,12 +9,12 @@ import (
 
 var ErrNoMoreUUIDs = errors.New("you reached the limit of uuids ")
 
-type Uinquer struct {
+type Uniquer struct {
 	source []string
 	mutex  sync.Mutex
 }
 
-func (u *Uinquer) shuffle() {
+func (u *Uniquer) shuffle() {
 	u.source = list
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(u.source), func(i, j int) {
@@ -22,7 +22,7 @@ func (u *Uinquer) shuffle() {
 	})
 }
 
-func (u *Uinquer) New() (string, error) {
+func (u *Uniquer) New() (string, error) {
 	if u.source == nil {
 		u.shuffle()
 	}

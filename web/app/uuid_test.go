@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestUinquer_New_WillReturnErrorWhenListRunsOut(t *testing.T) {
-	U := Uinquer{}
+func TestUniquer_New_WillReturnErrorWhenListRunsOut(t *testing.T) {
+	U := Uniquer{}
 	list = []string{"a"}
 	s, err := U.New()
 	assert.Nil(t, err)
@@ -17,14 +17,14 @@ func TestUinquer_New_WillReturnErrorWhenListRunsOut(t *testing.T) {
 	assert.Equal(t, "", s)
 }
 
-func TestUinquer_New_ReturnPseudoRandom(t *testing.T) {
+func TestUniquer_New_ReturnPseudoRandom(t *testing.T) {
 
 	list = []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"}
 
-	A := Uinquer{}
+	A := Uniquer{}
 	sa, errA := A.New()
 
-	B := Uinquer{}
+	B := Uniquer{}
 	sb, errB := B.New()
 
 	assert.Nil(t, errA)
@@ -32,13 +32,13 @@ func TestUinquer_New_ReturnPseudoRandom(t *testing.T) {
 	assert.NotEqual(t, sa, sb)
 }
 
-func TestUinquer_New_ReturnUniqueValue(t *testing.T) {
+func TestUniquer_New_ReturnUniqueValue(t *testing.T) {
 
 	list = []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"}
 
 	returnedValues := map[string]bool{}
 
-	A := Uinquer{}
+	A := Uniquer{}
 	var err error
 	for {
 		var s string
