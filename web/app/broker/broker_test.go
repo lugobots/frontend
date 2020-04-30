@@ -59,7 +59,7 @@ func TestNewBinder_IgnoreWhenThereIsNoConnections(t *testing.T) {
 	mockOnEventClient.EXPECT().Recv().Return(expectedGameEvent, nil)
 	mockOnEventClient.EXPECT().Recv().Return(nil, io.EOF)
 	go func() {
-		err := binder.Listen()
+		err := binder.broadcast()
 		assert.NotNil(t, err)
 		assert.Equal(t, app.ErrGRPCConnectionClosed, err)
 		listenerStopper()
@@ -101,7 +101,7 @@ func TestNewBinder_SendsTheEvents(t *testing.T) {
 
 	}).Return(nil, io.EOF)
 	go func() {
-		err := binder.Listen()
+		err := binder.broadcast()
 		assert.NotNil(t, err)
 		assert.Equal(t, app.ErrGRPCConnectionClosed, err)
 		producerStopper()
@@ -184,7 +184,7 @@ func TestNewBinder_DropsIdleConnections(t *testing.T) {
 	_ = binder.StreamEventsTo("consumer-a")
 
 	go func() {
-		err := binder.Listen()
+		err := binder.broadcast()
 		assert.NotNil(t, err)
 		assert.Equal(t, app.ErrGRPCConnectionClosed, err)
 		producerStopper()
@@ -246,7 +246,7 @@ func TestNewBinder_ShouldUpdateTheGameSetup(t *testing.T) {
 	_ = binder.StreamEventsTo("consumer-a")
 
 	go func() {
-		err := binder.Listen()
+		err := binder.broadcast()
 		assert.NotNil(t, err)
 		assert.Equal(t, app.ErrGRPCConnectionClosed, err)
 		producerStopper()

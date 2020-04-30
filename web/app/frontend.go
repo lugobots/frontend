@@ -28,6 +28,7 @@ var html = template.Must(template.New("https").Parse(`
 type FrontEndUpdate struct {
 	Type string
 	Data interface{}
+	//add remaining time
 }
 
 type Service struct {
@@ -136,12 +137,12 @@ func Newhandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 	}
 
 	r.SetHTMLTemplate(t)
-	//r.Static("/assets", "./assets")
+
 	r.Static("/js", path.Join(whereAmI, "/static/dist/js"))
 	r.Static("/images", path.Join(whereAmI, "/static/dist/images"))
 	r.Static("/external", path.Join(whereAmI, "/static/external"))
 
-	//velho
+	//temp
 	r.Static("/velho", path.Join(whereAmI, "/static/"))
 
 	uquiner := Uniquer{}
@@ -177,12 +178,13 @@ func makeGameStateHandler(srv EventsBroker) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientGone := c.Writer.CloseNotify()
 		uuid := c.Param("uuid")
+		streamChan := srv.StreamEventsTo(uuid)
 		c.Stream(func(w io.Writer) bool {
 			select {
 			case <-clientGone:
 				log.Println("Closed")
 				return false
-			case m := <-srv.StreamEventsTo(uuid):
+			case m := <-streamChan:
 				log.Printf("Sending type %s: %s", m.Type, m.Data)
 				c.SSEvent(m.Type, m.Data)
 			}

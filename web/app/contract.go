@@ -29,4 +29,8 @@ const (
 
 	// ErrUnknownGameEvent identifies an error when the service receives an event of an unknown type
 	ErrUnknownGameEvent = Error("unknown event type")
+
+	ErrGameOver = Error("the game is over")
+
+	ErrStopRequested = Error("it was requested to stop")
 )

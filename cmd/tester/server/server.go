@@ -44,7 +44,11 @@ func (b *Broadcaster) OnEvent(_ *empty.Empty, server lugo.Broadcast_OnEventServe
 			},
 			Ball: &lugo.Ball{},
 		},
-		Event: &lugo.GameEvent_NewPlayer{},
+		Event: &lugo.GameEvent_NewPlayer{
+			NewPlayer: &lugo.EventNewPlayer{
+				//Player: &lugo.Player{},
+			},
+		},
 	})
 	<-server.Context().Done()
 	return nil
