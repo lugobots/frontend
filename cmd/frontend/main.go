@@ -49,8 +49,40 @@ func main() {
 		TimeRemaining:     "",
 		GameDuration:      0,
 		ListeningDuration: 0,
-		HomeTeam:          app.TeamConfiguration{},
-		AwayTeam:          app.TeamConfiguration{},
+		HomeTeam: app.TeamConfiguration{
+			Name:   "Canada",
+			Avatar: "external/profile-team-home.jpg",
+			Score:  0,
+			Colors: app.TeamColors{
+				PrimaryColor: app.Color{
+					R: 100,
+					G: 146,
+					B: 250,
+				},
+				SecondaryColor: app.Color{
+					R: 240,
+					G: 50,
+					B: 150,
+				},
+			},
+		},
+		AwayTeam: app.TeamConfiguration{
+			Name:   "Canada",
+			Avatar: "external/profile-team-away.jpg",
+			Score:  0,
+			Colors: app.TeamColors{
+				PrimaryColor: app.Color{
+					R: 100,
+					G: 255,
+					B: 150,
+				},
+				SecondaryColor: app.Color{
+					R: 100,
+					G: 200,
+					B: 50,
+				},
+			},
+		},
 	}
 
 	eventBroker := broker.NewBinder(gameConfig, zapLog)
@@ -68,6 +100,7 @@ func main() {
 	go func() {
 		serviceGroup.Add(1)
 		defer serviceGroup.Done()
+		zapLog.Errorf("starting http server at %s", httpServer.Addr)
 		err := eventBroker.ListenAndBroadcast()
 		zapLog.Errorf("event broker has stopped: %s", err)
 
@@ -80,7 +113,7 @@ func main() {
 	go func() {
 		serviceGroup.Add(1)
 		defer serviceGroup.Done()
-		err := httpServer.ListenAndServeTLS("testdata/server.pem", "testdata/server.key")
+		err := httpServer.ListenAndServe()
 		zapLog.Errorf("https has stopped: %s", err)
 
 		once.Do(func() {

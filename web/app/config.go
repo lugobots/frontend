@@ -17,11 +17,16 @@ func (c Color) MarshalJSON() ([]byte, error) {
 	})
 }
 
+type TeamColors struct {
+	PrimaryColor   Color `json:"a"`
+	SecondaryColor Color `json:"b"`
+}
+
 type TeamConfiguration struct {
-	Name   string           `json:"name"`
-	Avatar string           `json:"avatar"`
-	Score  uint32           `json:"score"` // Realmente precisa?
-	Colors map[string]Color `json:"colors"`
+	Name   string     `json:"name"`
+	Avatar string     `json:"avatar"`
+	Score  uint32     `json:"score"` // Realmente precisa?
+	Colors TeamColors `json:"colors"`
 }
 
 type BroadcastConfig struct {
@@ -30,7 +35,7 @@ type BroadcastConfig struct {
 }
 
 type Configuration struct {
-	Broadcast         BroadcastConfig
+	Broadcast         BroadcastConfig   `json:"-"`
 	DevMode           bool              `json:"dev_mode"`
 	StartMode         string            `json:"start_mode"`
 	TimeRemaining     string            `json:"time_remaining"` // Realmente precisa?

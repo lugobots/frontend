@@ -99,12 +99,12 @@ func (s *Service) GetGameConfig() Configuration {
 		HomeTeam: TeamConfiguration{
 			Name:   "My team",
 			Avatar: "external/profile-team-home.jpg",
-			Colors: map[string]Color{
-				"a": {
+			Colors: TeamColors{
+				PrimaryColor: Color{
 					R: 255,
 					G: 255,
 				},
-				"b": {
+				SecondaryColor: Color{
 					R: 100,
 					G: 100,
 				},
@@ -113,14 +113,15 @@ func (s *Service) GetGameConfig() Configuration {
 		AwayTeam: TeamConfiguration{
 			Name:   "Other team",
 			Avatar: "external/profile-team-away.jpg",
-			Colors: map[string]Color{
-				"a": {
+			Colors: TeamColors{
+				PrimaryColor: Color{
 					R: 100,
-					B: 255,
+					G: 255,
 				},
-				"b": {
-					R: 150,
-					B: 200,
+				SecondaryColor: Color{
+					R: 100,
+					G: 200,
+					B: 50,
 				},
 			},
 		},

@@ -2,8 +2,7 @@ import React from 'react';
 import Panel from "./Panel";
 import Field from "./Field";
 
-
-const BackEndPoint = "https://localhost:8080"
+const BackEndPoint = "http://localhost:8080"
 
 class Stadium extends React.Component {
   constructor(props) {
@@ -63,6 +62,7 @@ class Stadium extends React.Component {
 
     // addEventListener version
     evtSource.addEventListener('open', () => {
+      console.log("connection opened")
       me.setState(state => {
         let s = state;
         s.isConnected = true;
@@ -113,6 +113,7 @@ class Stadium extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
+          console.log("setup defined")
           console.log(result)
           this.setState({
             isLoaded: true,

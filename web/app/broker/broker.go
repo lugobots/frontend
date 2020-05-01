@@ -41,10 +41,64 @@ type Binder struct {
 }
 
 func (b *Binder) StreamEventsTo(uuid string) chan app.FrontEndUpdate {
-	b.consumersMux.Lock()
-	defer b.consumersMux.Unlock()
-	b.consumers[uuid] = make(chan app.FrontEndUpdate, maxIgnoredMessaged)
-	return b.consumers[uuid]
+
+	clientChan := make(chan app.FrontEndUpdate)
+
+	sn := &lugo.GameSnapshot{
+		State: lugo.GameSnapshot_WAITING,
+		Turn:  12,
+		HomeTeam: &lugo.Team{
+			Players: []*lugo.Player{{
+				Number: 1,
+				Position: &lugo.Point{
+					X: 100,
+					Y: 100,
+				},
+				Velocity:     nil,
+				TeamSide:     0,
+				InitPosition: nil,
+			},
+			},
+			Name:  "Eu",
+			Score: 0,
+			Side:  lugo.Team_HOME,
+		},
+		AwayTeam: &lugo.Team{
+			Players: []*lugo.Player{{
+				Number: 1,
+				Position: &lugo.Point{
+					X: 100,
+					Y: 100,
+				},
+				Velocity:     nil,
+				TeamSide:     0,
+				InitPosition: nil,
+			},
+			},
+			Name:  "Eu",
+			Score: 0,
+			Side:  lugo.Team_AWAY,
+		},
+		Ball:      &lugo.Ball{},
+		ShotClock: nil,
+	}
+
+	go func() {
+		for {
+			time.Sleep(1 * time.Second)
+			sn.Turn = uint32(time.Now().Second())
+			clientChan <- app.FrontEndUpdate{
+				Type: "ping",
+				Data: sn,
+			}
+		}
+	}()
+	return clientChan
+
+	//b.consumersMux.Lock()
+	//defer b.consumersMux.Unlock()
+	//b.consumers[uuid] = make(chan app.FrontEndUpdate, maxIgnoredMessaged)
+	//return b.consumers[uuid]
 }
 
 func (b *Binder) GetGameConfig() app.Configuration {
