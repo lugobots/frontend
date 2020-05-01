@@ -25,7 +25,6 @@ type TeamColors struct {
 type TeamConfiguration struct {
 	Name   string     `json:"name"`
 	Avatar string     `json:"avatar"`
-	Score  uint32     `json:"score"` // Realmente precisa?
 	Colors TeamColors `json:"colors"`
 }
 

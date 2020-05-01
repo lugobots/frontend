@@ -7,6 +7,20 @@ const BackEndPoint = "http://localhost:8080"
 class Stadium extends React.Component {
   constructor(props) {
     super(props);
+
+    const snapshot = {
+      turn: 0,
+      home_team: {
+        players: [],
+        score: 0,
+      },
+      away_team: {
+        players: [],
+        score: 0,
+      },
+      ball: {}
+    }
+
     this.state = {
       isConnected: false,
       isLoaded: false,
@@ -15,7 +29,7 @@ class Stadium extends React.Component {
         dev_mode: false,
         start_mode: "normal",
         turn_duration: 50,//milliseconds
-        time_remaining: "5:00",
+        // time_remaining: "5:00",
         home_team: {
           name: "Rubens",
           avatar: "external/profile-team-home.jpg",
@@ -33,30 +47,25 @@ class Stadium extends React.Component {
           },
         },
       },
-      game: {
-        turn: 0,
-        home_team: {
-          players: [],
-          score: 0,
-        },
-        away_team: {
-          players: [],
-          score: 0,
-        },
-        ball: {}
+      event: {
+        type: "",
+        time_remaining: "",
+        snapshot: snapshot,
       }
     }
   }
 
   componentDidMount() {
     const me = this;
-    const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}`);
+    const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}/`);
 
-    evtSource.addEventListener("ping", function (event) {
+    evtSource.addEventListener("state_change", function (event) {
       const g = JSON.parse(event.data);
-      console.log(g)
       me.setState({
-        game: g
+        update: {
+          time_remaining: g.time_remaining,
+          snapshot: g.game_event?.game_snapshot,
+        }
       });
     });
 
@@ -73,7 +82,7 @@ class Stadium extends React.Component {
 
 
     evtSource.onerror = function () {
-      console.debug("EventSource failed.");
+      console.error("EventSource failed.");
       me.setState(state => {
         let s = state;
         s.isConnected = false;
@@ -92,17 +101,18 @@ class Stadium extends React.Component {
     } else if (!isLoaded) {
       return <div>Loading...</div>;
     } else {
+
       document.documentElement.style.setProperty('--team-home-color-primary', this.state.setup.home_team.colors.a);
       document.documentElement.style.setProperty('--team-home-color-secondary', this.state.setup.home_team.colors.b);
       document.documentElement.style.setProperty('--team-away-color-primary', this.state.setup.away_team.colors.a);
       document.documentElement.style.setProperty('--team-away-color-secondary', this.state.setup.away_team.colors.b);
       return <div>
         <header id="lugobot-header" className="container">
-          <Panel game={this.state.game} setup={this.state.setup}/>
+          <Panel update={this.state.update} setup={this.state.setup}/>
         </header>
 
         <main id="lugobot-stadium" className="container">
-          <Field game={this.state.game}/>
+          <Field update={this.state.update}/>
         </main>
       </div>;
     }

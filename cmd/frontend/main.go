@@ -46,13 +46,11 @@ func main() {
 		},
 		DevMode:           false,
 		StartMode:         "",
-		TimeRemaining:     "",
 		GameDuration:      0,
 		ListeningDuration: 0,
 		HomeTeam: app.TeamConfiguration{
 			Name:   "Canada",
 			Avatar: "external/profile-team-home.jpg",
-			Score:  0,
 			Colors: app.TeamColors{
 				PrimaryColor: app.Color{
 					R: 100,
@@ -69,7 +67,6 @@ func main() {
 		AwayTeam: app.TeamConfiguration{
 			Name:   "Canada",
 			Avatar: "external/profile-team-away.jpg",
-			Score:  0,
 			Colors: app.TeamColors{
 				PrimaryColor: app.Color{
 					R: 100,
@@ -91,62 +88,73 @@ func main() {
 		Addr:    ":8080",
 		Handler: server,
 	}
-	var once sync.Once
+	var evenBrokerStopped sync.Once
+	var httpStopped sync.Once
+	var somethingStopped sync.Once
 
 	serviceGroup := sync.WaitGroup{}
-	firstStop := ""
 	running := make(chan error)
 
-	go func() {
+	stoppingEventBroker := func() {
+		evenBrokerStopped.Do(func() {
+			zapLog.Info("stopping event broker")
+			if err := eventBroker.Stop(); err != nil {
+				zapLog.Errorf("error stopping event broker: %s", err)
+			}
+		})
+	}
+	startingEventBroker := func() {
 		serviceGroup.Add(1)
 		defer serviceGroup.Done()
 		zapLog.Errorf("starting http server at %s", httpServer.Addr)
 		err := eventBroker.ListenAndBroadcast()
 		zapLog.Errorf("event broker has stopped: %s", err)
 
-		once.Do(func() {
-			firstStop = "event-broker"
+		somethingStopped.Do(func() {
 			close(running)
 		})
-	}()
+		stoppingEventBroker()
+	}
 
-	go func() {
+	stoppingHttpServer := func() {
+		httpStopped.Do(func() {
+			zapLog.Info("stopping http server")
+			ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
+			if err := httpServer.Shutdown(ctx); err != nil {
+				zapLog.Errorf("error stopping event broker: %s", err)
+			}
+		})
+	}
+
+	startingHttpServer := func() {
 		serviceGroup.Add(1)
 		defer serviceGroup.Done()
 		err := httpServer.ListenAndServe()
 		zapLog.Errorf("https has stopped: %s", err)
 
-		once.Do(func() {
-			firstStop = "http"
+		somethingStopped.Do(func() {
 			close(running)
 		})
-	}()
+		stoppingHttpServer()
+	}
 
-	go func() {
+	monitorInterruptionSignal := func() {
 		signalChan := make(chan os.Signal, 1)
 		signal.Notify(signalChan, os.Interrupt)
 		<-signalChan
-		once.Do(func() {
+		somethingStopped.Do(func() {
 			zapLog.Info("interruption signal sent")
 			close(running)
 		})
-	}()
+	}
+
+	go startingEventBroker()
+	go startingHttpServer()
+	go monitorInterruptionSignal()
 
 	<-running
 
-	if firstStop != "event-broker" {
-		zapLog.Info("stopping event broker")
-		if err := eventBroker.Stop(); err != nil {
-			zapLog.Errorf("error stopping event broker: %s", err)
-		}
-	}
-
-	if firstStop != "http" {
-		zapLog.Info("stopping http server")
-		ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
-		if err := httpServer.Shutdown(ctx); err != nil {
-			zapLog.Errorf("error stopping event broker: %s", err)
-		}
-	}
+	stoppingHttpServer()
+	stoppingEventBroker()
 	serviceGroup.Wait()
 }

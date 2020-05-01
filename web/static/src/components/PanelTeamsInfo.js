@@ -5,7 +5,6 @@ class PanelTeamsInfo extends React.Component {
     super(props);
 
     this.state = {
-      game: null,
       setup: null,
     };
   }

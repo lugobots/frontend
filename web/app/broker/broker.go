@@ -88,8 +88,17 @@ func (b *Binder) StreamEventsTo(uuid string) chan app.FrontEndUpdate {
 			time.Sleep(1 * time.Second)
 			sn.Turn = uint32(time.Now().Second())
 			clientChan <- app.FrontEndUpdate{
-				Type: "ping",
-				Data: sn,
+				Type: app.EventStateChange,
+				Update: app.UpdateData{
+					GameEvent: &lugo.GameEvent{
+						GameSnapshot: sn,
+						Event: &lugo.GameEvent_StateChange{StateChange: &lugo.EventStateChange{
+							PreviousState: lugo.GameSnapshot_LISTENING,
+							NewState:      lugo.GameSnapshot_PLAYING,
+						}},
+					},
+					TimeRemaining: time.Now().Format("i:s"),
+				},
 			}
 		}
 	}()
@@ -181,22 +190,19 @@ func (b *Binder) broadcast() error {
 			}
 			return app.ErrGRPCConnectionClosed
 		}
-		b.configMux.Lock()
-		newSnap := event.GameSnapshot
-		remaining := time.Duration(b.gameConfig.GameDuration-event.GameSnapshot.Turn) * b.gameConfig.ListeningDuration
-		b.gameConfig.TimeRemaining = fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds()))
-		b.gameConfig.HomeTeam.Score = newSnap.HomeTeam.Score
-		b.gameConfig.AwayTeam.Score = newSnap.AwayTeam.Score
-		b.configMux.Unlock()
 
 		eventType, err := eventTypeTranslator(event.GetEvent())
 		if err != nil {
 			b.Logger.With(err).Error("ignoring game event")
 			continue
 		}
+		remaining := time.Duration(b.gameConfig.GameDuration-event.GameSnapshot.Turn) * b.gameConfig.ListeningDuration
 		update := app.FrontEndUpdate{
 			Type: eventType,
-			Data: event,
+			Update: app.UpdateData{
+				GameEvent:     event,
+				TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())),
+			},
 		}
 		b.configMux.RLock()
 		for uuid, consumer := range b.consumers {

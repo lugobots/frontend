@@ -25,10 +25,13 @@ var html = template.Must(template.New("https").Parse(`
 </html>
 `))
 
+type UpdateData struct {
+	GameEvent     *lugo.GameEvent `json:"game_event"`
+	TimeRemaining string          `json:"time_remaining"`
+}
 type FrontEndUpdate struct {
-	Type string
-	Data interface{}
-	//add remaining time
+	Type   string     `json:"type"`
+	Update UpdateData `json:"data"`
 }
 
 type Service struct {
@@ -83,8 +86,17 @@ func (s *Service) StreamEventsTo(uuid string) chan FrontEndUpdate {
 			time.Sleep(1 * time.Second)
 			sn.Turn = uint32(time.Now().Second())
 			clientChan <- FrontEndUpdate{
-				Type: "ping",
-				Data: sn,
+				Type: EventStateChange,
+				Update: UpdateData{
+					GameEvent: &lugo.GameEvent{
+						GameSnapshot: sn,
+						Event: &lugo.GameEvent_StateChange{StateChange: &lugo.EventStateChange{
+							PreviousState: lugo.GameSnapshot_LISTENING,
+							NewState:      lugo.GameSnapshot_PLAYING,
+						}},
+					},
+					TimeRemaining: time.Now().Format("i:s"),
+				},
 			}
 		}
 	}()
@@ -93,9 +105,8 @@ func (s *Service) StreamEventsTo(uuid string) chan FrontEndUpdate {
 
 func (s *Service) GetGameConfig() Configuration {
 	return Configuration{
-		DevMode:       false,
-		StartMode:     "",
-		TimeRemaining: "5:00",
+		DevMode:   false,
+		StartMode: "",
 		HomeTeam: TeamConfiguration{
 			Name:   "My team",
 			Avatar: "external/profile-team-home.jpg",
@@ -180,16 +191,23 @@ func makeGameStateHandler(srv EventsBroker) gin.HandlerFunc {
 		clientGone := c.Writer.CloseNotify()
 		uuid := c.Param("uuid")
 		streamChan := srv.StreamEventsTo(uuid)
+
+		log.Printf("streaming to %s", uuid)
 		c.Stream(func(w io.Writer) bool {
 			select {
 			case <-clientGone:
 				log.Println("Closed")
 				return false
-			case m := <-streamChan:
-				log.Printf("Sending type %s: %s", m.Type, m.Data)
-				c.SSEvent(m.Type, m.Data)
+			case m, ok := <-streamChan:
+				if !ok {
+					log.Println("channel closed")
+					return false
+				}
+				log.Printf("Sending type %s: %s", m.Type, m.Update)
+				c.SSEvent(m.Type, m.Update)
 			}
 			return true
 		})
+		log.Printf("finished opening stream to %s", uuid)
 	}
 }

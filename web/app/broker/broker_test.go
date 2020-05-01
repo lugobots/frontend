@@ -81,7 +81,7 @@ func TestNewBinder_SendsTheEvents(t *testing.T) {
 		HomeTeam:          app.TeamConfiguration{},
 		AwayTeam:          app.TeamConfiguration{},
 	}
-	binder := NewBinder(mockOnEventClient, config, zapLog)
+	binder := NewBinder(config, zapLog)
 
 	producerCtx, producerStopper := context.WithTimeout(context.Background(), 1*time.Minute)
 	consumerCtx, consumerStopper := context.WithTimeout(context.Background(), 1*time.Minute)
@@ -132,7 +132,7 @@ func TestNewBinder_SendsTheEvents(t *testing.T) {
 	assert.Equal(t, context.Canceled, err)
 
 	assert.Equal(t, app.EventNewPlayer, actualGameEvent.Type)
-	assert.Equal(t, expectedGameEvent, actualGameEvent.Data)
+	assert.Equal(t, expectedGameEvent, actualGameEvent.Update)
 }
 
 func TestNewBinder_DropsIdleConnections(t *testing.T) {
@@ -152,7 +152,7 @@ func TestNewBinder_DropsIdleConnections(t *testing.T) {
 		HomeTeam:          app.TeamConfiguration{},
 		AwayTeam:          app.TeamConfiguration{},
 	}
-	binder := NewBinder(mockOnEventClient, config, zapLog)
+	binder := NewBinder(config, zapLog)
 
 	producerCtx, producerStopper := context.WithTimeout(context.Background(), 1*time.Minute)
 
@@ -194,67 +194,4 @@ func TestNewBinder_DropsIdleConnections(t *testing.T) {
 	<-producerCtx.Done()
 	err := producerCtx.Err()
 	assert.Equal(t, context.Canceled, err)
-}
-
-func TestNewBinder_ShouldUpdateTheGameSetup(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	oldValue := maxIgnoredMessaged
-	maxIgnoredMessaged = 3
-	defer func() {
-		maxIgnoredMessaged = oldValue
-	}()
-
-	mockOnEventClient := NewMockBroadcast_OnEventClient(ctrl)
-	initialConfig := app.Configuration{
-		GameDuration:      100,
-		TimeRemaining:     "5:00",
-		ListeningDuration: 1 * time.Second,
-		HomeTeam:          app.TeamConfiguration{},
-		AwayTeam:          app.TeamConfiguration{},
-	}
-	binder := NewBinder(mockOnEventClient, initialConfig, zapLog)
-
-	producerCtx, producerStopper := context.WithTimeout(context.Background(), 1*time.Minute)
-
-	expectedGameEvent := &lugo.GameEvent{
-		GameSnapshot: &lugo.GameSnapshot{
-			HomeTeam: &lugo.Team{Score: 5},
-			AwayTeam: &lugo.Team{Score: 7},
-			Turn:     70,
-		},
-		Event: &lugo.GameEvent_NewPlayer{NewPlayer: &lugo.EventNewPlayer{
-			Player: &lugo.Player{},
-		}},
-	}
-
-	expectedConfig := app.Configuration{
-		GameDuration:      100,
-		TimeRemaining:     "00:30",
-		ListeningDuration: 1 * time.Second,
-		HomeTeam:          app.TeamConfiguration{Score: 5},
-		AwayTeam:          app.TeamConfiguration{Score: 7},
-	}
-
-	checkBeforeDropping := func() {
-		assert.Len(t, binder.consumers, 1)
-	}
-	mockOnEventClient.EXPECT().Recv().DoAndReturn(checkBeforeDropping).Return(expectedGameEvent, nil)
-	mockOnEventClient.EXPECT().Recv().Return(nil, io.EOF)
-	// let ignore
-	_ = binder.StreamEventsTo("consumer-a")
-
-	go func() {
-		err := binder.broadcast()
-		assert.NotNil(t, err)
-		assert.Equal(t, app.ErrGRPCConnectionClosed, err)
-		producerStopper()
-	}()
-
-	//waiting or go routine ends
-	<-producerCtx.Done()
-	err := producerCtx.Err()
-	assert.Equal(t, context.Canceled, err)
-	assert.Equal(t, expectedConfig, binder.gameConfig)
 }
