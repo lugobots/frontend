@@ -5,7 +5,7 @@ import (
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 )
 
-func MovinBall() []*lugo.GameEvent {
+func SampleMoveBall() []*lugo.GameEvent {
 	var events []*lugo.GameEvent
 	lastSnap := getInitSnap()
 

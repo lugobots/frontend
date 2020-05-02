@@ -22,10 +22,10 @@ func newPlayerEvent(snap *lugo.GameSnapshot, player *lugo.Player) *lugo.GameEven
 	}
 }
 
-func AllPlayersConnect() []*lugo.GameEvent {
-	events := ServerisUp()
+func SamplePlayersConnect() []*lugo.GameEvent {
+	events := SampleServerIsUp()
 
-	lastSnap := getInitSnap()
+	lastSnap := events[len(events)-1].GameSnapshot
 
 	posHome := field.HomeTeamGoal().Center
 	events = append(events, newPlayerEvent(lastSnap, &lugo.Player{

@@ -66,9 +66,10 @@ func main() {
 		command string
 		queue   []*lugo.GameEvent
 	}{
-		{command: "initial", queue: samples.ServerisUp()},
-		{command: "players_connect", queue: samples.AllPlayersConnect()},
-		{command: "move_ball", queue: samples.MovinBall()},
+		{command: "initial", queue: samples.SampleServerIsUp()},
+		{command: "players_connect", queue: samples.SamplePlayersConnect()},
+		{command: "move_ball", queue: samples.SampleMoveBall()},
+		{command: "move_player", queue: samples.SampleMovePlayers()},
 	}
 
 	for _, opt := range cms {

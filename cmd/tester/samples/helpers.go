@@ -23,7 +23,9 @@ func getInitSnap() *lugo.GameSnapshot {
 			Score:   0,
 			Side:    lugo.Team_AWAY,
 		},
-		Ball: &lugo.Ball{},
+		Ball: &lugo.Ball{
+			Position: &lugo.Point{},
+		},
 	}
 }
 
