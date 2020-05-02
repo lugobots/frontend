@@ -8,20 +8,27 @@ class Field extends React.Component {
 
   render() {
     const items = []
-    console.log("re render field")
+
+    const fillPlayer = (p, side) => {
+      items.push(<FieldPlayer
+        key={`${side}-${p.number}`}
+        number={p.number}
+        team_side={side}
+        position={p.Position}
+      />)
+    }
+    console.log(this.props.snapshot)
     if (this.props.snapshot.home_team.players) {
-      console.log(this.props.snapshot.home_team)
       for (const p of this.props.snapshot.home_team.players) {
         if (p) {
-          items.push(<FieldPlayer key={`home-${p.number}`} number={p.number} team_side="home" />)
+          fillPlayer(p, "home")
         }
       }
     }
     if (this.props.snapshot.away_team.players) {
-      console.log(this.props.snapshot.away_team)
       for (const p of this.props.snapshot.away_team.players) {
         if (p) {
-          items.push(<FieldPlayer key={`away-${p.number}`} number={p.number} team_side="away" />)
+          fillPlayer(p, "away")
         }
       }
     }

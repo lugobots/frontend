@@ -111,6 +111,7 @@ class Stadium extends React.Component {
       document.documentElement.style.setProperty('--team-home-color-secondary', this.state.setup.home_team.colors.b);
       document.documentElement.style.setProperty('--team-away-color-primary', this.state.setup.away_team.colors.a);
       document.documentElement.style.setProperty('--team-away-color-secondary', this.state.setup.away_team.colors.b);
+      console.log("RE RENDER")
       return <div>
         <header id="lugobot-header" className="container">
           <Panel event={this.state.event} setup={this.state.setup}/>
@@ -128,8 +129,6 @@ class Stadium extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
-          console.log("setup defined")
-          console.log(result)
           this.setState({
             isLoaded: true,
             setup: result
