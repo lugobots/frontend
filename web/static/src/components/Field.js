@@ -1,5 +1,8 @@
 import React from 'react';
 import FieldPlayer from "./FieldPlayer";
+
+import {FieldSettings} from '../constants';
+
 class Field extends React.Component {
   constructor(props) {
     super(props);
@@ -33,8 +36,18 @@ class Field extends React.Component {
       }
     }
 
+    const ball_left = 100 * (this.props.snapshot.ball.Position.X ?? 0) / FieldSettings.Width
+    const ball_bottom = 100 * (this.props.snapshot.ball.Position.Y ?? 0) / FieldSettings.Height
+
+    const ballStyle = {
+      left: `${ball_left}%`,
+      bottom: `calc(${ball_bottom}%)`
+    }
+
+    console.log(`ball `, ballStyle)
+
     return <div id="field">
-      <span id="ball"/>
+      <span id="ball" style={ballStyle}/>
       {items}
     </div>;
   }

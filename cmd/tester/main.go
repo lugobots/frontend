@@ -61,24 +61,25 @@ func initTheServer(srv *server.Broadcaster) chan bool {
 
 func main() {
 	rootCmd := cobra.Command{}
-
 	srv := server.NewServer(zapLog)
+	cms := []struct {
+		command string
+		queue   []*lugo.GameEvent
+	}{
+		{command: "initial", queue: samples.ServerisUp()},
+		{command: "players_connect", queue: samples.AllPlayersConnect()},
+		{command: "move_ball", queue: samples.MovinBall()},
+	}
 
-	rootCmd.AddCommand(&cobra.Command{
-		Use: "initial",
-		Run: func(cmd *cobra.Command, args []string) {
-			srv.EventQueue = samples.ServerisUp()
-			<-initTheServer(srv)
-		},
-	})
-
-	rootCmd.AddCommand(&cobra.Command{
-		Use: "players_connect",
-		Run: func(cmd *cobra.Command, args []string) {
-			srv.EventQueue = samples.AllPlayersConnect()
-			<-initTheServer(srv)
-		},
-	})
+	for _, opt := range cms {
+		rootCmd.AddCommand(&cobra.Command{
+			Use: opt.command,
+			Run: func(cmd *cobra.Command, args []string) {
+				srv.EventQueue = opt.queue
+				<-initTheServer(srv)
+			},
+		})
+	}
 
 	if err := rootCmd.Execute(); err != nil {
 		zapLog.With(zap.Error(err)).Fatalf("failure executing arguments")

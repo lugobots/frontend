@@ -36,7 +36,7 @@ func (b *Broadcaster) OnEvent(_ *empty.Empty, server lugo.Broadcast_OnEventServe
 		if err := server.Send(event); err != nil {
 			b.logger.Errorf("error sending event %d: %s", i, err)
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 	}
 
 	<-server.Context().Done()

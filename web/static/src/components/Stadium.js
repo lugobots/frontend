@@ -18,7 +18,9 @@ class Stadium extends React.Component {
         players: [],
         score: 0,
       },
-      ball: {}
+      ball: {
+
+      }
     }
 
     this.state = {
@@ -62,6 +64,8 @@ class Stadium extends React.Component {
 
     const eventProcessor = function (event) {
       const g = JSON.parse(event.data);
+
+      console.log(g.game_event?.game_snapshot)
       me.setState({
         event: {
           time_remaining: g.time_remaining,

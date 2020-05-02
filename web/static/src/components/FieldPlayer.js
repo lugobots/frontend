@@ -1,11 +1,11 @@
 import React from 'react';
 
-import {Field} from '../constants'
+import {FieldSettings} from '../constants'
 
 class FieldPlayer extends React.Component {
   render() {
-    const left = 100 * (this.props.position.X ?? 0) / Field.Width
-    const bottom = 100 * (this.props.position.Y ?? 0) / Field.Height
+    const left = 100 * (this.props.position.X ?? 0) / FieldSettings.Width
+    const bottom = 100 * (this.props.position.Y ?? 0) / FieldSettings.Height
 
     const playerStyle = {
       left: `${left}%`,
