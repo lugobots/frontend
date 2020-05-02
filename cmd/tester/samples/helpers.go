@@ -52,3 +52,15 @@ func makeInitialPosition(playerNumber uint32, side lugo.Team_Side) *lugo.Point {
 	}
 	return &p
 }
+
+func newStateChangeEvent(snap *lugo.GameSnapshot, previous lugo.GameSnapshot_State) *lugo.GameEvent {
+	return &lugo.GameEvent{
+		GameSnapshot: snap,
+		Event: &lugo.GameEvent_StateChange{
+			StateChange: &lugo.EventStateChange{
+				PreviousState: previous,
+				NewState:      snap.State,
+			},
+		},
+	}
+}

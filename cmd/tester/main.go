@@ -36,8 +36,8 @@ func init() {
 	zapLog = logger.Sugar()
 }
 
-func MyCommand() *cobra.Command {
-	srv := server.NewServer(zapLog)
+func initTheServer(srv *server.Broadcaster) chan bool {
+
 	grpcServer := grpc.NewServer()
 
 	lugo.RegisterBroadcastServer(grpcServer, srv)
@@ -56,32 +56,29 @@ func MyCommand() *cobra.Command {
 		}
 		close(running)
 	}()
-
-	return &cobra.Command{
-		Use:   "initial",
-		Short: "From waiting until first turn",
-		Run: func(cmd *cobra.Command, args []string) {
-			srv.EventQueue = samples.AllPlayersConnect()
-			//max := 0
-			//zapLog.Info("starting sender")
-			//for {
-			//	time.Sleep(1 * time.Second)
-			//	zapLog.Info("sending event")
-			//
-			//	max++
-			//	if max > 500 {
-			//		break
-			//	}
-			//}
-			<-running
-		},
-	}
+	return running
 }
 
 func main() {
 	rootCmd := cobra.Command{}
 
-	rootCmd.AddCommand(MyCommand())
+	srv := server.NewServer(zapLog)
+
+	rootCmd.AddCommand(&cobra.Command{
+		Use: "initial",
+		Run: func(cmd *cobra.Command, args []string) {
+			srv.EventQueue = samples.ServerisUp()
+			<-initTheServer(srv)
+		},
+	})
+
+	rootCmd.AddCommand(&cobra.Command{
+		Use: "players_connect",
+		Run: func(cmd *cobra.Command, args []string) {
+			srv.EventQueue = samples.AllPlayersConnect()
+			<-initTheServer(srv)
+		},
+	})
 
 	if err := rootCmd.Execute(); err != nil {
 		zapLog.With(zap.Error(err)).Fatalf("failure executing arguments")

@@ -23,7 +23,7 @@ func newPlayerEvent(snap *lugo.GameSnapshot, player *lugo.Player) *lugo.GameEven
 }
 
 func AllPlayersConnect() []*lugo.GameEvent {
-	var events []*lugo.GameEvent
+	events := ServerisUp()
 
 	lastSnap := getInitSnap()
 

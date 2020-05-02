@@ -8,7 +8,7 @@ class Stadium extends React.Component {
   constructor(props) {
     super(props);
 
-    const snapshot = {
+    this.initSnapshot = {
       turn: 0,
       home_team: {
         players: [],
@@ -50,7 +50,7 @@ class Stadium extends React.Component {
       event: {
         type: "",
         time_remaining: "",
-        snapshot: snapshot,
+        snapshot: this.initSnapshot,
       }
     }
   }
@@ -60,7 +60,7 @@ class Stadium extends React.Component {
 
     const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}/`);
 
-    evtSource.addEventListener("new_player", function (event) {
+    const eventProcessor = function (event) {
       const g = JSON.parse(event.data);
       me.setState({
         event: {
@@ -68,7 +68,10 @@ class Stadium extends React.Component {
           snapshot: g.game_event?.game_snapshot,
         }
       });
-    });
+    }
+
+    evtSource.addEventListener("state_change", eventProcessor);
+    evtSource.addEventListener("new_player", eventProcessor);
 
     evtSource.addEventListener("ping", function (event) {
       console.log("ping")
@@ -80,6 +83,10 @@ class Stadium extends React.Component {
       me.setState(state => {
         let s = state;
         s.isConnected = true;
+        s.event = {
+          time_remaining: "",
+          snapshot: this.initSnapshot,
+        };
         return s;
       })
       me.setup()
