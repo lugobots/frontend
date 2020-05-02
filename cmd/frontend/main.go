@@ -53,37 +53,37 @@ func main() {
 			Avatar: "external/profile-team-home.jpg",
 			Colors: app.TeamColors{
 				PrimaryColor: app.Color{
-					R: 100,
-					G: 146,
-					B: 250,
+					R: 230,
+					G: 0,
+					B: 0,
 				},
 				SecondaryColor: app.Color{
-					R: 240,
-					G: 50,
-					B: 150,
+					R: 255,
+					G: 255,
+					B: 255,
 				},
 			},
 		},
 		AwayTeam: app.TeamConfiguration{
-			Name:   "Canada",
+			Name:   "UK",
 			Avatar: "external/profile-team-away.jpg",
 			Colors: app.TeamColors{
 				PrimaryColor: app.Color{
-					R: 100,
-					G: 255,
-					B: 150,
+					R: 240,
+					G: 0,
+					B: 0,
 				},
 				SecondaryColor: app.Color{
-					R: 100,
-					G: 200,
-					B: 50,
+					R: 0,
+					G: 0,
+					B: 250,
 				},
 			},
 		},
 	}
 
 	eventBroker := broker.NewBinder(gameConfig, zapLog)
-	server := app.Newhandler("/home/rubens/go/src/bitbucket.org/makeitplay/lugo-frontend/web", "local", eventBroker)
+	server := app.NewHandler("/home/rubens/go/src/bitbucket.org/makeitplay/lugo-frontend/web", "local", eventBroker)
 	httpServer := &http.Server{
 		Addr:    ":8080",
 		Handler: server,
@@ -113,7 +113,7 @@ func main() {
 		somethingStopped.Do(func() {
 			close(running)
 		})
-		stoppingEventBroker()
+		//stoppingEventBroker()
 	}
 
 	stoppingHttpServer := func() {
@@ -135,7 +135,7 @@ func main() {
 		somethingStopped.Do(func() {
 			close(running)
 		})
-		stoppingHttpServer()
+		//stoppingHttpServer()
 	}
 
 	monitorInterruptionSignal := func() {

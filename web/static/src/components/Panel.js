@@ -11,7 +11,11 @@ class Panel extends React.Component {
   render() {
     return <section id="game-panel">
       <PanelTeamsInfo setup={this.props.setup}/>
-      <PanelGameInfo update={this.props.update} time_remaining={this.props.update.time_remaining} />
+      <PanelGameInfo
+        home_score={this.props.event.snapshot.home_team.score}
+        away_score={this.props.event.snapshot.away_team.score}
+        time_remaining={this.props.event.time_remaining}
+      />
     </section>;
   }
 }

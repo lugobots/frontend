@@ -57,16 +57,21 @@ class Stadium extends React.Component {
 
   componentDidMount() {
     const me = this;
+
     const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}/`);
 
-    evtSource.addEventListener("state_change", function (event) {
+    evtSource.addEventListener("new_player", function (event) {
       const g = JSON.parse(event.data);
       me.setState({
-        update: {
+        event: {
           time_remaining: g.time_remaining,
           snapshot: g.game_event?.game_snapshot,
         }
       });
+    });
+
+    evtSource.addEventListener("ping", function (event) {
+      console.log("ping")
     });
 
     // addEventListener version
@@ -82,7 +87,7 @@ class Stadium extends React.Component {
 
 
     evtSource.onerror = function () {
-      console.error("EventSource failed.");
+      console.log("stream connection lost. trying to reconnect...");
       me.setState(state => {
         let s = state;
         s.isConnected = false;
@@ -108,11 +113,11 @@ class Stadium extends React.Component {
       document.documentElement.style.setProperty('--team-away-color-secondary', this.state.setup.away_team.colors.b);
       return <div>
         <header id="lugobot-header" className="container">
-          <Panel update={this.state.update} setup={this.state.setup}/>
+          <Panel event={this.state.event} setup={this.state.setup}/>
         </header>
 
         <main id="lugobot-stadium" className="container">
-          <Field update={this.state.update}/>
+          <Field snapshot={this.state.event.snapshot}/>
         </main>
       </div>;
     }

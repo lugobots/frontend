@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bitbucket.org/makeitplay/lugo-frontend/cmd/tester/samples"
 	"bitbucket.org/makeitplay/lugo-frontend/cmd/tester/server"
 	"fmt"
 	"github.com/lugobots/lugo4go/v2/lugo"
@@ -60,7 +61,18 @@ func MyCommand() *cobra.Command {
 		Use:   "initial",
 		Short: "From waiting until first turn",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Hugo Static Site Generator v0.9 -- HEAD")
+			srv.EventQueue = samples.AllPlayersConnect()
+			//max := 0
+			//zapLog.Info("starting sender")
+			//for {
+			//	time.Sleep(1 * time.Second)
+			//	zapLog.Info("sending event")
+			//
+			//	max++
+			//	if max > 500 {
+			//		break
+			//	}
+			//}
 			<-running
 		},
 	}

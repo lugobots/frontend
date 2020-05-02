@@ -38,76 +38,78 @@ type Binder struct {
 	producer     lugo.BroadcastClient
 	stopRequest  bool
 	Logger       *zap.SugaredLogger
+	lastUpdate   app.FrontEndUpdate
 }
 
 func (b *Binder) StreamEventsTo(uuid string) chan app.FrontEndUpdate {
 
-	clientChan := make(chan app.FrontEndUpdate)
+	//clientChan := make(chan app.FrontEndUpdate)
+	//
+	//sn := &lugo.GameSnapshot{
+	//	State: lugo.GameSnapshot_WAITING,
+	//	Turn:  12,
+	//	HomeTeam: &lugo.Team{
+	//		Players: []*lugo.Player{{
+	//			Number: 1,
+	//			Position: &lugo.Point{
+	//				X: 100,
+	//				Y: 100,
+	//			},
+	//			Velocity:     nil,
+	//			TeamSide:     0,
+	//			InitPosition: nil,
+	//		},
+	//		},
+	//		Name:  "Eu",
+	//		Score: 0,
+	//		Side:  lugo.Team_HOME,
+	//	},
+	//	AwayTeam: &lugo.Team{
+	//		Players: []*lugo.Player{{
+	//			Number: 1,
+	//			Position: &lugo.Point{
+	//				X: 100,
+	//				Y: 100,
+	//			},
+	//			Velocity:     nil,
+	//			TeamSide:     0,
+	//			InitPosition: nil,
+	//		},
+	//		},
+	//		Name:  "Eu",
+	//		Score: 0,
+	//		Side:  lugo.Team_AWAY,
+	//	},
+	//	Ball:      &lugo.Ball{},
+	//	ShotClock: nil,
+	//}
+	//
+	//go func() {
+	//	for {
+	//		time.Sleep(1 * time.Second)
+	//		sn.Turn = uint32(time.Now().Second())
+	//		clientChan <- app.FrontEndUpdate{
+	//			Type: app.EventStateChange,
+	//			Update: app.UpdateData{
+	//				GameEvent: &lugo.GameEvent{
+	//					GameSnapshot: sn,
+	//					Event: &lugo.GameEvent_StateChange{StateChange: &lugo.EventStateChange{
+	//						PreviousState: lugo.GameSnapshot_LISTENING,
+	//						NewState:      lugo.GameSnapshot_PLAYING,
+	//					}},
+	//				},
+	//				TimeRemaining: time.Now().Format("i:s"),
+	//			},
+	//		}
+	//	}
+	//}()
+	//return clientChan
 
-	sn := &lugo.GameSnapshot{
-		State: lugo.GameSnapshot_WAITING,
-		Turn:  12,
-		HomeTeam: &lugo.Team{
-			Players: []*lugo.Player{{
-				Number: 1,
-				Position: &lugo.Point{
-					X: 100,
-					Y: 100,
-				},
-				Velocity:     nil,
-				TeamSide:     0,
-				InitPosition: nil,
-			},
-			},
-			Name:  "Eu",
-			Score: 0,
-			Side:  lugo.Team_HOME,
-		},
-		AwayTeam: &lugo.Team{
-			Players: []*lugo.Player{{
-				Number: 1,
-				Position: &lugo.Point{
-					X: 100,
-					Y: 100,
-				},
-				Velocity:     nil,
-				TeamSide:     0,
-				InitPosition: nil,
-			},
-			},
-			Name:  "Eu",
-			Score: 0,
-			Side:  lugo.Team_AWAY,
-		},
-		Ball:      &lugo.Ball{},
-		ShotClock: nil,
-	}
-
-	go func() {
-		for {
-			time.Sleep(1 * time.Second)
-			sn.Turn = uint32(time.Now().Second())
-			clientChan <- app.FrontEndUpdate{
-				Type: app.EventStateChange,
-				Update: app.UpdateData{
-					GameEvent: &lugo.GameEvent{
-						GameSnapshot: sn,
-						Event: &lugo.GameEvent_StateChange{StateChange: &lugo.EventStateChange{
-							PreviousState: lugo.GameSnapshot_LISTENING,
-							NewState:      lugo.GameSnapshot_PLAYING,
-						}},
-					},
-					TimeRemaining: time.Now().Format("i:s"),
-				},
-			}
-		}
-	}()
-	return clientChan
-
-	//b.consumersMux.Lock()
-	//defer b.consumersMux.Unlock()
-	//b.consumers[uuid] = make(chan app.FrontEndUpdate, maxIgnoredMessaged)
-	//return b.consumers[uuid]
+	b.consumersMux.Lock()
+	defer b.consumersMux.Unlock()
+	b.consumers[uuid] = make(chan app.FrontEndUpdate, maxIgnoredMessaged)
+	b.consumers[uuid] <- b.lastUpdate
+	return b.consumers[uuid]
 }
 
 func (b *Binder) GetGameConfig() app.Configuration {
@@ -204,6 +206,7 @@ func (b *Binder) broadcast() error {
 				TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())),
 			},
 		}
+		b.lastUpdate = update
 		b.configMux.RLock()
 		for uuid, consumer := range b.consumers {
 			select {
