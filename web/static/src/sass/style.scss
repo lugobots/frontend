@@ -534,6 +534,7 @@ html.loading #game-panel {
     font-family: $font-primary;
     transition: max-width 2s ease-in-out;
     overflow: hidden;
+    position: relative;
 
     #buffering {
       @include model-flex(column, nowrap, center, false);
@@ -541,9 +542,12 @@ html.loading #game-panel {
       position: relative;
       padding-top: 14px;
       text-transform: uppercase;
+      z-index: 5;
 
-      span{ z-index: 10;}
-      .label{
+      span {
+        z-index: 10;
+      }
+      .label {
         @include font-size(12, 14);
         line-height: 8px;
         font-family: $font-secondary;
@@ -578,8 +582,19 @@ html.loading #game-panel {
       padding-top: 21px;
       font-family: $font-primary;
       line-height: 24px;
-    }
+      max-width: 0px;
+      opacity: 0;
+      justify-content: center;
+      background: #0c1018;
+      transition: all 0.3s ease-in-out;
+      z-index: 1;
 
+      &.active {
+        max-width: 100%;
+        opacity: 1;
+        z-index: 10;
+      }
+    }
   }
 }
 
@@ -702,6 +717,7 @@ html.loading #game-panel {
     top: -16px;
     bottom: -16px;
     border-radius: 50%;
+    transition: all 0.3s ease;
     clip-path: polygon(74% 0%, calc(100% - 15px) 75%, 16px 74%, 26% 0%);
     box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0 0 3px rgba($team-home-color-1, 0.54);
   }
@@ -726,8 +742,12 @@ html.loading #game-panel {
   &.player-home-team {
 
     &::before {
-      border: 1px solid rgba($team-home-color-1, .8);
-      background: radial-gradient(circle, rgba($team-home-color-1, 0) 8%, rgba($team-home-color-1, .4) 100%);
+      border: 1px solid rgba($team-home-color-1, 0.8);
+      background: radial-gradient(
+                      circle,
+                      rgba($team-home-color-1, 0) 8%,
+                      rgba($team-home-color-1, 0.4) 100%
+      );
     }
     &::after{
       box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0 0 3px rgba($team-home-color-1, 0.54);
@@ -747,17 +767,20 @@ html.loading #game-panel {
   }
 
   &.player-away-team {
+    &::before {
+      border: 1px solid rgba($team-away-color-1, 0.8);
+      background: radial-gradient(
+                      circle,
+                      rgba($team-away-color-1, 0) 8%,
+                      rgba($team-away-color-1, 0.4) 100%
+      );
+    }
 
-      &::before {
-        border: 1px solid rgba($team-away-color-1, .8);
-        background: radial-gradient(circle, rgba($team-away-color-1, 0) 8%, rgba($team-away-color-1, .4) 100%);
-      }
-
-      &::after{
-        box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0px 0px 6px rgba($team-away-color-1, 0.9);
-        background: rgba($team-away-color-2, 1);
-      }
-
+    &::after {
+      box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44),
+      0px 0px 6px rgba($team-away-color-1, 0.9);
+      background: rgba($team-away-color-2, 1);
+    }
 
     .player-direction {
       background: rgba($team-away-color-1, 1);
@@ -1826,11 +1849,14 @@ html.loading #game-panel {
     &#btn-loading::before{ content: '\f110'; }
     &#btn-game-over::before{ content: '\f017'; }
     &#btn-winner::before{ content: '\f091'; }
-    &#btn-home-goal::before,
-    &#btn-away-goal::before{ content: '\f1e3'; font-weight: 400; }
-
-
-
+  &#btn-remaining::before {
+    content: "\f252";
   }
+  &#btn-home-goal::before,
+  &#btn-away-goal::before {
+    content: "\f1e3";
+    font-weight: 400;
+  }
+}
 /* #endregion -- Section END General classes */
 
