@@ -19,7 +19,10 @@ class Stadium extends React.Component {
         score: 0,
       },
       ball: {
-
+        Position: {
+          X:0,
+          Y:0,
+        }
       }
     }
 

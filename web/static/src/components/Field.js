@@ -17,6 +17,7 @@ class Field extends React.Component {
         key={`${side}-${p.number}`}
         number={p.number}
         team_side={side}
+        ang={p.velocity.direction.ang}
         position={p.Position}
       />)
     }

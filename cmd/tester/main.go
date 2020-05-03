@@ -70,6 +70,7 @@ func main() {
 		{command: "players_connect", queue: samples.SamplePlayersConnect()},
 		{command: "move_ball", queue: samples.SampleMoveBall()},
 		{command: "move_player", queue: samples.SampleMovePlayers()},
+		{command: "rotate_player", queue: samples.SampleRotatePlayers()},
 	}
 
 	for _, opt := range cms {
