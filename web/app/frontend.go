@@ -138,7 +138,12 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 
 	r.SetHTMLTemplate(t)
 
-	r.Static("/js", path.Join(whereAmI, "/static/dist/js"))
+	//r.Static("/js", path.Join(whereAmI, "/static/dist/js"))
+	r.GET("/js/bundle.js", func(context *gin.Context) {
+		time.Sleep(5 * time.Second)
+		context.File(path.Join(whereAmI, "/static/dist/js/bundle.js"))
+	})
+
 	r.Static("/images", path.Join(whereAmI, "/static/dist/images"))
 	r.Static("/external", path.Join(whereAmI, "/static/external"))
 
