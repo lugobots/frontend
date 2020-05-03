@@ -13,13 +13,13 @@ func getInitSnap() *lugo.GameSnapshot {
 		Turn:  0,
 		HomeTeam: &lugo.Team{
 			Players: []*lugo.Player{},
-			Name:    "Team A",
+			Name:    "Team C",
 			Score:   0,
 			Side:    lugo.Team_HOME,
 		},
 		AwayTeam: &lugo.Team{
 			Players: []*lugo.Player{},
-			Name:    "Team B",
+			Name:    "Team D",
 			Score:   0,
 			Side:    lugo.Team_AWAY,
 		},

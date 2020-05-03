@@ -183,11 +183,18 @@ $team-away-color-2 : var(--team-away-color-secondary);
     }
   } 
 
+html.loading #game-panel {
+  transform: translateY(-100%);
+}
 
 #game-panel {
   @extend %col-12, %no-gutter;
   @include model-flex(row, wrap, center, center);
   position: relative;
+
+  animation: slide-down 0.5s linear;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
 
   * {
     color: $white;
@@ -209,6 +216,17 @@ $team-away-color-2 : var(--team-away-color-secondary);
 
 
 }
+
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0%);
+  }
+}
+
 
 #teams-info {
   @include model-flex(row, wrap, false, space-between);

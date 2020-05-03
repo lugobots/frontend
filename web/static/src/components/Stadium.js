@@ -21,8 +21,8 @@ class Stadium extends React.Component {
       },
       ball: {
         Position: {
-          X:0,
-          Y:0,
+          X: 0,
+          Y: 0,
         }
       }
     }
@@ -110,8 +110,6 @@ class Stadium extends React.Component {
         return s;
       })
     };
-    document.getElementById('lugobot-view').className = "";
-
   }
 
   render() {
