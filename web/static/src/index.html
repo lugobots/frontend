@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-US" id="lugobot-view">
+<html lang="en-US" id="lugobot-view" class="loading">
 <head id="lugobot-head">
     <meta name="theme-color" content="#59585D">
     <meta name="apple-mobile-web-app-status-bar-style" content="#59585D">
@@ -7,6 +7,14 @@
     <link rel="Shortcut Icon" href="favicon.png">
     <meta name="description" content="Lugo is game played by bots. Your goal is developing a bot able to play Lugo.">
     <title>Hello world App</title>
+    <style>
+        html.loading {
+            background-color: black;
+            background-image: url("loader.gif");
+            background-position: top;
+            background-repeat: no-repeat;
+        }
+    </style>
     <script>
       const uuid = {{ .uuid}};
       const gameID = {{ .gameID}};

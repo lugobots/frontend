@@ -2,6 +2,7 @@ import React from 'react';
 import Panel from "./Panel";
 import Field from "./Field";
 
+
 const BackEndPoint = "http://localhost:8080"
 
 class Stadium extends React.Component {
@@ -109,6 +110,8 @@ class Stadium extends React.Component {
         return s;
       })
     };
+    document.getElementById('lugobot-view').className = "";
+
   }
 
   render() {
@@ -125,7 +128,6 @@ class Stadium extends React.Component {
       document.documentElement.style.setProperty('--team-home-color-secondary', this.state.setup.home_team.colors.b);
       document.documentElement.style.setProperty('--team-away-color-primary', this.state.setup.away_team.colors.a);
       document.documentElement.style.setProperty('--team-away-color-secondary', this.state.setup.away_team.colors.b);
-      console.log("RE RENDER")
       return <div>
         <header id="lugobot-header" className="container">
           <Panel event={this.state.event} setup={this.state.setup}/>
