@@ -91,8 +91,8 @@ type FrontEndUpdate struct {
 //	return clientChan
 //}
 //
-//func (s *Service) GetGameConfig() Configuration {
-//	return Configuration{
+//func (s *Service) GetGameConfig() Config {
+//	return Config{
 //		DevMode:   false,
 //		StartMode: "",
 //		HomeTeam: TeamConfiguration{
@@ -190,11 +190,9 @@ func makeGameStateHandler(srv EventsBroker) gin.HandlerFunc {
 		c.Stream(func(w io.Writer) bool {
 			select {
 			case <-clientGone:
-				log.Println("Closed")
 				return false
 			case m, ok := <-streamChan:
 				if !ok {
-					log.Println("channel closed")
 					return false
 				}
 				log.Printf("Sending type %s: %s", m.Type, m.Update)
@@ -204,6 +202,6 @@ func makeGameStateHandler(srv EventsBroker) gin.HandlerFunc {
 			}
 			return true
 		})
-		log.Printf("finished opening stream to %s", uuid)
+		log.Printf("finished streaming to %s", uuid)
 	}
 }

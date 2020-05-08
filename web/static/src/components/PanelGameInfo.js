@@ -12,6 +12,14 @@ class PanelGameInfo extends React.Component {
 
   }
 
+
+  componentDidMount() {
+    /* GAMBIS< APAGAR*/
+
+    document.getElementById('remaining').style.display = "flex"
+    document.getElementById('buffering').style.display = "none"
+  }
+
   render() {
     return <div id="game-info">
         <span id="score-info">

@@ -5,9 +5,9 @@ import (
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 )
 
-func SampleMoveBall() []*lugo.GameEvent {
-	var events []*lugo.GameEvent
-	lastSnap := getInitSnap()
+func SampleMoveBall() Sample {
+	sample := SampleServerIsUp()
+	lastSnap := getLastSampleSnap(sample)
 
 	lastSnap.Ball.Position = &lugo.Point{}
 
@@ -18,7 +18,7 @@ func SampleMoveBall() []*lugo.GameEvent {
 		if lastSnap.Ball.Position.X > field.FieldWidth {
 			lastSnap.Ball.Position.X = field.FieldWidth
 		}
-		events = append(events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
 	}
 
 	for lastSnap.Ball.Position.Y < field.FieldHeight {
@@ -28,7 +28,7 @@ func SampleMoveBall() []*lugo.GameEvent {
 		if lastSnap.Ball.Position.Y > field.FieldHeight {
 			lastSnap.Ball.Position.Y = field.FieldHeight
 		}
-		events = append(events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
 	}
 
 	for lastSnap.Ball.Position.X > 0 {
@@ -38,7 +38,7 @@ func SampleMoveBall() []*lugo.GameEvent {
 		if lastSnap.Ball.Position.X < 0 {
 			lastSnap.Ball.Position.X = 0
 		}
-		events = append(events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
 	}
 
 	for lastSnap.Ball.Position.Y > 0 {
@@ -48,7 +48,7 @@ func SampleMoveBall() []*lugo.GameEvent {
 		if lastSnap.Ball.Position.Y < 0 {
 			lastSnap.Ball.Position.Y = 0
 		}
-		events = append(events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
 	}
 
 	vec, _ := lugo.NewVector(*lastSnap.Ball.Position, field.FieldCenter())
@@ -58,11 +58,11 @@ func SampleMoveBall() []*lugo.GameEvent {
 
 		lastSnap.Ball.Position.X += int32(vec.X)
 		lastSnap.Ball.Position.Y += int32(vec.Y)
-		events = append(events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
 	}
 
 	*lastSnap.Ball.Position = field.FieldCenter()
-	events = append(events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+	sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
 
-	return events
+	return sample
 }

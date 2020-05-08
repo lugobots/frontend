@@ -22,14 +22,14 @@ func newPlayerEvent(snap *lugo.GameSnapshot, player *lugo.Player) *lugo.GameEven
 	}
 }
 
-func SamplePlayersConnect() []*lugo.GameEvent {
-	events := SampleServerIsUp()
+func SamplePlayersConnect() Sample {
+	sample := SampleServerIsUp()
 
-	lastSnap := events[len(events)-1].GameSnapshot
+	lastSnap := getLastSampleSnap(sample)
 
 	posHome := field.HomeTeamGoal().Center
 	lookingEast := lugo.NewZeroedVelocity(lugo.East())
-	events = append(events, newPlayerEvent(lastSnap, &lugo.Player{
+	sample.Events = append(sample.Events, newPlayerEvent(lastSnap, &lugo.Player{
 		Number:   1,
 		TeamSide: lugo.Team_HOME,
 		Position: &posHome,
@@ -45,12 +45,12 @@ func SamplePlayersConnect() []*lugo.GameEvent {
 			Position: makeInitialPosition(i, lugo.Team_HOME),
 			Velocity: &lookingEast,
 		}
-		events = append(events, newPlayerEvent(lastSnap, newPlayer))
+		sample.Events = append(sample.Events, newPlayerEvent(lastSnap, newPlayer))
 	}
 
 	posAway := field.AwayTeamGoal().Center
 	lookingWest := lugo.NewZeroedVelocity(lugo.West())
-	events = append(events, newPlayerEvent(lastSnap, &lugo.Player{
+	sample.Events = append(sample.Events, newPlayerEvent(lastSnap, &lugo.Player{
 		Number:   1,
 		TeamSide: lugo.Team_AWAY,
 		Position: &posAway,
@@ -64,8 +64,8 @@ func SamplePlayersConnect() []*lugo.GameEvent {
 			Position: makeInitialPosition(i, lugo.Team_AWAY),
 			Velocity: &lookingWest,
 		}
-		events = append(events, newPlayerEvent(lastSnap, newPlayer))
+		sample.Events = append(sample.Events, newPlayerEvent(lastSnap, newPlayer))
 	}
 
-	return events
+	return sample
 }

@@ -1,8 +1,10 @@
 package app
 
+import "github.com/lugobots/lugo4go/v2/lugo"
+
 type EventsBroker interface {
 	StreamEventsTo(uuid string) chan FrontEndUpdate
-	GetGameConfig() Configuration
+	GetGameConfig() *lugo.GameSetup
 }
 
 const (

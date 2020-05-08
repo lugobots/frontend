@@ -2,6 +2,7 @@ import React from 'react';
 import Panel from "./Panel";
 import Field from "./Field";
 
+import {GameSettings} from '../constants';
 
 const BackEndPoint = "http://localhost:8080"
 
@@ -9,15 +10,53 @@ class Stadium extends React.Component {
   constructor(props) {
     super(props);
 
+
+    var setup = {
+      dev_mode: false,
+      listening_mode: GameSettings.LISTENING_MODE.TIMER,
+      start_mode: GameSettings.START_MODE.WAIT,
+      listening_duration: 50,
+      game_duration: 6000,
+      home_team: {
+        name: "Home",
+        avatar: "external/profile-team-home.jpg",
+        colors: {
+          primary: {
+            red: 240
+          },
+          secondary: {
+            red: 255,
+            green: 255,
+            blue: 255
+          }
+        }
+      },
+      away_team: {
+        name: "Away",
+        side: 1,
+        avatar: "external/profile-team-away.jpg",
+        colors: {
+          primary: {
+            green: 200
+          },
+          secondary: {
+            green: 240,
+            blue: 240
+          }
+        }
+      }
+    }
+
+
     this.initSnapshot = {
       turn: 0,
       home_team: {
         players: [],
-        score: 0,
+        Score: 0,
       },
       away_team: {
         players: [],
-        score: 0,
+        Score: 0,
       },
       ball: {
         Position: {
@@ -31,31 +70,10 @@ class Stadium extends React.Component {
       isConnected: false,
       isLoaded: false,
       error: null,
-      setup: {
-        dev_mode: false,
-        start_mode: "normal",
-        turn_duration: 50,//milliseconds
-        // time_remaining: "5:00",
-        home_team: {
-          name: "Rubens",
-          avatar: "external/profile-team-home.jpg",
-          colors: {
-            a: [0, 250, 0],
-            b: [250, 200, 0]
-          },
-        },
-        away_team: {
-          name: "Outro",
-          avatar: "external/profile-team-away.jpg",
-          colors: {
-            a: [0, 0, 200],
-            b: [50, 100, 200]
-          },
-        },
-      },
+      setup: setup,
       event: {
         type: "",
-        time_remaining: "",
+        time_remaining: "00:00",
         snapshot: this.initSnapshot,
       }
     }
@@ -69,7 +87,7 @@ class Stadium extends React.Component {
     const eventProcessor = function (event) {
       const g = JSON.parse(event.data);
 
-      console.log(g.game_event?.game_snapshot)
+      // console.log(g.game_event?.game_snapshot)
       me.setState({
         event: {
           time_remaining: g.time_remaining,
@@ -122,10 +140,10 @@ class Stadium extends React.Component {
       return <div>Loading...</div>;
     } else {
 
-      document.documentElement.style.setProperty('--team-home-color-primary', this.state.setup.home_team.colors.a);
-      document.documentElement.style.setProperty('--team-home-color-secondary', this.state.setup.home_team.colors.b);
-      document.documentElement.style.setProperty('--team-away-color-primary', this.state.setup.away_team.colors.a);
-      document.documentElement.style.setProperty('--team-away-color-secondary', this.state.setup.away_team.colors.b);
+      this.setColor('--team-home-color-primary', this.state.setup.home_team.colors.primary);
+      this.setColor('--team-home-color-secondary', this.state.setup.home_team.colors.secondary);
+      this.setColor('--team-away-color-primary', this.state.setup.away_team.colors.primary);
+      this.setColor('--team-away-color-secondary', this.state.setup.away_team.colors.secondary);
       return <div>
         <header id="lugobot-header" className="container">
           <Panel event={this.state.event} setup={this.state.setup}/>
@@ -136,6 +154,11 @@ class Stadium extends React.Component {
         </main>
       </div>;
     }
+  }
+
+  setColor(name, colors) {
+    const lis = [colors.red ?? 0, colors.green ?? 0, colors.blue ?? 0]
+    document.documentElement.style.setProperty(name, lis.toString());
   }
 
   setup() {

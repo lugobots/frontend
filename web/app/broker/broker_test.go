@@ -36,7 +36,7 @@ func TestNewBinder_IgnoreWhenThereIsNoConnections(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOnEventClient := NewMockBroadcast_OnEventClient(ctrl)
-	config := app.Configuration{
+	config := app.Config{
 		GameDuration:      100,
 		ListeningDuration: 1 * time.Second,
 		HomeTeam:          app.TeamConfiguration{},
@@ -75,7 +75,7 @@ func TestNewBinder_SendsTheEvents(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOnEventClient := NewMockBroadcast_OnEventClient(ctrl)
-	config := app.Configuration{
+	config := app.Config{
 		GameDuration:      100,
 		ListeningDuration: 1 * time.Second,
 		HomeTeam:          app.TeamConfiguration{},
@@ -146,7 +146,7 @@ func TestNewBinder_DropsIdleConnections(t *testing.T) {
 	}()
 
 	mockOnEventClient := NewMockBroadcast_OnEventClient(ctrl)
-	config := app.Configuration{
+	config := app.Config{
 		GameDuration:      100,
 		ListeningDuration: 1 * time.Second,
 		HomeTeam:          app.TeamConfiguration{},

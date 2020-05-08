@@ -1,7 +1,7 @@
 import React from 'react';
 import FieldPlayer from "./FieldPlayer";
 
-import {FieldSettings} from '../constants';
+import {GameDefinitions} from '../constants';
 
 class Field extends React.Component {
   constructor(props) {
@@ -21,7 +21,7 @@ class Field extends React.Component {
         position={p.Position}
       />)
     }
-    console.log(this.props.snapshot)
+
     if (this.props.snapshot.home_team.players) {
       for (const p of this.props.snapshot.home_team.players) {
         if (p) {
@@ -37,15 +37,13 @@ class Field extends React.Component {
       }
     }
 
-    const ball_left = 100 * (this.props.snapshot.ball.Position.X ?? 0) / FieldSettings.Width
-    const ball_bottom = 100 * (this.props.snapshot.ball.Position.Y ?? 0) / FieldSettings.Height
+    const ball_left = 100 * (this.props.snapshot.ball.Position.X ?? 0) / GameDefinitions.Field.Width
+    const ball_bottom = 100 * (this.props.snapshot.ball.Position.Y ?? 0) / GameDefinitions.Field.Height
 
     const ballStyle = {
       left: `${ball_left}%`,
       bottom: `calc(${ball_bottom}%)`
     }
-
-    console.log(`ball `, ballStyle)
 
     return <div id="field">
       <span id="ball" style={ballStyle}/>

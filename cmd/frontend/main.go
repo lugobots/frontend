@@ -39,50 +39,53 @@ func init() {
 
 func main() {
 
-	gameConfig := app.Configuration{
-		Broadcast: app.BroadcastConfig{
-			Address:  "localhost:9090",
-			Insecure: true,
-		},
-		DevMode:           false,
-		StartMode:         "",
-		GameDuration:      0,
-		ListeningDuration: 0,
-		HomeTeam: app.TeamConfiguration{
-			Name:   "Canada",
-			Avatar: "external/profile-team-home.jpg",
-			Colors: app.TeamColors{
-				PrimaryColor: app.Color{
-					R: 230,
-					G: 0,
-					B: 0,
-				},
-				SecondaryColor: app.Color{
-					R: 255,
-					G: 255,
-					B: 255,
-				},
-			},
-		},
-		AwayTeam: app.TeamConfiguration{
-			Name:   "UK",
-			Avatar: "external/profile-team-away.jpg",
-			Colors: app.TeamColors{
-				PrimaryColor: app.Color{
-					R: 240,
-					G: 0,
-					B: 0,
-				},
-				SecondaryColor: app.Color{
-					R: 0,
-					G: 0,
-					B: 250,
-				},
-			},
-		},
-	}
+	//gameConfig := app.Config{
+	//	Broadcast: app.BroadcastConfig{
+	//		Address:  "localhost:9090",
+	//		Insecure: true,
+	//	},
+	//	DevMode:           false,
+	//	StartMode:         "",
+	//	GameDuration:      0,
+	//	ListeningDuration: 0,
+	//	HomeTeam: app.TeamConfiguration{
+	//		Name:   "Canada",
+	//		Avatar: "external/profile-team-home.jpg",
+	//		Colors: app.TeamColors{
+	//			PrimaryColor: app.Color{
+	//				R: 230,
+	//				G: 0,
+	//				B: 0,
+	//			},
+	//			SecondaryColor: app.Color{
+	//				R: 255,
+	//				G: 255,
+	//				B: 255,
+	//			},
+	//		},
+	//	},
+	//	AwayTeam: app.TeamConfiguration{
+	//		Name:   "UK",
+	//		Avatar: "external/profile-team-away.jpg",
+	//		Colors: app.TeamColors{
+	//			PrimaryColor: app.Color{
+	//				R: 240,
+	//				G: 0,
+	//				B: 0,
+	//			},
+	//			SecondaryColor: app.Color{
+	//				R: 0,
+	//				G: 0,
+	//				B: 250,
+	//			},
+	//		},
+	//	},
+	//}
 
-	eventBroker := broker.NewBinder(gameConfig, zapLog)
+	eventBroker := broker.NewBinder(app.Config{
+		GRPCAddress:  "localhost:9090",
+		GRPCInsecure: true,
+	}, zapLog)
 	server := app.NewHandler("/home/rubens/go/src/bitbucket.org/makeitplay/lugo-frontend/web", "local", eventBroker)
 	httpServer := &http.Server{
 		Addr:    ":8080",
@@ -101,19 +104,20 @@ func main() {
 			if err := eventBroker.Stop(); err != nil {
 				zapLog.Errorf("error stopping event broker: %s", err)
 			}
+			zapLog.Info("event broker stopped")
 		})
 	}
 	startingEventBroker := func() {
 		serviceGroup.Add(1)
 		defer serviceGroup.Done()
-		zapLog.Errorf("starting http server at %s", httpServer.Addr)
+		zapLog.Infof("starting http server at %s", httpServer.Addr)
 		err := eventBroker.ListenAndBroadcast()
 		zapLog.Errorf("event broker has stopped: %s", err)
 
 		somethingStopped.Do(func() {
+			evenBrokerStopped.Do(func() {})
 			close(running)
 		})
-		//stoppingEventBroker()
 	}
 
 	stoppingHttpServer := func() {
@@ -123,6 +127,7 @@ func main() {
 			if err := httpServer.Shutdown(ctx); err != nil {
 				zapLog.Errorf("error stopping event broker: %s", err)
 			}
+			zapLog.Info("http server stopped")
 		})
 	}
 
@@ -133,9 +138,9 @@ func main() {
 		zapLog.Errorf("https has stopped: %s", err)
 
 		somethingStopped.Do(func() {
+			httpStopped.Do(func() {})
 			close(running)
 		})
-		//stoppingHttpServer()
 	}
 
 	monitorInterruptionSignal := func() {

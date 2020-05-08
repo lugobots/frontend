@@ -7,19 +7,27 @@ import (
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 )
 
+type Sample struct {
+	Events []*lugo.GameEvent
+	Setup  *lugo.GameSetup
+}
+
+func getLastSampleSnap(sample Sample) *lugo.GameSnapshot {
+	return sample.Events[len(sample.Events)-1].GameSnapshot
+}
 func getInitSnap() *lugo.GameSnapshot {
 	return &lugo.GameSnapshot{
 		State: lugo.GameSnapshot_WAITING,
 		Turn:  0,
 		HomeTeam: &lugo.Team{
 			Players: []*lugo.Player{},
-			Name:    "Team C",
+			Name:    "Team C (snapshot)",
 			Score:   0,
 			Side:    lugo.Team_HOME,
 		},
 		AwayTeam: &lugo.Team{
 			Players: []*lugo.Player{},
-			Name:    "Team D",
+			Name:    "Team D (snapshot)",
 			Score:   0,
 			Side:    lugo.Team_AWAY,
 		},

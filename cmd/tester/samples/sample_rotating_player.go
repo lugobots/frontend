@@ -4,9 +4,9 @@ import (
 	"github.com/lugobots/lugo4go/v2/lugo"
 )
 
-func SampleRotatePlayers() []*lugo.GameEvent {
-	events := SamplePlayersConnect()
-	lastSnap := copySnap(events[len(events)-1].GameSnapshot)
+func SampleRotatePlayers() Sample {
+	sample := SamplePlayersConnect()
+	lastSnap := copySnap(getLastSampleSnap(sample))
 
 	playerTestIndex := 4
 
@@ -26,9 +26,9 @@ func SampleRotatePlayers() []*lugo.GameEvent {
 		lastSnap = copySnap(lastSnap)
 		lastSnap.HomeTeam.Players[playerTestIndex].Velocity.Direction = &x
 		for i := 0; i < 20; i++ {
-			events = append(events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+			sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
 		}
 	}
 
-	return events
+	return sample
 }

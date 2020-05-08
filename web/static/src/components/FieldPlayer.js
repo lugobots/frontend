@@ -1,11 +1,11 @@
 import React from 'react';
 
-import {FieldSettings} from '../constants'
+import {GameDefinitions} from '../constants'
 
 class FieldPlayer extends React.Component {
   render() {
-    const left = 100 * (this.props.position.X ?? 0) / FieldSettings.Width
-    const bottom = 100 * (this.props.position.Y ?? 0) / FieldSettings.Height
+    const left = 100 * (this.props.position.X ?? 0) / GameDefinitions.Field.Width
+    const bottom = 100 * (this.props.position.Y ?? 0) / GameDefinitions.Field.Height
 
     const playerStyle = {
       left: `${left}%`,

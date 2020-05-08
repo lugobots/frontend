@@ -64,20 +64,22 @@ func main() {
 	srv := server.NewServer(zapLog)
 	cms := []struct {
 		command string
-		queue   []*lugo.GameEvent
+		sample  samples.Sample
 	}{
-		{command: "initial", queue: samples.SampleServerIsUp()},
-		{command: "players_connect", queue: samples.SamplePlayersConnect()},
-		{command: "move_ball", queue: samples.SampleMoveBall()},
-		{command: "move_player", queue: samples.SampleMovePlayers()},
-		{command: "rotate_player", queue: samples.SampleRotatePlayers()},
+		{command: "initial", sample: samples.SampleServerIsUp()},
+		{command: "players_connect", sample: samples.SamplePlayersConnect()},
+		{command: "move_ball", sample: samples.SampleMoveBall()},
+		{command: "move_player", sample: samples.SampleMovePlayers()},
+		{command: "rotate_player", sample: samples.SampleRotatePlayers()},
+		{command: "score_time", sample: samples.SampleScoreTime()},
 	}
 
 	for _, opt := range cms {
 		rootCmd.AddCommand(&cobra.Command{
 			Use: opt.command,
 			Run: func(cmd *cobra.Command, args []string) {
-				srv.EventQueue = opt.queue
+				srv.EventQueue = opt.sample.Events
+				srv.Setup = opt.sample.Setup
 				<-initTheServer(srv)
 			},
 		})

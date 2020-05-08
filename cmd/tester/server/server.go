@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/golang/protobuf/ptypes/empty"
+	"context"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"go.uber.org/zap"
 	"sync"
@@ -21,9 +21,14 @@ type Broadcaster struct {
 	connMux    sync.Mutex
 	logger     *zap.SugaredLogger
 	EventQueue []*lugo.GameEvent
+	Setup      *lugo.GameSetup
 }
 
-func (b *Broadcaster) OnEvent(_ *empty.Empty, server lugo.Broadcast_OnEventServer) error {
+func (b *Broadcaster) GetGameSetup(ctx context.Context, request *lugo.WatcherRequest) (*lugo.GameSetup, error) {
+	return b.Setup, nil
+}
+
+func (b *Broadcaster) OnEvent(request *lugo.WatcherRequest, server lugo.Broadcast_OnEventServer) error {
 	b.connMux.Lock()
 	b.conns = append(b.conns, server)
 	b.connMux.Unlock()

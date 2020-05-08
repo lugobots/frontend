@@ -4,7 +4,6 @@ import (
 	"bitbucket.org/makeitplay/lugo-frontend/web/app"
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -19,21 +18,20 @@ var grpcReconnectInterval = time.Second
 
 const ErrMaxConnectionAttemptsReached = app.Error("did not connect to the game server")
 
-func NewBinder(gameConfig app.Configuration, logger *zap.SugaredLogger) *Binder {
+func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 	return &Binder{
 		consumers:    map[string]chan app.FrontEndUpdate{},
-		consumersMux: sync.Mutex{},
-		gameConfig:   gameConfig,
-		configMux:    sync.RWMutex{},
+		consumersMux: sync.RWMutex{},
+		config:       config,
 		Logger:       logger,
 	}
 }
 
 type Binder struct {
 	consumers    map[string]chan app.FrontEndUpdate
-	consumersMux sync.Mutex
-	gameConfig   app.Configuration
-	configMux    sync.RWMutex
+	consumersMux sync.RWMutex
+	config       app.Config
+	gameSetup    *lugo.GameSetup
 	producerConn *grpc.ClientConn
 	producer     lugo.BroadcastClient
 	stopRequest  bool
@@ -112,26 +110,31 @@ func (b *Binder) StreamEventsTo(uuid string) chan app.FrontEndUpdate {
 	return b.consumers[uuid]
 }
 
-func (b *Binder) GetGameConfig() app.Configuration {
-	b.configMux.RLock()
-	defer b.configMux.RUnlock()
-	return b.gameConfig
+func (b *Binder) GetGameConfig() *lugo.GameSetup {
+	return b.gameSetup
 }
 
 func (b *Binder) connect() error {
 	opts := []grpc.DialOption{grpc.WithBlock()}
 	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 
-	if b.gameConfig.Broadcast.Insecure {
+	if b.config.GRPCInsecure {
 		opts = append(opts, grpc.WithInsecure())
 	}
 	var err error
-	b.producerConn, err = grpc.DialContext(ctx, b.gameConfig.Broadcast.Address, opts...)
+	b.producerConn, err = grpc.DialContext(ctx, b.config.GRPCAddress, opts...)
 	if err != nil {
 		return err
 	}
 
 	b.producer = lugo.NewBroadcastClient(b.producerConn)
+	b.gameSetup, err = b.producer.GetGameSetup(ctx, &lugo.WatcherRequest{
+		UUID: "frontend",
+	})
+
+	if err != nil {
+		return err
+	}
 	return err
 }
 
@@ -179,7 +182,9 @@ func (b *Binder) Stop() error {
 
 func (b *Binder) broadcast() error {
 	ctx := context.Background()
-	receiver, err := b.producer.OnEvent(ctx, &empty.Empty{})
+	receiver, err := b.producer.OnEvent(ctx, &lugo.WatcherRequest{
+		UUID: "frontend",
+	})
 	if err != nil {
 		return err
 	}
@@ -198,25 +203,27 @@ func (b *Binder) broadcast() error {
 			b.Logger.With(err).Error("ignoring game event")
 			continue
 		}
-		remaining := time.Duration(b.gameConfig.GameDuration-event.GameSnapshot.Turn) * b.gameConfig.ListeningDuration
+
+		frameTime := time.Duration(b.gameSetup.ListeningDuration) * time.Millisecond
+		remaining := time.Duration(b.gameSetup.GameDuration-event.GameSnapshot.Turn) * frameTime
 		update := app.FrontEndUpdate{
 			Type: eventType,
 			Update: app.UpdateData{
 				GameEvent:     event,
-				TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())),
+				TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),
 			},
 		}
 		b.lastUpdate = update
-		b.configMux.RLock()
+		b.consumersMux.RLock()
 		for uuid, consumer := range b.consumers {
 			select {
 			case consumer <- update:
 			default:
 				b.Logger.Warnf("consumer %s reached the max ignored messaged. Closing channel", uuid)
-				b.dropConsumer(uuid)
+				go b.dropConsumer(uuid)
 			}
 		}
-		b.configMux.RUnlock()
+		b.consumersMux.RUnlock()
 		b.Logger.Infof("event sent: %s", eventType)
 		if eventType == app.EventGameOver {
 			// in this case we stop the connection before the server drop the broker
