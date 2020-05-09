@@ -9,10 +9,10 @@ class Panel extends React.Component {
   }
 
   render() {
-    console.log(this.props.event.snapshot)
     return <section id="game-panel">
       <PanelTeamsInfo setup={this.props.setup}/>
       <PanelGameInfo
+        team_goal={this.props.event.team_goal}
         home_score={this.props.event.snapshot.home_team.Score ?? 0}
         away_score={this.props.event.snapshot.away_team.Score ?? 0}
         time_remaining={this.props.event.time_remaining}

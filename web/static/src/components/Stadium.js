@@ -1,8 +1,9 @@
 import React from 'react';
 import Panel from "./Panel";
 import Field from "./Field";
+import Events from "./Events";
 
-import {GameSettings} from '../constants';
+import {GameSettings, GameStates} from '../constants';
 
 const BackEndPoint = "http://localhost:8080"
 
@@ -72,6 +73,7 @@ class Stadium extends React.Component {
       error: null,
       setup: setup,
       event: {
+        team_goal: "",
         type: "",
         time_remaining: "00:00",
         snapshot: this.initSnapshot,
@@ -86,14 +88,23 @@ class Stadium extends React.Component {
 
     const eventProcessor = function (event) {
       const g = JSON.parse(event.data);
-
-      // console.log(g.game_event?.game_snapshot)
-      me.setState({
+      let state = {
         event: {
+          team_goal: "",
           time_remaining: g.time_remaining,
           snapshot: g.game_event?.game_snapshot,
         }
-      });
+      }
+
+      if (g.game_event?.game_snapshot.state === GameStates.GET_READY) {
+        if (g.game_event?.game_snapshot.home_team.score !== me.state.event.snapshot.home_team.Score) {
+          state.event.team_goal = "home";
+        }else if (g.game_event?.game_snapshot.away_team.score !== me.state.event.snapshot.away_team.Score) {
+          state.event.team_goal = "away";
+        }
+      }
+      // console.log(g.game_event?.game_snapshot)
+      me.setState(state);
     }
 
     evtSource.addEventListener("state_change", eventProcessor);
@@ -140,18 +151,24 @@ class Stadium extends React.Component {
       return <div>Loading...</div>;
     } else {
 
+      let headerGoalClass = ""
+      if(this.state.event.team_goal !== "") {
+        headerGoalClass = `active-modal`
+      }
+
       this.setColor('--team-home-color-primary', this.state.setup.home_team.colors.primary);
       this.setColor('--team-home-color-secondary', this.state.setup.home_team.colors.secondary);
       this.setColor('--team-away-color-primary', this.state.setup.away_team.colors.primary);
       this.setColor('--team-away-color-secondary', this.state.setup.away_team.colors.secondary);
       return <div>
-        <header id="lugobot-header" className="container">
+        <header id="lugobot-header" className={`container ${headerGoalClass}`}>
           <Panel event={this.state.event} setup={this.state.setup}/>
         </header>
 
         <main id="lugobot-stadium" className="container">
           <Field snapshot={this.state.event.snapshot}/>
         </main>
+        <Events event={this.state.event}/>
       </div>;
     }
   }

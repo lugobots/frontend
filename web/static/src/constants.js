@@ -21,5 +21,13 @@ const GameSettings = {
   }
 }
 
+const GameStates = {
+  WAITING: 0,
+  GET_READY: 1,
+  LISTENING: 2,
+  PLAYING: 3,
+  SHIFTING: 4,
+  OVER: 99,
+}
 
-export {GameDefinitions, GameSettings};
+export {GameDefinitions, GameSettings, GameStates};
