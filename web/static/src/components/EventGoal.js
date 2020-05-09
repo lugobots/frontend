@@ -11,7 +11,6 @@ class EventGoal extends React.Component {
       snow.push(<div key={`snow-${i}`} className="snow"/>)
     }
 
-    console.log(this.props.team_goal)
     let style = ""
     if(this.props.team_goal !== "") {
       style = `active-modal goal goal-${this.props.team_goal}`

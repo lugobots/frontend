@@ -11,18 +11,7 @@ func SampleScoreTime() Sample {
 	//time pass
 
 	lastSnap.State = lugo.GameSnapshot_WAITING
-	for i := 0; i < 100; i++ {
-		lastSnap = copySnap(lastSnap)
-		lastSnap.Turn++
-		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
-	}
-
-	lastSnap.AwayTeam.Score += 1
-	lastSnap.State = lugo.GameSnapshot_GET_READY
-	sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
-
-	lastSnap.State = lugo.GameSnapshot_WAITING
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 200; i++ {
 		lastSnap = copySnap(lastSnap)
 		lastSnap.Turn++
 		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
@@ -30,6 +19,19 @@ func SampleScoreTime() Sample {
 
 	lastSnap = copySnap(lastSnap)
 	lastSnap.AwayTeam.Score += 1
+	lastSnap.State = lugo.GameSnapshot_GET_READY
+	sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+
+	lastSnap = copySnap(lastSnap)
+	lastSnap.State = lugo.GameSnapshot_WAITING
+	for i := 0; i < 200; i++ {
+		lastSnap = copySnap(lastSnap)
+		lastSnap.Turn++
+		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+	}
+
+	lastSnap = copySnap(lastSnap)
+	lastSnap.HomeTeam.Score += 1
 	lastSnap.State = lugo.GameSnapshot_GET_READY
 	sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
 

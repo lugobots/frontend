@@ -88,22 +88,31 @@ class Stadium extends React.Component {
 
     const eventProcessor = function (event) {
       const g = JSON.parse(event.data);
+      let team_goal = ""
+      const newState = g.game_event?.game_snapshot?.state || GameStates.WAITING
+      if (g.game_event?.game_snapshot?.state === GameStates.GET_READY) {
+
+        const homeScoreOld = me.state.event.snapshot.home_team.Score ?? 0
+        const awayScoreOld = me.state.event.snapshot.away_team.Score ?? 0
+
+        const homeScoreNew = g.game_event?.game_snapshot?.home_team?.Score ?? 0
+        const awayScoreNew = g.game_event?.game_snapshot?.away_team?.Score ?? 0
+
+        if (homeScoreOld !== homeScoreNew) {
+          team_goal = "home";
+        }else if (awayScoreOld !== awayScoreNew) {
+          team_goal = "away";
+        }
+      }
+
       let state = {
         event: {
-          team_goal: "",
+          team_goal: team_goal,
           time_remaining: g.time_remaining,
           snapshot: g.game_event?.game_snapshot,
         }
       }
 
-      if (g.game_event?.game_snapshot.state === GameStates.GET_READY) {
-        if (g.game_event?.game_snapshot.home_team.score !== me.state.event.snapshot.home_team.Score) {
-          state.event.team_goal = "home";
-        }else if (g.game_event?.game_snapshot.away_team.score !== me.state.event.snapshot.away_team.Score) {
-          state.event.team_goal = "away";
-        }
-      }
-      // console.log(g.game_event?.game_snapshot)
       me.setState(state);
     }
 
