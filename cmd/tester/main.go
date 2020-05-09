@@ -75,11 +75,12 @@ func main() {
 	}
 
 	for _, opt := range cms {
+		ddd := opt
 		rootCmd.AddCommand(&cobra.Command{
-			Use: opt.command,
+			Use: ddd.command,
 			Run: func(cmd *cobra.Command, args []string) {
-				srv.EventQueue = opt.sample.Events
-				srv.Setup = opt.sample.Setup
+				srv.EventQueue = ddd.sample.Events
+				srv.Setup = ddd.sample.Setup
 				<-initTheServer(srv)
 			},
 		})
