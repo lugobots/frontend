@@ -13,10 +13,18 @@ import (
 )
 
 var maxIgnoredMessaged = 20
-var maxGRPCReconnect = 3
+var maxGRPCReconnect = 10
 var grpcReconnectInterval = time.Second
 
 const ErrMaxConnectionAttemptsReached = app.Error("did not connect to the game server")
+
+var defaultColor = &lugo.TeamColor{}
+var defaultTeamColors = &lugo.TeamSettings{
+	Colors: &lugo.TeamColors{
+		Primary:   defaultColor,
+		Secondary: defaultColor,
+	},
+}
 
 func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 	return &Binder{
@@ -24,6 +32,10 @@ func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 		consumersMux: sync.RWMutex{},
 		config:       config,
 		Logger:       logger,
+		gameSetup: &lugo.GameSetup{
+			HomeTeam: defaultTeamColors,
+			AwayTeam: defaultTeamColors,
+		},
 	}
 }
 
@@ -40,69 +52,6 @@ type Binder struct {
 }
 
 func (b *Binder) StreamEventsTo(uuid string) chan app.FrontEndUpdate {
-
-	//clientChan := make(chan app.FrontEndUpdate)
-	//
-	//sn := &lugo.GameSnapshot{
-	//	State: lugo.GameSnapshot_WAITING,
-	//	Turn:  12,
-	//	HomeTeam: &lugo.Team{
-	//		Players: []*lugo.Player{{
-	//			Number: 1,
-	//			Position: &lugo.Point{
-	//				X: 100,
-	//				Y: 100,
-	//			},
-	//			Velocity:     nil,
-	//			TeamSide:     0,
-	//			InitPosition: nil,
-	//		},
-	//		},
-	//		Name:  "Eu",
-	//		Score: 0,
-	//		Side:  lugo.Team_HOME,
-	//	},
-	//	AwayTeam: &lugo.Team{
-	//		Players: []*lugo.Player{{
-	//			Number: 1,
-	//			Position: &lugo.Point{
-	//				X: 100,
-	//				Y: 100,
-	//			},
-	//			Velocity:     nil,
-	//			TeamSide:     0,
-	//			InitPosition: nil,
-	//		},
-	//		},
-	//		Name:  "Eu",
-	//		Score: 0,
-	//		Side:  lugo.Team_AWAY,
-	//	},
-	//	Ball:      &lugo.Ball{},
-	//	ShotClock: nil,
-	//}
-	//
-	//go func() {
-	//	for {
-	//		time.Sleep(1 * time.Second)
-	//		sn.Turn = uint32(time.Now().Second())
-	//		clientChan <- app.FrontEndUpdate{
-	//			Type: app.EventStateChange,
-	//			Update: app.UpdateData{
-	//				GameEvent: &lugo.GameEvent{
-	//					GameSnapshot: sn,
-	//					Event: &lugo.GameEvent_StateChange{StateChange: &lugo.EventStateChange{
-	//						PreviousState: lugo.GameSnapshot_LISTENING,
-	//						NewState:      lugo.GameSnapshot_PLAYING,
-	//					}},
-	//				},
-	//				TimeRemaining: time.Now().Format("i:s"),
-	//			},
-	//		}
-	//	}
-	//}()
-	//return clientChan
-
 	b.consumersMux.Lock()
 	defer b.consumersMux.Unlock()
 	b.consumers[uuid] = make(chan app.FrontEndUpdate, maxIgnoredMessaged)
@@ -110,8 +59,15 @@ func (b *Binder) StreamEventsTo(uuid string) chan app.FrontEndUpdate {
 	return b.consumers[uuid]
 }
 
-func (b *Binder) GetGameConfig() *lugo.GameSetup {
-	return b.gameSetup
+func (b *Binder) GetGameConfig() app.FrontEndSet {
+	state := app.ConnStateUp
+	if b.producerConn == nil {
+		state = app.ConnStateDown
+	}
+	return app.FrontEndSet{
+		GameSetup:       b.gameSetup,
+		ConnectionState: state,
+	}
 }
 
 func (b *Binder) connect() error {
@@ -143,16 +99,19 @@ func (b *Binder) ListenAndBroadcast() error {
 	var finalErr error
 	for tries < maxGRPCReconnect && !b.stopRequest {
 		if err := b.connect(); err != nil {
+			b.broadcastConnectionLost()
 			b.Logger.Warnf("failure on connecting to the game server: %s", err)
 			time.Sleep(grpcReconnectInterval)
 			tries++
 		} else {
+			b.broadcastConnectionRees()
 			tries = 0
 			err := b.broadcast()
 			if err == app.ErrGameOver {
 				finalErr = err
 				break
 			}
+			b.broadcastConnectionLost()
 			b.Logger.Warnf("broadcast interrupted: %s", err)
 		}
 	}
@@ -212,19 +171,10 @@ func (b *Binder) broadcast() error {
 				GameEvent:     event,
 				TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),
 			},
+			ConnectionState: app.ConnStateUp,
 		}
 		b.lastUpdate = update
-		b.consumersMux.RLock()
-		for uuid, consumer := range b.consumers {
-			select {
-			case consumer <- update:
-			default:
-				b.Logger.Warnf("consumer %s reached the max ignored messaged. Closing channel", uuid)
-				go b.dropConsumer(uuid)
-			}
-		}
-		b.consumersMux.RUnlock()
-		b.Logger.Infof("event sent: %s", eventType)
+		b.sendToAll(update)
 		if eventType == app.EventGameOver {
 			// in this case we stop the connection before the server drop the broker
 			return app.ErrGameOver
@@ -246,6 +196,36 @@ func (b *Binder) dropAllConsumers() {
 		close(consumer)
 		delete(b.consumers, uuid)
 	}
+}
+
+func (b *Binder) sendToAll(update app.FrontEndUpdate) {
+	b.consumersMux.RLock()
+	for uuid, consumer := range b.consumers {
+		select {
+		case consumer <- update:
+		default:
+			b.Logger.Warnf("consumer %s reached the max ignored messaged. Closing channel", uuid)
+			go b.dropConsumer(uuid)
+		}
+	}
+	b.consumersMux.RUnlock()
+	b.Logger.Infof("event sent: %s", update.Type)
+}
+
+func (b *Binder) broadcastConnectionLost() {
+	b.sendToAll(app.FrontEndUpdate{
+		Type:            app.EventConnectionLost,
+		Update:          b.lastUpdate.Update,
+		ConnectionState: app.ConnStateDown,
+	})
+}
+
+func (b *Binder) broadcastConnectionRees() {
+	b.sendToAll(app.FrontEndUpdate{
+		Type:            app.EventConnectionReestablished,
+		Update:          b.lastUpdate.Update,
+		ConnectionState: app.ConnStateUp,
+	})
 }
 
 func eventTypeTranslator(event interface{}) (string, error) {

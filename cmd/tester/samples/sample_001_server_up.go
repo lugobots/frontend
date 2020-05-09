@@ -44,9 +44,9 @@ func SampleServerIsUp() Sample {
 						Blue:  0,
 					},
 					Secondary: &lugo.TeamColor{
-						Red:   0,
-						Green: 240,
-						Blue:  240,
+						Red:   255,
+						Green: 211,
+						Blue:  0,
 					},
 				},
 			},

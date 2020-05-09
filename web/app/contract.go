@@ -4,7 +4,7 @@ import "github.com/lugobots/lugo4go/v2/lugo"
 
 type EventsBroker interface {
 	StreamEventsTo(uuid string) chan FrontEndUpdate
-	GetGameConfig() *lugo.GameSetup
+	GetGameConfig() FrontEndSet
 }
 
 const (
@@ -14,7 +14,31 @@ const (
 	EventDebugReleased = "debug_released"
 	EventGameOver      = "game_over"
 	EventLostPlayer    = "lost_player"
+
+	//events between frontend server and frontend
+	EventConnectionLost          = "connection_lots"
+	EventConnectionReestablished = "connection_Reestablished"
 )
+
+const (
+	ConnStateUp   = "up"
+	ConnStateDown = "down"
+)
+
+type UpdateData struct {
+	GameEvent     *lugo.GameEvent `json:"game_event"`
+	TimeRemaining string          `json:"time_remaining"`
+}
+
+type FrontEndUpdate struct {
+	Type            string     `json:"type"`
+	Update          UpdateData `json:"data"`
+	ConnectionState string     `json:"connection_state"`
+}
+type FrontEndSet struct {
+	GameSetup       *lugo.GameSetup `json:"game_setup"`
+	ConnectionState string          `json:"connection_state"`
+}
 
 // Error is used to identify internal errors
 type Error string

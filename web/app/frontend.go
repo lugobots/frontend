@@ -9,18 +9,7 @@ import (
 	"net/http"
 	"path"
 	"time"
-
-	"github.com/lugobots/lugo4go/v2/lugo"
 )
-
-type UpdateData struct {
-	GameEvent     *lugo.GameEvent `json:"game_event"`
-	TimeRemaining string          `json:"time_remaining"`
-}
-type FrontEndUpdate struct {
-	Type   string     `json:"type"`
-	Update UpdateData `json:"data"`
-}
 
 //type Service struct {
 //	Clients []string

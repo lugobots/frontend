@@ -10,10 +10,11 @@ const BackEndPoint = "http://localhost:8080"
 class Stadium extends React.Component {
   constructor(props) {
     super(props);
-    this.reset()
+    this.reset(true)
   }
 
   componentDidMount() {
+
     const me = this;
 
     const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}/`);
@@ -59,10 +60,17 @@ class Stadium extends React.Component {
     evtSource.addEventListener("ping", function (event) {
       console.debug("ping")
     });
+    evtSource.addEventListener("connection_lots", function (event) {
+      console.error("upstream connection lost")
+    });
+    evtSource.addEventListener("connection_Reestablished", function (event) {
+      console.error("upstream connection reestablished")
+      me.setup()
+    });
 
     // addEventListener version
     evtSource.addEventListener('open', () => {
-      console.log("connection opened")
+      console.log("%cconnection opened", "color: green")
       me.reset()
       document.getElementById('lugobot-view').classList.remove("loading");
       this.setState({
@@ -73,7 +81,7 @@ class Stadium extends React.Component {
 
 
     evtSource.onerror = () => {
-      console.log("stream connection lost. trying to reconnect...");
+      console.error("stream connection lost. trying to reconnect...");
       this.setState({
         isConnected: false,
         isLoaded: false,
@@ -124,11 +132,12 @@ class Stadium extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
-
-          document.title = `Lugo - ${result.home_team.name} VS ${result.away_team.name}`
+          console.log(result)
+          // document.title = `Lugo - ${result.home_team.name} VS ${result.away_team.name}`
           this.setState({
             isLoaded: true,
-            setup: result
+            setup: result.game_setup,
+            upstream_state: result.connection_state === "up",
           });
         },
         // Note: it's important to handle errors here
@@ -137,13 +146,14 @@ class Stadium extends React.Component {
         (error) => {
           this.setState({
             isLoaded: true,
+            upstream_up: false,
             error
           });
         }
       )
   }
 
-  reset() {
+  reset(initialise) {
     document.getElementById('lugobot-view').classList.add("loading");
     document.title = "Lugo"
     const setup = {
@@ -183,7 +193,7 @@ class Stadium extends React.Component {
     }
 
 
-    this.initSnapshot = {
+    const snapshot = {
       turn: 0,
       home_team: {
         players: [],
@@ -201,18 +211,25 @@ class Stadium extends React.Component {
       }
     }
 
-    this.state = {
+    const initialState = {
       isConnected: false,
       isLoaded: false,
+      upstream_up: false,
       error: null,
       setup: setup,
       event: {
         team_goal: "",
         type: "",
         time_remaining: "00:00",
-        snapshot: this.initSnapshot,
+        snapshot: snapshot,
       }
     }
+
+    if (initialise) {
+      this.state = initialState
+      return
+    }
+    this.setState(initialState);
   }
 }
 
