@@ -55,6 +55,7 @@ func (b *Binder) StreamEventsTo(uuid string) chan app.FrontEndUpdate {
 	b.consumersMux.Lock()
 	defer b.consumersMux.Unlock()
 	b.consumers[uuid] = make(chan app.FrontEndUpdate, maxIgnoredMessaged)
+	// it won't block because the channel is still empty and its cap is larger than 1
 	b.consumers[uuid] <- b.lastUpdate
 	return b.consumers[uuid]
 }
@@ -185,16 +186,17 @@ func (b *Binder) broadcast() error {
 func (b *Binder) dropConsumer(uuid string) {
 	b.consumersMux.Lock()
 	defer b.consumersMux.Unlock()
-	close(b.consumers[uuid])
-	delete(b.consumers, uuid)
+	// this method may be called twice with the same argument because of concurrency between lock grant attempts
+	_, stillThere := b.consumers[uuid]
+	if stillThere {
+		close(b.consumers[uuid])
+		delete(b.consumers, uuid)
+	}
 }
 
 func (b *Binder) dropAllConsumers() {
-	b.consumersMux.Lock()
-	defer b.consumersMux.Unlock()
-	for uuid, consumer := range b.consumers {
-		close(consumer)
-		delete(b.consumers, uuid)
+	for uuid := range b.consumers {
+		b.dropConsumer(uuid)
 	}
 }
 

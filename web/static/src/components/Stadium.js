@@ -56,6 +56,8 @@ class Stadium extends React.Component {
       me.setState(state);
     }
 
+
+
     evtSource.addEventListener("state_change", eventProcessor);
     evtSource.addEventListener("new_player", eventProcessor);
     evtSource.addEventListener("ping", function (event) {
@@ -71,7 +73,7 @@ class Stadium extends React.Component {
           <br/>Wait the connection be reestablished <br/><br/>Retrying {upstreamConnTries}</span>)
     });
     evtSource.addEventListener("connection_Reestablished", function (event) {
-      console.error("upstream connection reestablished")
+      console.log("%cupstream connection reestablished", "color: green")
       upstreamConnTries = 0;
       me.closeModal()
       me.setup()
