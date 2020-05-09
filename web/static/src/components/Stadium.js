@@ -16,12 +16,13 @@ class Stadium extends React.Component {
   componentDidMount() {
 
     const me = this;
-
+    let upstreamConnTries = 0;
     const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}/`);
 
     const eventProcessor = function (event) {
       const g = JSON.parse(event.data);
       let team_goal = ""
+
       const newState = g.game_event?.game_snapshot?.state || GameStates.WAITING
       if (g.game_event?.game_snapshot?.state === GameStates.GET_READY) {
 
@@ -60,11 +61,19 @@ class Stadium extends React.Component {
     evtSource.addEventListener("ping", function (event) {
       console.debug("ping")
     });
+
+
     evtSource.addEventListener("connection_lots", function (event) {
       console.error("upstream connection lost")
+      upstreamConnTries++
+      me.openModal("Upstream connection lost",
+        <span>The frontend application is not connected to the GameServer.
+          <br/>Wait the connection be reestablished <br/><br/>Retrying {upstreamConnTries}</span>)
     });
     evtSource.addEventListener("connection_Reestablished", function (event) {
       console.error("upstream connection reestablished")
+      upstreamConnTries = 0;
+      me.closeModal()
       me.setup()
     });
 
@@ -72,6 +81,7 @@ class Stadium extends React.Component {
     evtSource.addEventListener('open', () => {
       console.log("%cconnection opened", "color: green")
       me.reset()
+      upstreamConnTries = 0;
       document.getElementById('lugobot-view').classList.remove("loading");
       this.setState({
         isConnected: true,
@@ -117,7 +127,7 @@ class Stadium extends React.Component {
         <main id="lugobot-stadium" className="container">
           <Field snapshot={this.state.event.snapshot}/>
         </main>
-        <Events event={this.state.event}/>
+        <Events event={this.state.event} modal={this.state.modal}/>
       </div>;
     }
   }
@@ -217,6 +227,7 @@ class Stadium extends React.Component {
       upstream_up: false,
       error: null,
       setup: setup,
+      modal: null,
       event: {
         team_goal: "",
         type: "",
@@ -230,6 +241,19 @@ class Stadium extends React.Component {
       return
     }
     this.setState(initialState);
+  }
+
+  openModal(title, text, buttons) {
+    document.getElementById('lugobot-page').classList.add("active-modal");
+    this.setState({
+      modal: {title, text, buttons}
+    })
+  }
+  closeModal() {
+    document.getElementById('lugobot-page').classList.remove("active-modal");
+    this.setState({
+      modal: null
+    })
   }
 }
 
