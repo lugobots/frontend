@@ -19,7 +19,8 @@ class Field extends React.Component {
   }
 
   componentDidMount() {
-    this.props.setOnNewFrameListener(snapshot => {
+    this.props.setOnNewEventListener(gameEvent => {
+      const snapshot = gameEvent.snapshot;
       const left = 100 * (snapshot.ball.Position.X ?? 0) / GameDefinitions.Field.Width
       const bottom = 100 * (snapshot.ball.Position.Y ?? 0) / GameDefinitions.Field.Height
 

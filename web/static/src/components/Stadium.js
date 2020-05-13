@@ -12,12 +12,14 @@ class Stadium extends React.Component {
     super(props);
     this.reset(true)
 
-    let onNewFrameListener = ()=>{}
-    this.onNewFrame = (snapshot) => {
-      onNewFrameListener(snapshot)
+    let onNewEventListener = []
+    this.onNewEvent = (snapshot) => {
+      onNewEventListener.forEach(cb => {
+        cb(snapshot)
+      })
     }
-    this.setOnNewFrameListener = (cb) =>{
-      onNewFrameListener = cb
+    this.addOnNewEventListener = (cb) =>{
+      onNewEventListener.push(cb)
     }
   }
 
@@ -52,7 +54,7 @@ class Stadium extends React.Component {
           snapshot: g.game_event?.game_snapshot,
         }
       }
-      me.onNewFrame(state.event.snapshot)
+      me.onNewEvent(state.event)
     }
 
     evtSource.addEventListener("state_change", eventProcessor);
@@ -120,14 +122,18 @@ class Stadium extends React.Component {
       this.setMainColor('--team-away-color-secondary', this.state.setup.away_team.colors.secondary);
       return <div>
         {/*<header id="lugobot-header" className={`container ${headerGoalClass}`}>*/}
-        {/*  <Panel event={this.state.event} setup={this.state.setup}/>*/}
+        {/*  <Panel*/}
+        {/*    event={this.state.event}*/}
+        {/*    setup={this.state.setup}*/}
+        {/*    setOnNewEventListener={ (cb) => { this.addOnNewEventListener(cb)}}*/}
+        {/*  />*/}
         {/*</header>*/}
 
         <main id="lugobot-stadium" className="container">
           <Field
             v={this.state.v}
             ball={this.state.event.snapshot.ball}
-            setOnNewFrameListener={this.setOnNewFrameListener}
+            setOnNewEventListener={ (cb) => { this.addOnNewEventListener(cb)}}
           />
         </main>
         {/*
