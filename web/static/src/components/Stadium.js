@@ -3,7 +3,7 @@ import Panel from "./Panel";
 import Field from "./Field";
 import Events from "./Events";
 
-import {GameSettings, GameStates} from '../constants';
+import {GameDefinitions, GameSettings, GameStates} from '../constants';
 
 const BackEndPoint = "http://localhost:8080"
 
@@ -11,10 +11,20 @@ class Stadium extends React.Component {
   constructor(props) {
     super(props);
     this.reset(true)
+
+
+    let onNewFrameListener = ()=>{}
+    this.onNewFrame = (snapshot) => {
+      onNewFrameListener(snapshot)
+    }
+    this.setOnNewFrameListener = (cb) =>{
+      onNewFrameListener = cb
+    }
   }
 
-  componentDidMount() {
 
+  componentDidMount() {
+    this.DIEGO = null
     const me = this;
     let upstreamConnTries = 0;
     const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}/`);
@@ -45,6 +55,7 @@ class Stadium extends React.Component {
         }
       }
 
+
       let state = {
         event: {
           team_goal: team_goal,
@@ -52,19 +63,15 @@ class Stadium extends React.Component {
           snapshot: g.game_event?.game_snapshot,
         }
       }
-
-      me.setState(state);
+      me.onNewFrame(state.event.snapshot)
+      console.log("FRAME")
     }
-
-
 
     evtSource.addEventListener("state_change", eventProcessor);
     evtSource.addEventListener("new_player", eventProcessor);
     evtSource.addEventListener("ping", function (event) {
       console.debug("ping")
     });
-
-
     evtSource.addEventListener("connection_lots", function (event) {
       console.error("upstream connection lost")
       upstreamConnTries++
@@ -91,7 +98,6 @@ class Stadium extends React.Component {
       me.setup()
     });
 
-
     evtSource.onerror = () => {
       console.error("stream connection lost. trying to reconnect...");
       this.setState({
@@ -100,18 +106,21 @@ class Stadium extends React.Component {
       });
       me.reset()
     };
+
+
   }
 
   render() {
-    const {error, isLoaded, isConnected} = this.state;
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    } else if (!isConnected) {
-      return <div>Connecting...</div>;
-    } else if (!isLoaded) {
-      return <div>Loading...</div>;
-    } else {
+    // const {error, isLoaded, isConnected} = this.state;
+    // if (error) {
+    //   return <div>Error: {error.message}</div>;
+    // } else if (!isConnected) {
+    //   return <div>Connecting...</div>;
+    // } else if (!isLoaded) {
+    //   return <div>Loading...</div>;
+    // } else {
 
+    console.log(`ainda rerender`)
       let headerGoalClass = ""
       if (this.state.event.team_goal !== "") {
         headerGoalClass = `active-modal`
@@ -122,16 +131,22 @@ class Stadium extends React.Component {
       this.setColor('--team-away-color-primary', this.state.setup.away_team.colors.primary);
       this.setColor('--team-away-color-secondary', this.state.setup.away_team.colors.secondary);
       return <div>
-        <header id="lugobot-header" className={`container ${headerGoalClass}`}>
-          <Panel event={this.state.event} setup={this.state.setup}/>
-        </header>
+        {/*<header id="lugobot-header" className={`container ${headerGoalClass}`}>*/}
+        {/*  <Panel event={this.state.event} setup={this.state.setup}/>*/}
+        {/*</header>*/}
 
         <main id="lugobot-stadium" className="container">
-          <Field snapshot={this.state.event.snapshot}/>
+          <Field
+            v={this.state.v}
+            ball={this.state.event.snapshot.ball}
+            setOnNewFrameListener={this.setOnNewFrameListener}
+          />
         </main>
-        <Events event={this.state.event} modal={this.state.modal}/>
+        {/*
+
+        <Events event={this.state.event} modal={this.state.modal}/>*/}
       </div>;
-    }
+    // }
   }
 
   setColor(name, colors) {
@@ -147,6 +162,7 @@ class Stadium extends React.Component {
           console.log(result)
           // document.title = `Lugo - ${result.home_team.name} VS ${result.away_team.name}`
           this.setState({
+            v: (new Date()).getUTCDate(),
             isLoaded: true,
             setup: result.game_setup,
             upstream_state: result.connection_state === "up",
@@ -224,6 +240,7 @@ class Stadium extends React.Component {
     }
 
     const initialState = {
+      v: (new Date()).getUTCDate(),
       isConnected: false,
       isLoaded: false,
       upstream_up: false,
@@ -251,12 +268,17 @@ class Stadium extends React.Component {
       modal: {title, text, buttons}
     })
   }
+
   closeModal() {
     document.getElementById('lugobot-page').classList.remove("active-modal");
     this.setState({
       modal: null
     })
   }
+}
+
+Stadium.prototype.DIEGO = function () {
+
 }
 
 export default Stadium;
