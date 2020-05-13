@@ -3,7 +3,7 @@ import Panel from "./Panel";
 import Field from "./Field";
 import Events from "./Events";
 
-import {GameDefinitions, GameSettings, GameStates} from '../constants';
+import {GameSettings, GameStates} from '../constants';
 
 const BackEndPoint = "http://localhost:8080"
 
@@ -11,7 +11,6 @@ class Stadium extends React.Component {
   constructor(props) {
     super(props);
     this.reset(true)
-
 
     let onNewFrameListener = ()=>{}
     this.onNewFrame = (snapshot) => {
@@ -22,9 +21,7 @@ class Stadium extends React.Component {
     }
   }
 
-
   componentDidMount() {
-    this.DIEGO = null
     const me = this;
     let upstreamConnTries = 0;
     const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}/`);
@@ -42,19 +39,12 @@ class Stadium extends React.Component {
         const homeScoreNew = g.game_event?.game_snapshot?.home_team?.Score ?? 0
         const awayScoreNew = g.game_event?.game_snapshot?.away_team?.Score ?? 0
 
-
-        console.log(`homeScoreOld: ${homeScoreOld}`)
-        console.log(`awayScoreOld: ${awayScoreOld}`)
-        console.log(`homeScoreNew: ${homeScoreNew}`)
-        console.log(`awayScoreNew: ${awayScoreNew}`)
-
         if (homeScoreOld !== homeScoreNew) {
           team_goal = "home";
         } else if (awayScoreOld !== awayScoreNew) {
           team_goal = "away";
         }
       }
-
 
       let state = {
         event: {
@@ -64,7 +54,6 @@ class Stadium extends React.Component {
         }
       }
       me.onNewFrame(state.event.snapshot)
-      console.log("FRAME")
     }
 
     evtSource.addEventListener("state_change", eventProcessor);
@@ -111,25 +100,25 @@ class Stadium extends React.Component {
   }
 
   render() {
-    // const {error, isLoaded, isConnected} = this.state;
-    // if (error) {
-    //   return <div>Error: {error.message}</div>;
-    // } else if (!isConnected) {
-    //   return <div>Connecting...</div>;
-    // } else if (!isLoaded) {
-    //   return <div>Loading...</div>;
-    // } else {
+    const {error, isLoaded, isConnected} = this.state;
+    if (error) {
+      return <div>Error: {error.message}</div>;
+    } else if (!isConnected) {
+      return <div>Connecting...</div>;
+    } else if (!isLoaded) {
+      return <div>Loading...</div>;
+    } else {
 
-    console.log(`ainda rerender`)
-      let headerGoalClass = ""
-      if (this.state.event.team_goal !== "") {
-        headerGoalClass = `active-modal`
-      }
+      console.log(`Stadium re rendered`)
+      // let headerGoalClass = ""
+      // if (this.state.event.team_goal !== "") {
+      //   headerGoalClass = `active-modal`
+      // }
 
-      this.setColor('--team-home-color-primary', this.state.setup.home_team.colors.primary);
-      this.setColor('--team-home-color-secondary', this.state.setup.home_team.colors.secondary);
-      this.setColor('--team-away-color-primary', this.state.setup.away_team.colors.primary);
-      this.setColor('--team-away-color-secondary', this.state.setup.away_team.colors.secondary);
+      this.setMainColor('--team-home-color-primary', this.state.setup.home_team.colors.primary);
+      this.setMainColor('--team-home-color-secondary', this.state.setup.home_team.colors.secondary);
+      this.setMainColor('--team-away-color-primary', this.state.setup.away_team.colors.primary);
+      this.setMainColor('--team-away-color-secondary', this.state.setup.away_team.colors.secondary);
       return <div>
         {/*<header id="lugobot-header" className={`container ${headerGoalClass}`}>*/}
         {/*  <Panel event={this.state.event} setup={this.state.setup}/>*/}
@@ -146,10 +135,10 @@ class Stadium extends React.Component {
 
         <Events event={this.state.event} modal={this.state.modal}/>*/}
       </div>;
-    // }
+    }
   }
 
-  setColor(name, colors) {
+  setMainColor(name, colors) {
     const lis = [colors.red ?? 0, colors.green ?? 0, colors.blue ?? 0]
     document.documentElement.style.setProperty(name, lis.toString());
   }
@@ -159,8 +148,7 @@ class Stadium extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
-          console.log(result)
-          // document.title = `Lugo - ${result.home_team.name} VS ${result.away_team.name}`
+          console.log(`Setup: `, result)
           this.setState({
             v: (new Date()).getUTCDate(),
             isLoaded: true,
@@ -168,9 +156,6 @@ class Stadium extends React.Component {
             upstream_state: result.connection_state === "up",
           });
         },
-        // Note: it's important to handle errors here
-        // instead of a catch() block so that we don't swallow
-        // exceptions from actual bugs in components.
         (error) => {
           this.setState({
             isLoaded: true,
@@ -275,10 +260,6 @@ class Stadium extends React.Component {
       modal: null
     })
   }
-}
-
-Stadium.prototype.DIEGO = function () {
-
 }
 
 export default Stadium;

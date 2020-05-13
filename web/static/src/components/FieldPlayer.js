@@ -15,32 +15,14 @@ class FieldPlayer extends React.Component {
     return ShouldRender(this.props, nextProps);
   }
 
-  onNewFrame(player) {
-
-
-    // this.onNewFrameListener(player)
-  }
-  // setOnNewFrameListener(cb) {
-  //   this.onNewFrameListener = cb
-  // }
-
-  // onNewFrameListener(cb) {
-  //   console.log(`${this.constructor.name}: onNewFrameListener not listened`)
-  // }
-
   componentDidMount() {
     this.props.setOnNewFrameListener(player => {
-      console.log(`Player ${this.props.team_side} -> ${this.props.number}`)
-      // const me = player[this.props.team_side][`${this.props.team_side}_${this.props.number}`]
       const left = 100 * (player.Position.X ?? 0) / GameDefinitions.Field.Width
       const bottom = 100 * (player.Position.Y ?? 0) / GameDefinitions.Field.Height
 
       this.myDOM.current.style.left = `${left}%`;
       this.myDOM.current.style.bottom = `calc(${bottom}%)`;
-
-      console.log(this.myDirectionDOM)
       this.myDirectionDOM.current.style.transform = `rotate(${-player.velocity.direction.ang + 90}deg)`;
-
     })
   }
 
