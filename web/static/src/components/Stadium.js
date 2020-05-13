@@ -12,18 +12,24 @@ class Stadium extends React.Component {
     super(props);
     this.reset(true)
 
+    let lastframe = null
     let onNewEventListener = []
     this.onNewEvent = (snapshot) => {
+      lastframe = snapshot
       onNewEventListener.forEach(cb => {
         cb(snapshot)
       })
     }
     this.addOnNewEventListener = (cb) =>{
+      if(lastframe !== null) {
+        cb(lastframe)
+      }
       onNewEventListener.push(cb)
     }
   }
 
   componentDidMount() {
+    console.log(`${this.constructor.name} mounted`)
     const me = this;
     let upstreamConnTries = 0;
     const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}/`);
@@ -31,6 +37,7 @@ class Stadium extends React.Component {
     const eventProcessor = function (event) {
       const g = JSON.parse(event.data);
       let team_goal = ""
+
       const newState = g.game_event?.game_snapshot?.state || GameStates.WAITING
       if (g.game_event?.game_snapshot?.state === GameStates.GET_READY) {
 
@@ -110,24 +117,22 @@ class Stadium extends React.Component {
       return <div>Loading...</div>;
     } else {
 
-      console.log(`Stadium re rendered`)
-      // let headerGoalClass = ""
-      // if (this.state.event.team_goal !== "") {
-      //   headerGoalClass = `active-modal`
-      // }
+      let headerGoalClass = ""
+      if (this.state.event.team_goal !== "") {
+        headerGoalClass = `active-modal`
+      }
 
       this.setMainColor('--team-home-color-primary', this.state.setup.home_team.colors.primary);
       this.setMainColor('--team-home-color-secondary', this.state.setup.home_team.colors.secondary);
       this.setMainColor('--team-away-color-primary', this.state.setup.away_team.colors.primary);
       this.setMainColor('--team-away-color-secondary', this.state.setup.away_team.colors.secondary);
       return <div>
-        {/*<header id="lugobot-header" className={`container ${headerGoalClass}`}>*/}
-        {/*  <Panel*/}
-        {/*    event={this.state.event}*/}
-        {/*    setup={this.state.setup}*/}
-        {/*    setOnNewEventListener={ (cb) => { this.addOnNewEventListener(cb)}}*/}
-        {/*  />*/}
-        {/*</header>*/}
+        <header id="lugobot-header" className={`container ${headerGoalClass}`}>
+          <Panel
+            setup={this.state.setup}
+            setOnNewEventListener={ (cb) => { this.addOnNewEventListener(cb)}}
+          />
+        </header>
 
         <main id="lugobot-stadium" className="container">
           <Field

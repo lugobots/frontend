@@ -21,7 +21,7 @@ class PanelGameInfo extends React.Component {
   }
 
   render() {
-
+    console.log(`${this.constructor.name} rendered`)
     let homeTeamClass = ""
     if(this.props.team_goal === "home") {
       homeTeamClass = "goal"
