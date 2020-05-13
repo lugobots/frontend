@@ -3,11 +3,13 @@ import FieldPlayer from "./FieldPlayer";
 
 
 import {ShouldRender} from '../helpers';
+import {GameDefinitions} from "../constants";
 const defaultPost = {Y: -1000, X: -10000}
 
 class Field extends React.Component {
   constructor(props) {
     super(props);
+    this.ballDOM = React.createRef();
     this.players = {home: {}, away: {}};
     this.onNewFrameListeners = {home: {}, away: {}};
   }
@@ -18,6 +20,12 @@ class Field extends React.Component {
 
   componentDidMount() {
     this.props.setOnNewFrameListener(snapshot => {
+      const left = 100 * (snapshot.ball.Position.X ?? 0) / GameDefinitions.Field.Width
+      const bottom = 100 * (snapshot.ball.Position.Y ?? 0) / GameDefinitions.Field.Height
+
+      this.ballDOM.current.style.left = `${left}%`;
+      this.ballDOM.current.style.bottom = `calc(${bottom}%)`;
+
       snapshot.home_team?.players?.forEach( (player) =>{
         this.onNewFrameListeners["home"][`home_${player.number}`](player)
       })
@@ -51,7 +59,7 @@ class Field extends React.Component {
     }
 
     return <div id="field">
-            <span id="ball"/>
+            <span id="ball" ref={this.ballDOM} />
             {items}
           </div>;
   }

@@ -29,7 +29,6 @@ class Stadium extends React.Component {
     const eventProcessor = function (event) {
       const g = JSON.parse(event.data);
       let team_goal = ""
-
       const newState = g.game_event?.game_snapshot?.state || GameStates.WAITING
       if (g.game_event?.game_snapshot?.state === GameStates.GET_READY) {
 
