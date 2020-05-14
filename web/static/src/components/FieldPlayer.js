@@ -27,6 +27,7 @@ class FieldPlayer extends React.Component {
   }
 
   render() {
+    console.log(`${this.constructor.name} rendered`)
     return <span ref={this.myDOM}
       id={`player-${this.props.team_side}-team-${this.props.number}`}
       className={"player player-"+this.props.team_side+"-team"}

@@ -37,6 +37,7 @@ class Field extends React.Component {
   }
 
   render() {
+    console.log(`${this.constructor.name} rendered`)
     const items = []
     const fillPlayer = (p, side) => {
       const a = <FieldPlayer

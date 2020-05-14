@@ -1,7 +1,6 @@
 import React from 'react';
 import PanelTeamsInfo from "./PanelTeamsInfo";
 import PanelGameInfo from "./PanelGameInfo";
-import {GameDefinitions} from "../constants";
 import {ShouldRender} from "../helpers";
 
 class Panel extends React.Component {
@@ -20,26 +19,25 @@ class Panel extends React.Component {
   // }
 
   componentDidMount() {
-
     this.props.setOnNewEventListener(gameEvent => {
-
-      if(gameEvent.time_remaining !== this.state.time_remaining) {
+      if(this.state.time_remaining !== gameEvent.time_remaining) {
         this.setState({time_remaining: gameEvent.time_remaining})
       }
-      if(gameEvent.team_goal !== this.state.team_goal) {
+      if(this.state.team_goal !== gameEvent.team_goal) {
         this.setState({team_goal: gameEvent.team_goal})
       }
 
-      if(gameEvent.snapshot?.home_team.Score !== this.state.home_score) {
+      if(this.state.home_score !== gameEvent.snapshot?.home_team.Score) {
         this.setState({home_score: gameEvent.snapshot?.home_team.Score})
       }
-      if(gameEvent.snapshot?.away_team.Score !== this.state.away_score) {
+      if(this.state.away_score !== gameEvent.snapshot?.away_team.Score) {
         this.setState({away_score: gameEvent.snapshot?.away_team.Score})
       }
     })
   }
 
   render() {
+    console.log(`${this.constructor.name} rendered`)
     return <section id="game-panel">
       <PanelTeamsInfo setup={this.props.setup}/>
       <PanelGameInfo

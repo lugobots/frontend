@@ -37,7 +37,7 @@ class Stadium extends React.Component {
     const eventProcessor = function (event) {
       const g = JSON.parse(event.data);
       let team_goal = ""
-
+      console.log(`event`)
       const newState = g.game_event?.game_snapshot?.state || GameStates.WAITING
       if (g.game_event?.game_snapshot?.state === GameStates.GET_READY) {
 
@@ -106,48 +106,6 @@ class Stadium extends React.Component {
 
 
   }
-
-  render() {
-    const {error, isLoaded, isConnected} = this.state;
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    } else if (!isConnected) {
-      return <div>Connecting...</div>;
-    } else if (!isLoaded) {
-      return <div>Loading...</div>;
-    } else {
-
-      let headerGoalClass = ""
-      if (this.state.event.team_goal !== "") {
-        headerGoalClass = `active-modal`
-      }
-
-      this.setMainColor('--team-home-color-primary', this.state.setup.home_team.colors.primary);
-      this.setMainColor('--team-home-color-secondary', this.state.setup.home_team.colors.secondary);
-      this.setMainColor('--team-away-color-primary', this.state.setup.away_team.colors.primary);
-      this.setMainColor('--team-away-color-secondary', this.state.setup.away_team.colors.secondary);
-      return <div>
-        <header id="lugobot-header" className={`container ${headerGoalClass}`}>
-          <Panel
-            setup={this.state.setup}
-            setOnNewEventListener={ (cb) => { this.addOnNewEventListener(cb)}}
-          />
-        </header>
-
-        <main id="lugobot-stadium" className="container">
-          <Field
-            v={this.state.v}
-            ball={this.state.event.snapshot.ball}
-            setOnNewEventListener={ (cb) => { this.addOnNewEventListener(cb)}}
-          />
-        </main>
-        {/*
-
-        <Events event={this.state.event} modal={this.state.modal}/>*/}
-      </div>;
-    }
-  }
-
   setMainColor(name, colors) {
     const lis = [colors.red ?? 0, colors.green ?? 0, colors.blue ?? 0]
     document.documentElement.style.setProperty(name, lis.toString());
@@ -269,6 +227,55 @@ class Stadium extends React.Component {
     this.setState({
       modal: null
     })
+  }
+
+  setGoalState(team_side) {
+
+  }
+
+  render() {
+    console.log(`${this.constructor.name} rendered`)
+    const {error, isLoaded, isConnected} = this.state;
+    if (error) {
+      return <div>Error: {error.message}</div>;
+    } else if (!isConnected) {
+      return <div>Connecting...</div>;
+    } else if (!isLoaded) {
+      return <div>Loading...</div>;
+    } else {
+
+      let headerGoalClass = ""
+      if (this.state.event.team_goal !== "") {
+        headerGoalClass = `active-modal`
+      }
+
+      this.setMainColor('--team-home-color-primary', this.state.setup.home_team.colors.primary);
+      this.setMainColor('--team-home-color-secondary', this.state.setup.home_team.colors.secondary);
+      this.setMainColor('--team-away-color-primary', this.state.setup.away_team.colors.primary);
+      this.setMainColor('--team-away-color-secondary', this.state.setup.away_team.colors.secondary);
+      return <div>
+        <header id="lugobot-header" className={`container ${headerGoalClass}`}>
+          <Panel
+            v={this.state.v}
+            setup={this.state.setup}
+            setOnNewEventListener={ (cb) => { this.addOnNewEventListener(cb)}}
+          />
+        </header>
+
+        <main id="lugobot-stadium" className="container">
+          <Field
+            v={this.state.v}
+            setup={this.state.setup}
+            setOnNewEventListener={ (cb) => { this.addOnNewEventListener(cb)}}
+          />
+        </main>
+        <Events
+          v={this.state.v}
+          modal={this.state.modal}
+          setOnNewEventListener={ (cb) => { this.addOnNewEventListener(cb)}}
+        />
+      </div>;
+    }
   }
 }
 

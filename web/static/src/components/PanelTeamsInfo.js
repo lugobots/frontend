@@ -10,6 +10,7 @@ class PanelTeamsInfo extends React.Component {
   }
 
   render() {
+    console.log(`${this.constructor.name} rendered`)
     return <div id="teams-info">
         <span id="home-team" className="team">
           <span id="profile-home-team" className="profile-team">
