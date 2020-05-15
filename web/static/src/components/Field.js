@@ -15,6 +15,7 @@ class Field extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    console.log(`should it be re render?`, this.props.v, nextProps.v)
     return ShouldRender(this.props, nextProps);
   }
 
@@ -61,7 +62,7 @@ class Field extends React.Component {
     }
 
     return <div id="field">
-            <span id="ball" ref={this.ballDOM} />
+            <span id="ball" style={{}} ref={this.ballDOM} />
             {items}
           </div>;
   }

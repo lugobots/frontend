@@ -30,4 +30,13 @@ const GameStates = {
   OVER: 99,
 }
 
-export {GameDefinitions, GameSettings, GameStates};
+
+const StadiumStates = {
+  StadiumStateConnecting: "connecting",
+  StadiumStateSetting: "setting-up",
+  StadiumStateListening: "listening",
+  StadiumStateConn: "conn-upstream",
+  StadiumStateGoal: "goal",
+
+}
+export {GameDefinitions, GameSettings, GameStates, StadiumStates};

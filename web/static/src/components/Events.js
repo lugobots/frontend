@@ -1,6 +1,7 @@
 import React from 'react';
 import EventGoal from './EventGoal'
 import Modal from "./Modal";
+import {StadiumStates} from "../constants";
 
 class Events extends React.Component {
   constructor(props) {
@@ -21,15 +22,20 @@ class Events extends React.Component {
   render() {
     console.log(`${this.constructor.name} rendered`)
     let style = []
-    if (this.state.team_goal !== "") {
-      style = ["zoom-In", "active-modal", "goal", `goal-${this.state.team_goal}`];
-    } else if (this.props.modal !== null) {
+    let team_goal = ""
+    switch (this.props.stadium_state.mode) {
+      case StadiumStates.StadiumStateGoal:
+        style = ["zoom-In", "active-modal", "goal", `goal-${this.props.stadium_state.side }`];
+        team_goal = this.props.stadium_state.side
+        break;
+    }
+    if(this.props.modal !== null) {
       style = ["zoom-In", "active-modal"];
     }
 
     return <section id="event-view" className={style.join(" ")}>
       <Modal modal={this.props.modal}/>
-      <EventGoal team_goal={this.state.team_goal}/>
+      <EventGoal team_goal={team_goal}/>
     </section>;
   }
 }
