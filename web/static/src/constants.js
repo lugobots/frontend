@@ -37,6 +37,29 @@ const StadiumStates = {
   StadiumStateListening: "listening",
   StadiumStateConn: "conn-upstream",
   StadiumStateGoal: "goal",
-
 }
-export {GameDefinitions, GameSettings, GameStates, StadiumStates};
+
+const EventTypes = {
+  NewPlayer: "new_player",
+  Breakpoint: "breakpoint",
+  StateChange: "state_change",
+  DebugReleased: "debug_released",
+  GameOver: "game_over",
+  LostPlayer: "lost_player",
+  ConnectionLost: "connection_lots",
+  ConnectionReestablished: "connection_Reestablished",
+}
+
+const BreakpointType = {
+  ORDERS: 0,
+  TURN: 1,
+}
+
+export {
+  GameDefinitions,
+  GameSettings,
+  GameStates,
+  StadiumStates,
+  EventTypes,
+  BreakpointType,
+};

@@ -6,7 +6,7 @@ import ToolBar from "./ToolBar";
 import {Howl, Howler} from 'howler';
 import tickAudio from '../sounds/kick.wav';
 
-import {GameSettings, GameStates, StadiumStates} from '../constants';
+import {GameSettings, GameStates, StadiumStates, EventTypes} from '../constants';
 
 const BackEndPoint = "http://localhost:8080"
 
@@ -51,21 +51,31 @@ class Stadium extends React.Component {
       console.error("stream connection lost. trying to reconnect...");
       me.gotoStateConnecting()
     };
-    evtSource.addEventListener("connection_lots", function (event) {
+    evtSource.addEventListener("ping", () => {
+      console.debug("ping")
+    });
+    evtSource.addEventListener(EventTypes.ConnectionLost, function (event) {
       console.error("upstream connection lost")
       me.gotoStateConnectingUpstream(upstreamConnTries++)
     });
-    evtSource.addEventListener("connection_Reestablished", function (event) {
+    evtSource.addEventListener(EventTypes.ConnectionReestablished, function (event) {
       console.log("%cupstream connection reestablished", "color: green")
       upstreamConnTries = 0;
       me.gotoStateSettingUp()
     });
 
-    evtSource.addEventListener("state_change", (e) => this.processGameEvent(e));
-    evtSource.addEventListener("new_player", (e) => this.processGameEvent(e));
-    evtSource.addEventListener("ping", () => {
-      console.debug("ping")
+    evtSource.addEventListener(EventTypes.StateChange, (e) => this.processGameEvent(e));
+    evtSource.addEventListener(EventTypes.NewPlayer, (e) => this.processGameEvent(e));
+    evtSource.addEventListener(EventTypes.Breakpoint, (e) => {
+      const g = JSON.parse(e.data);
+      console.log("%cDEBUG ON", "color: blue", g)
+      this.processGameEvent(e)
     });
+    evtSource.addEventListener(EventTypes.DebugReleased, (e) => {
+      console.log("%cDEBUG OFF", "color: gray")
+      this.processGameEvent(e)
+    });
+
   }
 
   processGameEvent(event) {
@@ -93,6 +103,7 @@ class Stadium extends React.Component {
 
     let state = {
       event: {
+        debug_mode: g.debug_mode,
         shot_time: g.shot_time,
         time_remaining: g.time_remaining,
         snapshot: g.game_event?.game_snapshot,
@@ -316,7 +327,13 @@ class Stadium extends React.Component {
           }}
         />
       </main>
-      <ToolBar v={this.state.v} setup={this.state.setup} />
+      <ToolBar
+        v={this.state.v}
+        setup={this.state.setup}
+        setOnNewEventListener={(cb) => {
+          this.addOnNewEventListener(cb)
+        }}
+      />
       <Events
         v={this.state.v}
         stadium_state={this.state.stadium}

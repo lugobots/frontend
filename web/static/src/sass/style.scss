@@ -1798,6 +1798,10 @@ $team-away-color-2 : var(--team-away-color-secondary);
       }
     }
 
+    &.deactivated {
+      color: #4e6365 !important;
+      border-color: rgba(93, 67, 67, 0);
+    }
     &#btn-next-order::before { content: '\f051'; }
     &#btn-next-cycle::before { content: '\f050'; }
     &#btn-rearrange::before { content: '\f0b2'; }

@@ -156,6 +156,10 @@ func (b *Binder) broadcast() error {
 		return err
 	}
 	b.Logger.Warn("starting broadcasting")
+	/**
+	@todo the frontend server currently has no accurate information about the debugging state, so we presume it is not paused
+	*/
+	debugging := false
 	for {
 		event, err := receiver.Recv()
 		if err != nil {
@@ -177,12 +181,18 @@ func (b *Binder) broadcast() error {
 		if event.GameSnapshot.ShotClock != nil {
 			shotRemaining = time.Duration(event.GameSnapshot.ShotClock.Turns) * frameTime
 		}
+		if eventType == app.EventBreakpoint {
+			debugging = true
+		} else if eventType == app.EventDebugReleased {
+			debugging = false
+		}
 		update := app.FrontEndUpdate{
 			Type: eventType,
 			Update: app.UpdateData{
 				GameEvent:     event,
 				TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),
 				ShotTime:      fmt.Sprintf("%02d", int(shotRemaining.Seconds())),
+				DebugMode:     debugging,
 			},
 			ConnectionState: app.ConnStateUp,
 		}

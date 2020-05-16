@@ -59,12 +59,19 @@ class ToolBarTabDebug extends React.Component {
   }
 
   render() {
+    console.log(`${this.constructor.name} rendered`)
+    let deactivateClass = "deactivated"
+    let disabled = true
+    if(this.props.debugOn) {
+      deactivateClass = ""
+      disabled = true
+    }
     return <div className={`${this.props.className} debug-tab`}>
       <button id="btn-resume" className="btn btn-main" onClick={this.pauseResume}>Resume</button>
-      <button id="btn-next-order" className="btn" onClick={this.nextTurn}>Next Order</button>
-      <button id="btn-next-cycle" className="btn" onClick={this.nextOrder}>Next Cycle</button>
-      <button id="btn-rearrange" className="btn">Rearrange</button>
-      <button id="btn-save-positions" className="btn">Save Positions</button>
+      <button id="btn-next-order" aria-disabled={disabled} className={`btn ${deactivateClass}`} onClick={this.nextTurn}>Next Order</button>
+      <button id="btn-next-cycle" aria-disabled={disabled} className={`btn ${deactivateClass}`} onClick={this.nextOrder}>Next Cycle</button>
+      <button id="btn-rearrange" aria-disabled={disabled} className={`btn ${deactivateClass}`}>Rearrange</button>
+      <button id="btn-save-positions" className={`btn ${deactivateClass}`}>Save Positions</button>
       <span id="choose-preset">
             <label htmlFor="preset">Choose a pre-set Arrangement</label>
             <select name="preset">

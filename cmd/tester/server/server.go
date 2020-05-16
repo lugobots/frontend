@@ -26,12 +26,31 @@ type Broadcaster struct {
 
 	breakpoint chan bool
 	lastSnap   *lugo.GameSnapshot
+
+	// gambiarra pra nao precisar fazer lista de conecoes. Nao vai funcionar se tiver mais de um front end connectado!
+	shortcutHole chan *lugo.GameEvent
 }
 
 func (b *Broadcaster) PauseOrResume(ctx context.Context, empty *empty.Empty) (*lugo.CommandResponse, error) {
 	if b.breakpoint == nil {
 		b.breakpoint = make(chan bool)
+		defer func() {
+			b.shortcutHole <- &lugo.GameEvent{
+				GameSnapshot: b.lastSnap,
+				Event: &lugo.GameEvent_Breakpoint{
+					Breakpoint: &lugo.EventDebugBreakpoint{Breakpoint: lugo.EventDebugBreakpoint_ORDERS},
+				},
+			}
+		}()
 	} else {
+		defer func() {
+			b.shortcutHole <- &lugo.GameEvent{
+				GameSnapshot: b.lastSnap,
+				Event: &lugo.GameEvent_DebugReleased{
+					DebugReleased: &lugo.EventDebugReleased{},
+				},
+			}
+		}()
 		close(b.breakpoint)
 		b.breakpoint = nil
 	}
@@ -43,12 +62,26 @@ func (b *Broadcaster) PauseOrResume(ctx context.Context, empty *empty.Empty) (*l
 }
 
 func (b *Broadcaster) NextTurn(ctx context.Context, empty *empty.Empty) (*lugo.CommandResponse, error) {
+	return b.sendBreakpoint(lugo.EventDebugBreakpoint_TURN)
+}
+
+func (b *Broadcaster) NextOrder(ctx context.Context, empty *empty.Empty) (*lugo.CommandResponse, error) {
+	return b.sendBreakpoint(lugo.EventDebugBreakpoint_ORDERS)
+}
+
+func (b *Broadcaster) sendBreakpoint(breakType lugo.EventDebugBreakpoint_Breakpoint) (*lugo.CommandResponse, error) {
 	if b.breakpoint == nil {
 		return &lugo.CommandResponse{
 			Code:         lugo.CommandResponse_OTHER,
 			GameSnapshot: b.lastSnap,
 			Details:      ":-)",
 		}, nil
+	}
+	b.shortcutHole <- &lugo.GameEvent{
+		GameSnapshot: b.lastSnap,
+		Event: &lugo.GameEvent_Breakpoint{
+			Breakpoint: &lugo.EventDebugBreakpoint{Breakpoint: breakType},
+		},
 	}
 	close(b.breakpoint)
 	b.breakpoint = make(chan bool)
@@ -57,10 +90,6 @@ func (b *Broadcaster) NextTurn(ctx context.Context, empty *empty.Empty) (*lugo.C
 		GameSnapshot: b.lastSnap,
 		Details:      ":-)",
 	}, nil
-}
-
-func (b *Broadcaster) NextOrder(ctx context.Context, empty *empty.Empty) (*lugo.CommandResponse, error) {
-	return b.NextTurn(ctx, empty)
 }
 
 func (b *Broadcaster) SetBallProperties(ctx context.Context, properties *lugo.BallProperties) (*lugo.CommandResponse, error) {
@@ -87,6 +116,18 @@ func (b *Broadcaster) OnEvent(request *lugo.WatcherRequest, server lugo.Broadcas
 	time.Sleep(5 * time.Second)
 
 	b.logger.Infof("starting stream")
+	go func() {
+		b.shortcutHole = make(chan *lugo.GameEvent)
+		for {
+			v, ok := <-b.shortcutHole
+			if !ok {
+				return
+			}
+			if err := server.Send(v); err != nil {
+				b.logger.Errorf("error sending event through the hole: %s", err)
+			}
+		}
+	}()
 	for i, event := range b.EventQueue {
 		if b.breakpoint != nil {
 			<-b.breakpoint
