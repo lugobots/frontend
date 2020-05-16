@@ -36,6 +36,11 @@ class PanelGameInfo extends React.Component {
           <span id="score-home-team" className={`score-team ${homeTeamClass}`}>{this.props.home_score}</span>
           <span id="timer">
             <span id="remaining" className="active">{this.props.time_remaining}</span>
+            <span id="shot-clock" >
+              <span id="shot-clock-home" />
+              <span id="shot-clock-timer">{this.props.shot_time}</span>
+              <span id="shot-clock-away" />
+            </span>
             <span id="buffering" >
               <span className="label">Buffering</span>
               <span className="percent">50%</span>

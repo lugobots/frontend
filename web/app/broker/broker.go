@@ -166,11 +166,16 @@ func (b *Binder) broadcast() error {
 
 		frameTime := time.Duration(b.gameSetup.ListeningDuration) * time.Millisecond
 		remaining := time.Duration(b.gameSetup.GameDuration-event.GameSnapshot.Turn) * frameTime
+		shotRemaining := time.Duration(0)
+		if event.GameSnapshot.ShotClock != nil {
+			shotRemaining = time.Duration(event.GameSnapshot.ShotClock.Turns) * frameTime
+		}
 		update := app.FrontEndUpdate{
 			Type: eventType,
 			Update: app.UpdateData{
 				GameEvent:     event,
 				TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),
+				ShotTime:      fmt.Sprintf("%02d", int(shotRemaining.Seconds())),
 			},
 			ConnectionState: app.ConnStateUp,
 		}

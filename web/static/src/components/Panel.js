@@ -18,6 +18,9 @@ class Panel extends React.Component {
       if(this.state.time_remaining !== gameEvent.time_remaining) {
         this.setState({time_remaining: gameEvent.time_remaining})
       }
+      if(this.state.shot_time !== gameEvent.shot_time) {
+        this.setState({shot_time: gameEvent.shot_time})
+      }
 
       if(this.state.home_score !== gameEvent.snapshot?.home_team.Score) {
         this.setState({home_score: gameEvent.snapshot?.home_team.Score})
@@ -37,6 +40,7 @@ class Panel extends React.Component {
         home_score={this.state.home_score || 0}
         away_score={this.state.away_score || 0}
         time_remaining={this.state.time_remaining}
+        shot_time={this.state.shot_time}
       />
     </section>;
   }

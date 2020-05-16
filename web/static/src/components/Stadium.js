@@ -12,7 +12,6 @@ class Stadium extends React.Component {
   constructor(props) {
     super(props);
     this.reset(true)
-
     let lastFrame = null
     let onNewEventListener = []
     this.onNewEvent = (snapshot) => {
@@ -56,7 +55,9 @@ class Stadium extends React.Component {
 
     evtSource.addEventListener("state_change", (e) => this.processGameEvent(e));
     evtSource.addEventListener("new_player", (e) => this.processGameEvent(e));
-    evtSource.addEventListener("ping", () => {console.debug("ping")});
+    evtSource.addEventListener("ping", () => {
+      console.debug("ping")
+    });
   }
 
   processGameEvent(event) {
@@ -66,9 +67,9 @@ class Stadium extends React.Component {
     if (s === StadiumStates.StadiumStateGoal) {
       this.gotoStateListening()
     }
-    console.log("event")
-    if (g.game_event?.game_snapshot?.state === GameStates.GET_READY) {
-
+    const frameState = g.game_event?.game_snapshot?.state;
+    console.log("event", frameState, g.shot_time)
+    if (frameState === GameStates.GET_READY) {
       const homeScoreOld = this.state.event.snapshot.home_team.Score ?? 0
       const awayScoreOld = this.state.event.snapshot.away_team.Score ?? 0
 
@@ -84,6 +85,7 @@ class Stadium extends React.Component {
 
     let state = {
       event: {
+        shot_time: g.shot_time,
         time_remaining: g.time_remaining,
         snapshot: g.game_event?.game_snapshot,
       }
@@ -198,6 +200,7 @@ class Stadium extends React.Component {
       event: {
         type: "",
         time_remaining: "00:00",
+        shot_time: "00",
         snapshot: snapshot,
       }
     }
@@ -234,7 +237,6 @@ class Stadium extends React.Component {
   }
 
   resetStadiumState() {
-
     this.setState({
       stadium: {mode: null},
     })

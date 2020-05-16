@@ -28,6 +28,7 @@ const (
 type UpdateData struct {
 	GameEvent     *lugo.GameEvent `json:"game_event"`
 	TimeRemaining string          `json:"time_remaining"`
+	ShotTime      string          `json:"shot_time"`
 }
 
 type FrontEndUpdate struct {
