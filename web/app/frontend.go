@@ -69,6 +69,22 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 			}
 			context.JSON(http.StatusOK, resp)
 		})
+		remote.POST("/next-turn", func(context *gin.Context) {
+			resp, err := srv.GetRemote().NextTurn(context, &empty.Empty{})
+			if err != nil {
+				context.JSON(http.StatusInternalServerError, err)
+				return
+			}
+			context.JSON(http.StatusOK, resp)
+		})
+		remote.POST("/next-order", func(context *gin.Context) {
+			resp, err := srv.GetRemote().NextTurn(context, &empty.Empty{})
+			if err != nil {
+				context.JSON(http.StatusInternalServerError, err)
+				return
+			}
+			context.JSON(http.StatusOK, resp)
+		})
 	}
 
 	return r

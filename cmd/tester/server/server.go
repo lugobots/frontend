@@ -43,11 +43,24 @@ func (b *Broadcaster) PauseOrResume(ctx context.Context, empty *empty.Empty) (*l
 }
 
 func (b *Broadcaster) NextTurn(ctx context.Context, empty *empty.Empty) (*lugo.CommandResponse, error) {
-	panic("implement me")
+	if b.breakpoint == nil {
+		return &lugo.CommandResponse{
+			Code:         lugo.CommandResponse_OTHER,
+			GameSnapshot: b.lastSnap,
+			Details:      ":-)",
+		}, nil
+	}
+	close(b.breakpoint)
+	b.breakpoint = make(chan bool)
+	return &lugo.CommandResponse{
+		Code:         lugo.CommandResponse_SUCCESS,
+		GameSnapshot: b.lastSnap,
+		Details:      ":-)",
+	}, nil
 }
 
 func (b *Broadcaster) NextOrder(ctx context.Context, empty *empty.Empty) (*lugo.CommandResponse, error) {
-	panic("implement me")
+	return b.NextTurn(ctx, empty)
 }
 
 func (b *Broadcaster) SetBallProperties(ctx context.Context, properties *lugo.BallProperties) (*lugo.CommandResponse, error) {

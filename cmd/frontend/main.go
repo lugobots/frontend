@@ -86,6 +86,7 @@ func main() {
 		GRPCAddress:  "localhost:9090",
 		GRPCInsecure: true,
 	}, zapLog)
+
 	server := app.NewHandler("/home/rubens/go/src/bitbucket.org/makeitplay/lugo-frontend/web", "local", eventBroker)
 	httpServer := &http.Server{
 		Addr:    ":8080",

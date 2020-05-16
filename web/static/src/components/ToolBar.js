@@ -1,23 +1,25 @@
 import React from 'react';
-import TooBarTabs from './TooBarTabs'
+import ToolBarTabDebug from './ToolBarTabDebug'
 
 class ToolBar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      open_tab: "",
+      open_tab: "debug",
     }
   }
+
   openTab(tab) {
     this.setState({
       open_tab: tab,
     })
   }
+
   render() {
     return <footer id="lugobot-admin-panel" className="container debug-mode">
       <nav id="tabs-panel-link">
         <li className="tab-link active-tab-link">
-          <a onClick={() => this.openTab("a")}>DEBUG</a>
+          <a onClick={() => this.openTab("debug")}>DEBUG</a>
         </li>
         <li className="tab-link active-tab-link">
           <a onClick={() => this.openTab("b")}>EVENTS</a>
@@ -28,9 +30,13 @@ class ToolBar extends React.Component {
         <li className="bg-tab"><a>BG TAB</a></li>
       </nav>
       <section id="tabs-panel-content">
-        <TooBarTabs active_tab={this.state.open_tab} id="a"> <div>A</div></TooBarTabs>
-        <TooBarTabs active_tab={this.state.open_tab} id="b"> <div>B</div></TooBarTabs>
-        <TooBarTabs active_tab={this.state.open_tab} id="c"> <div>C</div></TooBarTabs>
+        {
+          {
+            'debug': <ToolBarTabDebug className="tab-content active-tab-content" />,
+            'a': <div>B</div>,
+            'b': <div>C</div>,
+          }[this.state.open_tab]
+        }
       </section>
     </footer>;
   }
