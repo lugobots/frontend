@@ -5,6 +5,7 @@ import "github.com/lugobots/lugo4go/v2/lugo"
 type EventsBroker interface {
 	StreamEventsTo(uuid string) chan FrontEndUpdate
 	GetGameConfig() FrontEndSet
+	GetRemote() lugo.RemoteClient
 }
 
 const (

@@ -15,7 +15,6 @@ class Field extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    console.log(`should it be re render?`, this.props.v, nextProps.v)
     return ShouldRender(this.props, nextProps);
   }
 

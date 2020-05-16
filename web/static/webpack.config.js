@@ -47,6 +47,13 @@ module.exports = {
                     outputPath: 'images',
                 },
             },
+            {
+                test: /\.(wav|mp3)$/,
+                loader: 'file-loader',
+                options: {
+                    outputPath: 'sounds',
+                },
+            },
         ]
     },
     // add a custom index.html as the template

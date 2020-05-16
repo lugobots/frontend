@@ -46,9 +46,14 @@ type Binder struct {
 	gameSetup    *lugo.GameSetup
 	producerConn *grpc.ClientConn
 	producer     lugo.BroadcastClient
+	remoteConn   lugo.RemoteClient
 	stopRequest  bool
 	Logger       *zap.SugaredLogger
 	lastUpdate   app.FrontEndUpdate
+}
+
+func (b *Binder) GetRemote() lugo.RemoteClient {
+	return b.remoteConn
 }
 
 func (b *Binder) StreamEventsTo(uuid string) chan app.FrontEndUpdate {
@@ -88,6 +93,8 @@ func (b *Binder) connect() error {
 	b.gameSetup, err = b.producer.GetGameSetup(ctx, &lugo.WatcherRequest{
 		UUID: "frontend",
 	})
+
+	b.remoteConn = lugo.NewRemoteClient(b.producerConn)
 
 	if err != nil {
 		return err

@@ -2,6 +2,9 @@ import React from 'react';
 import Panel from "./Panel";
 import Field from "./Field";
 import Events from "./Events";
+import ToolBar from "./ToolBar";
+import {Howl, Howler} from 'howler';
+import tickAudio from '../sounds/kick.wav';
 
 import {GameSettings, GameStates, StadiumStates} from '../constants';
 
@@ -30,6 +33,11 @@ class Stadium extends React.Component {
 
   componentDidMount() {
     console.log(`${this.constructor.name} mounted`)
+    // let AAAAA = new Howl({
+    //   src: [tickAudio]
+    // });
+    // AAAAA.play()
+
     const me = this;
     let upstreamConnTries = 0;
     const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}/`);
@@ -308,6 +316,7 @@ class Stadium extends React.Component {
           }}
         />
       </main>
+      <ToolBar v={this.state.v} setup={this.state.setup} />
       <Events
         v={this.state.v}
         stadium_state={this.state.stadium}

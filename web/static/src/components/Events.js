@@ -21,19 +21,21 @@ class Events extends React.Component {
 
   render() {
     console.log(`${this.constructor.name} rendered`)
-    let style = []
+    let classList = []
     let team_goal = ""
-    switch (this.props.stadium_state.mode) {
-      case StadiumStates.StadiumStateGoal:
-        style = ["zoom-In", "active-modal", "goal", `goal-${this.props.stadium_state.side }`];
-        team_goal = this.props.stadium_state.side
-        break;
-    }
+    let displayNone = {display: "none"}
     if(this.props.modal !== null) {
-      style = ["zoom-In", "active-modal"];
+      displayNone = {}
+      classList = ["zoom-In", "active-modal"];
+      switch (this.props.stadium_state.mode) {
+        case StadiumStates.StadiumStateGoal:
+          classList = ["zoom-In", "active-modal", "goal", `goal-${this.props.stadium_state.side }`];
+          team_goal = this.props.stadium_state.side
+          break;
+      }
     }
 
-    return <section id="event-view" className={style.join(" ")}>
+    return <section id="event-view" style={displayNone} className={classList.join(" ")}>
       <Modal modal={this.props.modal}/>
       <EventGoal team_goal={team_goal}/>
     </section>;

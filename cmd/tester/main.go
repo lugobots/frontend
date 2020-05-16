@@ -41,6 +41,7 @@ func initTheServer(srv *server.Broadcaster) chan bool {
 	grpcServer := grpc.NewServer()
 
 	lugo.RegisterBroadcastServer(grpcServer, srv)
+	lugo.RegisterRemoteServer(grpcServer, srv)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9090))
 	if err != nil {
