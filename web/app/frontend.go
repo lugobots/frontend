@@ -1,14 +1,17 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/lugobots/lugo4go/v2/lugo"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"path"
+	"strconv"
 	"time"
 )
 
@@ -81,6 +84,49 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 			resp, err := srv.GetRemote().NextTurn(context, &empty.Empty{})
 			if err != nil {
 				context.JSON(http.StatusInternalServerError, err)
+				return
+			}
+			context.JSON(http.StatusOK, resp)
+		})
+		remote.PATCH("/players/:team/:number", func(context *gin.Context) {
+			side := lugo.Team_HOME
+			if context.Param("team") == "away" {
+				side = lugo.Team_AWAY
+			}
+			n, err := strconv.Atoi(context.Param("number"))
+			if err != nil {
+				e := fmt.Errorf("invalid player number %s: %w", context.Param("number"), err)
+				log.Println(e)
+				context.JSON(http.StatusInternalServerError, e)
+				return
+			}
+
+			props, err := context.GetRawData()
+			if err != nil {
+				e := fmt.Errorf("error reading playload: %w", err)
+				log.Println(e)
+				context.JSON(http.StatusInternalServerError, e)
+				return
+			}
+			playerProperties := &lugo.PlayerProperties{
+				Side:     side,
+				Number:   uint32(n),
+				Position: &lugo.Point{},
+				Velocity: nil,
+			}
+
+			if err := json.Unmarshal(props, playerProperties.Position); err != nil {
+				e := fmt.Errorf("not a valid JSON: %w", err)
+				log.Println(e)
+				context.JSON(http.StatusInternalServerError, e)
+				return
+			}
+
+			resp, err := srv.GetRemote().SetPlayerProperties(context, playerProperties)
+			if err != nil {
+				e := fmt.Errorf("error from game server: %w", err)
+				log.Println(e)
+				context.JSON(http.StatusInternalServerError, e)
 				return
 			}
 			context.JSON(http.StatusOK, resp)

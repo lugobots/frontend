@@ -12,7 +12,7 @@ func SampleMoveBall() Sample {
 	lastSnap.Ball.Position = &lugo.Point{}
 
 	for lastSnap.Ball.Position.X < field.FieldWidth {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 
 		lastSnap.Ball.Position.X += field.BallMaxSpeed
 		if lastSnap.Ball.Position.X > field.FieldWidth {
@@ -22,7 +22,7 @@ func SampleMoveBall() Sample {
 	}
 
 	for lastSnap.Ball.Position.Y < field.FieldHeight {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 
 		lastSnap.Ball.Position.Y += field.BallMaxSpeed
 		if lastSnap.Ball.Position.Y > field.FieldHeight {
@@ -32,7 +32,7 @@ func SampleMoveBall() Sample {
 	}
 
 	for lastSnap.Ball.Position.X > 0 {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 
 		lastSnap.Ball.Position.X -= field.BallMaxSpeed
 		if lastSnap.Ball.Position.X < 0 {
@@ -42,7 +42,7 @@ func SampleMoveBall() Sample {
 	}
 
 	for lastSnap.Ball.Position.Y > 0 {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 
 		lastSnap.Ball.Position.Y -= field.BallMaxSpeed
 		if lastSnap.Ball.Position.Y < 0 {
@@ -54,7 +54,7 @@ func SampleMoveBall() Sample {
 	vec, _ := lugo.NewVector(*lastSnap.Ball.Position, field.FieldCenter())
 	vec.SetLength(field.BallMaxSpeed)
 	for lastSnap.Ball.Position.DistanceTo(field.FieldCenter()) >= field.BallSize/2 {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 
 		lastSnap.Ball.Position.X += int32(vec.X)
 		lastSnap.Ball.Position.Y += int32(vec.Y)

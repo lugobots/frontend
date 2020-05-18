@@ -11,7 +11,7 @@ func SampleMovePlayers() Sample {
 
 	playerTestIndex := 4
 	for lastSnap.HomeTeam.Players[playerTestIndex].Position.X < field.FieldWidth {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 
 		lastSnap.HomeTeam.Players[playerTestIndex].Position.X += field.PlayerMaxSpeed
 		if lastSnap.HomeTeam.Players[playerTestIndex].Position.X > field.FieldWidth {
@@ -21,7 +21,7 @@ func SampleMovePlayers() Sample {
 	}
 
 	for lastSnap.HomeTeam.Players[playerTestIndex].Position.Y < field.FieldHeight {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 
 		lastSnap.HomeTeam.Players[playerTestIndex].Position.Y += field.PlayerMaxSpeed
 		if lastSnap.HomeTeam.Players[playerTestIndex].Position.Y > field.FieldHeight {
@@ -31,7 +31,7 @@ func SampleMovePlayers() Sample {
 	}
 
 	for lastSnap.HomeTeam.Players[playerTestIndex].Position.X > 0 {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 
 		lastSnap.HomeTeam.Players[playerTestIndex].Position.X -= field.PlayerMaxSpeed
 		if lastSnap.HomeTeam.Players[playerTestIndex].Position.X < 0 {
@@ -41,7 +41,7 @@ func SampleMovePlayers() Sample {
 	}
 
 	for lastSnap.HomeTeam.Players[playerTestIndex].Position.Y > 0 {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 
 		lastSnap.HomeTeam.Players[playerTestIndex].Position.Y -= field.PlayerMaxSpeed
 		if lastSnap.HomeTeam.Players[playerTestIndex].Position.Y < 0 {
@@ -51,7 +51,7 @@ func SampleMovePlayers() Sample {
 	}
 
 	for lastSnap.HomeTeam.Players[playerTestIndex].Position.X < field.FieldWidth {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 
 		lastSnap.HomeTeam.Players[playerTestIndex].Position.X += field.PlayerMaxSpeed
 		if lastSnap.HomeTeam.Players[playerTestIndex].Position.X > field.FieldWidth {

@@ -186,6 +186,7 @@ func (b *Binder) broadcast() error {
 		} else if eventType == app.EventDebugReleased {
 			debugging = false
 		}
+
 		update := app.FrontEndUpdate{
 			Type: eventType,
 			Update: app.UpdateData{

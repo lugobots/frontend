@@ -37,7 +37,7 @@ func getInitSnap() *lugo.GameSnapshot {
 	}
 }
 
-func copySnap(snap *lugo.GameSnapshot) *lugo.GameSnapshot {
+func CopySnap(snap *lugo.GameSnapshot) *lugo.GameSnapshot {
 	j, err := proto.Marshal(snap)
 	if err != nil {
 		panic(fmt.Sprintf("error marshalling snapshot: %s", err))

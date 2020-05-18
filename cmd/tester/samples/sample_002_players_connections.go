@@ -37,7 +37,7 @@ func SamplePlayersConnect() Sample {
 	}))
 
 	for i := uint32(2); i <= field.MaxPlayers; i++ {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 		lookingEast.Speed = float64(i)
 		newPlayer := &lugo.Player{
 			Number:   i,
@@ -57,7 +57,7 @@ func SamplePlayersConnect() Sample {
 		Velocity: &lookingWest,
 	}))
 	for i := uint32(2); i <= field.MaxPlayers; i++ {
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 		newPlayer := &lugo.Player{
 			Number:   i,
 			TeamSide: lugo.Team_AWAY,

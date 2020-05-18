@@ -23,7 +23,7 @@ func TestCopySnap(t *testing.T) {
 		},
 	}
 
-	newValue := copySnap(initial)
+	newValue := CopySnap(initial)
 
 	newValue.Turn = 200
 	newValue.HomeTeam.Score = 200

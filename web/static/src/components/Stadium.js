@@ -6,9 +6,8 @@ import ToolBar from "./ToolBar";
 import {Howl, Howler} from 'howler';
 import tickAudio from '../sounds/kick.wav';
 
-import {GameSettings, GameStates, StadiumStates, EventTypes} from '../constants';
-
-const BackEndPoint = "http://localhost:8080"
+import {GameSettings, GameStates, StadiumStates, EventTypes, BackendConfig} from '../constants';
+import {renderLogger, updateRatio} from "../helpers";
 
 
 class Stadium extends React.Component {
@@ -32,15 +31,14 @@ class Stadium extends React.Component {
   }
 
   componentDidMount() {
-    console.log(`${this.constructor.name} mounted`)
     // let AAAAA = new Howl({
     //   src: [tickAudio]
     // });
     // AAAAA.play()
-
+    updateRatio()
     const me = this;
     let upstreamConnTries = 0;
-    const evtSource = new EventSource(`${BackEndPoint}/game-state/${gameID}/${uuid}/`);
+    const evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
     // addEventListener version
     evtSource.addEventListener('open', () => {
       console.log("%cconnection opened", "color: green")
@@ -85,8 +83,8 @@ class Stadium extends React.Component {
     if (s === StadiumStates.StadiumStateGoal) {
       this.gotoStateListening()
     }
-    const frameState = g.game_event?.game_snapshot?.state;
-    console.log("event", frameState, g.shot_time)
+    const frameState = g.game_event?.game_snapshot?.state || GameStates.WAITING;
+    console.log("event", frameState, g.debug_mode)
     if (frameState === GameStates.GET_READY) {
       const homeScoreOld = this.state.event.snapshot.home_team.Score ?? 0
       const awayScoreOld = this.state.event.snapshot.away_team.Score ?? 0
@@ -121,7 +119,7 @@ class Stadium extends React.Component {
   }
 
   setup() {
-    fetch(`${BackEndPoint}/setup/${gameID}/${uuid}`)
+    fetch(`${BackendConfig.BackEndPoint}/setup/${gameID}/${uuid}`)
       .then(res => res.json())
       .then(
         (result) => {
@@ -303,7 +301,12 @@ class Stadium extends React.Component {
     this.setStadiumState({mode: StadiumStates.StadiumStateGoal, side: team_side})
   }
 
+  gotoStateRearranging() {
+    this.setStadiumState({mode: StadiumStates.StadiumStateRearranging})
+  }
+
   render() {
+    renderLogger(this.constructor.name)
     return <div>
       <header id="lugobot-header"
               className={`container ${
@@ -317,10 +320,10 @@ class Stadium extends React.Component {
           }}
         />
       </header>
-
       <main id="lugobot-stadium" className="container">
         <Field
           v={this.state.v}
+          stadium_state={this.state.stadium}
           setup={this.state.setup}
           setOnNewEventListener={(cb) => {
             this.addOnNewEventListener(cb)
@@ -333,6 +336,7 @@ class Stadium extends React.Component {
         setOnNewEventListener={(cb) => {
           this.addOnNewEventListener(cb)
         }}
+        gotoStateRearranging={this.gotoStateRearranging.bind(this)}
       />
       <Events
         v={this.state.v}

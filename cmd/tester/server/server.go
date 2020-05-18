@@ -1,9 +1,12 @@
 package server
 
 import (
+	"bitbucket.org/makeitplay/lugo-frontend/cmd/tester/samples"
 	"context"
+	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"go.uber.org/zap"
 	"sync"
 	"time"
@@ -34,23 +37,19 @@ type Broadcaster struct {
 func (b *Broadcaster) PauseOrResume(ctx context.Context, empty *empty.Empty) (*lugo.CommandResponse, error) {
 	if b.breakpoint == nil {
 		b.breakpoint = make(chan bool)
-		defer func() {
-			b.shortcutHole <- &lugo.GameEvent{
-				GameSnapshot: b.lastSnap,
-				Event: &lugo.GameEvent_Breakpoint{
-					Breakpoint: &lugo.EventDebugBreakpoint{Breakpoint: lugo.EventDebugBreakpoint_ORDERS},
-				},
-			}
-		}()
+		b.shortcutHole <- &lugo.GameEvent{
+			GameSnapshot: b.lastSnap,
+			Event: &lugo.GameEvent_Breakpoint{
+				Breakpoint: &lugo.EventDebugBreakpoint{Breakpoint: lugo.EventDebugBreakpoint_ORDERS},
+			},
+		}
 	} else {
-		defer func() {
-			b.shortcutHole <- &lugo.GameEvent{
-				GameSnapshot: b.lastSnap,
-				Event: &lugo.GameEvent_DebugReleased{
-					DebugReleased: &lugo.EventDebugReleased{},
-				},
-			}
-		}()
+		b.shortcutHole <- &lugo.GameEvent{
+			GameSnapshot: b.lastSnap,
+			Event: &lugo.GameEvent_DebugReleased{
+				DebugReleased: &lugo.EventDebugReleased{},
+			},
+		}
 		close(b.breakpoint)
 		b.breakpoint = nil
 	}
@@ -97,7 +96,19 @@ func (b *Broadcaster) SetBallProperties(ctx context.Context, properties *lugo.Ba
 }
 
 func (b *Broadcaster) SetPlayerProperties(ctx context.Context, properties *lugo.PlayerProperties) (*lugo.CommandResponse, error) {
-	panic("implement me")
+	snap := samples.CopySnap(b.lastSnap)
+
+	p := field.GetPlayer(snap, properties.Side, properties.Number)
+	if p == nil {
+		return nil, fmt.Errorf("player not found: %s-%d", properties.Side, properties.Number)
+	}
+	p.Position = properties.Position
+
+	return &lugo.CommandResponse{
+		Code:         lugo.CommandResponse_SUCCESS,
+		GameSnapshot: snap,
+		Details:      "player moved",
+	}, nil
 }
 
 func (b *Broadcaster) SetGameProperties(ctx context.Context, properties *lugo.GameProperties) (*lugo.CommandResponse, error) {

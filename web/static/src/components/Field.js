@@ -2,7 +2,7 @@ import React from 'react';
 import FieldPlayer from "./FieldPlayer";
 
 
-import {ShouldRender} from '../helpers';
+import {renderLogger, ShouldRender} from '../helpers';
 import {GameDefinitions} from "../constants";
 const defaultPost = {Y: -1000, X: -10000}
 
@@ -37,16 +37,18 @@ class Field extends React.Component {
   }
 
   render() {
-    console.log(`${this.constructor.name} rendered`)
+    renderLogger(this.constructor.name)
     const items = []
     const fillPlayer = (p, side) => {
       const a = <FieldPlayer
+        v={this.props.v}
         setOnNewFrameListener={(cb) => this.onNewFrameListeners[side][`${side}_${p.number}`] = cb}
         key={`${side}-${p.number}`}
         number={p.number}
         team_side={side}
         ang={p.ang}
         position={p.Position}
+        stadium_state={this.props.stadium_state}
       />
       this.players[side][`${side}_${p.number}`] = a
       items.push(a)

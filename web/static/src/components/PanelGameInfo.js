@@ -1,4 +1,5 @@
 import React from 'react';
+import {renderLogger} from "../helpers";
 
 
 class PanelGameInfo extends React.Component {
@@ -21,7 +22,7 @@ class PanelGameInfo extends React.Component {
   }
 
   render() {
-    console.log(`${this.constructor.name} rendered`)
+    renderLogger(this.constructor.name)
     let homeTeamClass = ""
     if(this.props.team_goal === "home") {
       homeTeamClass = "goal"

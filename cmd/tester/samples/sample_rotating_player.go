@@ -6,7 +6,7 @@ import (
 
 func SampleRotatePlayers() Sample {
 	sample := SamplePlayersConnect()
-	lastSnap := copySnap(getLastSampleSnap(sample))
+	lastSnap := CopySnap(getLastSampleSnap(sample))
 
 	playerTestIndex := 4
 
@@ -23,7 +23,7 @@ func SampleRotatePlayers() Sample {
 
 	for _, d := range dirs {
 		x := d
-		lastSnap = copySnap(lastSnap)
+		lastSnap = CopySnap(lastSnap)
 		lastSnap.HomeTeam.Players[playerTestIndex].Velocity.Direction = &x
 		for i := 0; i < 20; i++ {
 			sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))

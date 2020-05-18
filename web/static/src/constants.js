@@ -2,6 +2,9 @@ const GameDefinitions = {
   Field: {
     Width: 20000,
     Height: 10000,
+  },
+  Player: {
+    Size:400,
   }
 }
 
@@ -37,6 +40,9 @@ const StadiumStates = {
   StadiumStateListening: "listening",
   StadiumStateConn: "conn-upstream",
   StadiumStateGoal: "goal",
+
+  // dev mode
+  StadiumStateRearranging: "rearranging",
 }
 
 const EventTypes = {
@@ -55,6 +61,10 @@ const BreakpointType = {
   TURN: 1,
 }
 
+
+const BackendConfig = {
+  BackEndPoint: "http://localhost:8080",
+}
 export {
   GameDefinitions,
   GameSettings,
@@ -62,4 +72,5 @@ export {
   StadiumStates,
   EventTypes,
   BreakpointType,
+  BackendConfig,
 };

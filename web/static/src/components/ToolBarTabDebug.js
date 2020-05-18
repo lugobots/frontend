@@ -1,12 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
-import 'jquery-ui/ui/widgets/draggable';
-
-
-const BackEndPoint = "http://localhost:8080"
-const BaseUnit = 100;
-const virtualCourtHeight = 100 * BaseUnit;
-const virtualCourtWidth = 200 * BaseUnit;
+import {getSizeRatio, renderLogger} from "../helpers";
+import {GameDefinitions, BackendConfig} from '../constants'
 
 class ToolBarTabDebug extends React.Component {
   constructor(props) {
@@ -15,24 +10,15 @@ class ToolBarTabDebug extends React.Component {
     this.coordXDOM = React.createRef();
     this.coordYDOM = React.createRef();
 
-    this.sendDebug = this.sendDebug.bind(this);
     this.pauseResume = this.pauseResume.bind(this);
     this.nextTurn = this.nextTurn.bind(this);
     this.nextOrder = this.nextOrder.bind(this);
+    this.startRearrangingMode = this.startRearrangingMode.bind(this);
   }
 
-  sendDebug(path) {
-    return fetch(`${BackEndPoint}/remote/${path}`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    }).then(res => res.json())
-  }
 
   pauseResume() {
-    this.sendDebug("pause-resume")
+    sendDebug("pause-resume")
       .then(
         (result) => {
           console.log(`DEBG: `, result)
@@ -44,7 +30,7 @@ class ToolBarTabDebug extends React.Component {
   }
 
   nextTurn() {
-    this.sendDebug("next-turn")
+    sendDebug("next-turn")
       .then(
         (result) => {
           console.log(`DEBG: `, result)
@@ -56,7 +42,7 @@ class ToolBarTabDebug extends React.Component {
   }
 
   nextOrder() {
-    this.sendDebug("next-order")
+    sendDebug("next-order")
       .then(
         (result) => {
           console.log(`DEBG: `, result)
@@ -67,41 +53,72 @@ class ToolBarTabDebug extends React.Component {
       )
   }
 
+  startRearrangingMode() {
+    this.props.gotoStateRearranging()
+  }
+
+  confirmRearranging() {
+    let newPositions = {};
+    $(".player").each(function () {
+        let ui = $(this);
+        let coordsScreen = ui.position();
+        let coords = convertPixelToGameUnit(coordsScreen.left, coordsScreen.top);
+        console.log(`Final position ${this.dataset.id} (${this.dataset.team}-${this.dataset.number}): (${coords.x.toFixed(2)}, ${coords.y.toFixed(2)})`)
+        newPositions[this.dataset.id] = {x: coords.x, y: coords.y};
+
+      sendDebug(`/players/${this.dataset.team}/:${this.dataset.number}`)
+        .then(
+          (result) => {
+            console.log(`DEBG: `, result)
+          },
+          (error) => {
+            console.error(`Debug tool: `, error)
+          }
+        )
+      }
+    );
+  }
+
   componentDidMount() {
     let me = this;
     document.getElementById('field').onmousemove = function (e) {
-      const ratio = $(this).innerWidth() / virtualCourtWidth;
+      const ratio = getSizeRatio()
       const parentOffset = $(this).offset();
       //or $(this).offset(); if you really just want the current element's offset
-      console.log(parentOffset)
       let x = e.pageX - parentOffset.left;
       let y = e.pageY - parentOffset.top;
       x /= ratio;
       y /= ratio;
-      y = virtualCourtHeight - y;
+      y = GameDefinitions.Field.Height - y;
       me.coordXDOM.current.innerHTML = x.toFixed(0)
       me.coordYDOM.current.innerHTML = y.toFixed(0)
     };
   }
 
   render() {
-    console.log(`${this.constructor.name} rendered`)
+    renderLogger(this.constructor.name)
     let deactivateClass = "deactivated"
-    let disabled = true
+    let disabledBreakPoint = true
+    console.log("props", this.props)
     if (this.props.debugOn) {
+
       deactivateClass = ""
-      disabled = true
+      disabledBreakPoint = true
     }
     return <div className={`${this.props.className} debug-tab`}>
       <button id="btn-resume" className="btn btn-main" onClick={this.pauseResume}>Resume</button>
-      <button id="btn-next-order" aria-disabled={disabled} className={`btn ${deactivateClass}`}
+      <button id="btn-next-order" aria-disabled={disabledBreakPoint} className={`btn ${deactivateClass}`}
               onClick={this.nextTurn}>Next Order
       </button>
-      <button id="btn-next-cycle" aria-disabled={disabled} className={`btn ${deactivateClass}`}
+      <button id="btn-next-cycle" aria-disabled={disabledBreakPoint} className={`btn ${deactivateClass}`}
               onClick={this.nextOrder}>Next Cycle
       </button>
-      <button id="btn-rearrange" aria-disabled={disabled} className={`btn ${deactivateClass}`}>Rearrange</button>
-      <button id="btn-save-positions" className={`btn ${deactivateClass}`}>Save Positions</button>
+      <button id="btn-rearrange" aria-disabled={disabledBreakPoint} className={`btn ${deactivateClass}`}
+              onClick={this.startRearrangingMode}>Rearrange
+      </button>
+      <button id="btn-save-positions" className={`btn ${deactivateClass}`}
+              onClick={this.confirmRearranging}>Save Positions
+      </button>
       <span id="choose-preset">
             <label htmlFor="preset">Choose a pre-set Arrangement</label>
             <select name="preset">
@@ -125,4 +142,31 @@ class ToolBarTabDebug extends React.Component {
 
 }
 
-export default ToolBarTabDebug;
+function SetPlayerProperties(side, number, Position) {
+  sendDebug(`players/${side}/${number}`, {Position}, 'PATCH')
+    .then(
+      (result) => {console.log(`Rearrange`, result)},
+      (error) => {console.error(`Debug tool: `, error)}
+    )
+}
+
+function sendDebug(path, payload = {}, method = "POST") {
+  return fetch(`${BackendConfig.BackEndPoint}/remote/${path}`, {
+    method: method,
+    body: JSON.stringify(payload),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  }).then(res => res.json())
+}
+
+
+function convertPixelToGameUnit(left, top) {
+  let xPos = (left / unit) + (GameDefinitions.Player.Size/2);
+  let yPos = (top / unit) + (GameDefinitions.Player.Size/2);
+  yPos = GameDefinitions.Field.Height - yPos;
+  return {x: xPos, y:yPos}
+}
+
+export {ToolBarTabDebug, SetPlayerProperties};

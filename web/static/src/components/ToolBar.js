@@ -1,5 +1,6 @@
 import React from 'react';
-import ToolBarTabDebug from './ToolBarTabDebug'
+import {ToolBarTabDebug} from './ToolBarTabDebug'
+import {renderLogger} from "../helpers";
 
 class ToolBar extends React.Component {
   constructor(props) {
@@ -18,7 +19,6 @@ class ToolBar extends React.Component {
 
   componentDidMount() {
     this.props.setOnNewEventListener(gameEvent => {
-      console.log(`MODE `, gameEvent)
       if(this.state.debugOn !== gameEvent.debug_mode) {
         this.setState({
           debugOn: gameEvent.debug_mode
@@ -29,26 +29,28 @@ class ToolBar extends React.Component {
   }
 
   render() {
-    console.log(`${this.constructor.name} rendered`)
+    renderLogger(this.constructor.name)
     return <footer id="lugobot-admin-panel" className="container debug-mode">
       <nav id="tabs-panel-link">
         <li className="tab-link active-tab-link">
           <a onClick={() => this.openTab("debug")}>DEBUG</a>
         </li>
-        <li className="tab-link">
-          <a onClick={() => this.openTab("b")}>EVENTS</a>
-        </li>
-        <li className="tab-link">
-          <a onClick={() => this.openTab("c")}>OTHERS</a>
-        </li>
-        <li className="bg-tab"><a>BG TAB</a></li>
+        {/*<li className="tab-link">*/}
+        {/*  <a onClick={() => this.openTab("b")}>EVENTS</a>*/}
+        {/*</li>*/}
+        {/*<li className="tab-link">*/}
+        {/*  <a onClick={() => this.openTab("c")}>OTHERS</a>*/}
+        {/*</li>*/}
+        {/*<li className="bg-tab"><a>BG TAB</a></li>*/}
       </nav>
       <section id="tabs-panel-content">
         {
           {
-            'debug': <ToolBarTabDebug debugOn={this.state.debugOn} className="tab-content active-tab-content" />,
-            'a': <div>B</div>,
-            'b': <div>C</div>,
+            'debug': <ToolBarTabDebug
+              setup={this.state.setup}
+              gotoStateRearranging={this.props.gotoStateRearranging}
+              debugOn={this.state.debugOn} className="tab-content active-tab-content" />,
+            // 'a': <div>B</div>,
           }[this.state.open_tab]
         }
       </section>

@@ -2,6 +2,7 @@ import React from 'react';
 import EventGoal from './EventGoal'
 import Modal from "./Modal";
 import {StadiumStates} from "../constants";
+import {renderLogger} from "../helpers";
 
 class Events extends React.Component {
   constructor(props) {
@@ -20,7 +21,7 @@ class Events extends React.Component {
   }
 
   render() {
-    console.log(`${this.constructor.name} rendered`)
+    renderLogger(this.constructor.name)
     let classList = []
     let team_goal = ""
     let displayNone = {display: "none"}

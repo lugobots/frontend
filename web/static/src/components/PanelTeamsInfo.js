@@ -1,4 +1,5 @@
 import React from 'react';
+import {renderLogger} from "../helpers";
 
 class PanelTeamsInfo extends React.Component {
   constructor(props) {
@@ -10,7 +11,7 @@ class PanelTeamsInfo extends React.Component {
   }
 
   render() {
-    console.log(`${this.constructor.name} rendered`)
+    renderLogger(this.constructor.name)
     return <div id="teams-info">
         <span id="home-team" className="team">
           <span id="profile-home-team" className="profile-team">

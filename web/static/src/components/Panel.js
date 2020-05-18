@@ -2,6 +2,7 @@ import React from 'react';
 import PanelTeamsInfo from "./PanelTeamsInfo";
 import PanelGameInfo from "./PanelGameInfo";
 import {StadiumStates} from '../constants';
+import {renderLogger} from "../helpers";
 
 class Panel extends React.Component {
   constructor(props) {
@@ -32,7 +33,7 @@ class Panel extends React.Component {
   }
 
   render() {
-    console.log(`${this.constructor.name} rendered`)
+    renderLogger(this.constructor.name)
     return <section id="game-panel">
       <PanelTeamsInfo setup={this.props.setup}/>
       <PanelGameInfo
