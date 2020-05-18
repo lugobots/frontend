@@ -35,11 +35,11 @@ class ToolBar extends React.Component {
         <li className="tab-link active-tab-link">
           <a onClick={() => this.openTab("debug")}>DEBUG</a>
         </li>
-        <li className="tab-link active-tab-link">
+        <li className="tab-link">
           <a onClick={() => this.openTab("b")}>EVENTS</a>
         </li>
-        <a onClick={() => this.openTab("c")}>OTHERS</a>
-        <li className="tab-link active-tab-link">
+        <li className="tab-link">
+          <a onClick={() => this.openTab("c")}>OTHERS</a>
         </li>
         <li className="bg-tab"><a>BG TAB</a></li>
       </nav>

@@ -13,6 +13,10 @@ module.exports = {
         filename: 'js/bundle.js'
     },
     watch: true,
+    watchOptions: {
+        poll: true,
+        ignored: /node_modules/
+    },
     module: {
         rules: [
             {
