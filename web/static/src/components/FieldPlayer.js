@@ -18,7 +18,7 @@ class FieldPlayer extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     $(this.myDOM.current).draggable("disable");
-    if (nextProps.stadium_state.mode === StadiumStates.StadiumStateRearranging) {
+    if (nextProps.stadium_state.mode === StadiumStates.StadiumStateDebugging && nextProps.stadium_state.action === "rearranging") {
       $(this.myDOM.current).draggable("enable");
     }
     return ShouldRender(this.props, nextProps);
@@ -63,7 +63,7 @@ class FieldPlayer extends React.Component {
 
   render() {
     let classNames = ['player', `player-${this.props.team_side}-team`];
-    if (this.props.stadium_state.mode === StadiumStates.StadiumStateRearranging) {
+    if (this.props.stadium_state.mode === StadiumStates.StadiumStateDebugging && this.props.stadium_state.action === "rearranging") {
       classNames.push('rearranging')
     }
     return <span ref={this.myDOM}

@@ -1,7 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import {getSizeRatio, renderLogger} from "../helpers";
-import {GameDefinitions, BackendConfig} from '../constants'
+import {GameDefinitions, BackendConfig, StadiumStates} from '../constants'
 
 class ToolBarTabDebug extends React.Component {
   constructor(props) {
@@ -13,7 +13,7 @@ class ToolBarTabDebug extends React.Component {
     this.pauseResume = this.pauseResume.bind(this);
     this.nextTurn = this.nextTurn.bind(this);
     this.nextOrder = this.nextOrder.bind(this);
-    this.startRearrangingMode = this.startRearrangingMode.bind(this);
+    this.startDebuggingMode = this.startDebuggingMode.bind(this);
   }
 
 
@@ -53,8 +53,8 @@ class ToolBarTabDebug extends React.Component {
       )
   }
 
-  startRearrangingMode() {
-    this.props.gotoStateRearranging()
+  startDebuggingMode() {
+    this.props.gotoStateDebugging("rearranging")
   }
 
   confirmRearranging() {
@@ -97,26 +97,33 @@ class ToolBarTabDebug extends React.Component {
 
   render() {
     renderLogger(this.constructor.name)
-    let deactivateClass = "deactivated"
+    let rearrangeClass = "deactivated"
+    let breakPointClass = "deactivated"
     let disabledBreakPoint = true
-    console.log("props", this.props)
-    if (this.props.debugOn) {
+    let disabledRearrange = true
+    console.log("props>>>>", this.props)
+    if (this.props.stadium_state.mode === StadiumStates.StadiumStateDebugging) {
 
-      deactivateClass = ""
-      disabledBreakPoint = true
+      disabledRearrange = true
+      rearrangeClass = ""
+      if(this.props.stadium_state.action !== "rearranging") {
+        disabledBreakPoint = true
+        breakPointClass = ""
+      }
+
     }
     return <div className={`${this.props.className} debug-tab`}>
       <button id="btn-resume" className="btn btn-main" onClick={this.pauseResume}>Resume</button>
-      <button id="btn-next-order" aria-disabled={disabledBreakPoint} className={`btn ${deactivateClass}`}
+      <button id="btn-next-order" aria-disabled={disabledBreakPoint} className={`btn ${breakPointClass}`}
               onClick={this.nextTurn}>Next Order
       </button>
-      <button id="btn-next-cycle" aria-disabled={disabledBreakPoint} className={`btn ${deactivateClass}`}
+      <button id="btn-next-cycle" aria-disabled={disabledBreakPoint} className={`btn ${breakPointClass}`}
               onClick={this.nextOrder}>Next Cycle
       </button>
-      <button id="btn-rearrange" aria-disabled={disabledBreakPoint} className={`btn ${deactivateClass}`}
-              onClick={this.startRearrangingMode}>Rearrange
+      <button id="btn-rearrange" aria-disabled={disabledRearrange} className={`btn ${rearrangeClass}`}
+              onClick={this.startDebuggingMode}>Rearrange
       </button>
-      <button id="btn-save-positions" className={`btn ${deactivateClass}`}
+      <button id="btn-save-positions" className={`btn ${breakPointClass}`}
               onClick={this.confirmRearranging}>Save Positions
       </button>
       <span id="choose-preset">

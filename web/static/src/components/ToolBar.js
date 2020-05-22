@@ -19,11 +19,13 @@ class ToolBar extends React.Component {
 
   componentDidMount() {
     this.props.setOnNewEventListener(gameEvent => {
-      if(this.state.debugOn !== gameEvent.debug_mode) {
-        this.setState({
-          debugOn: gameEvent.debug_mode
-        })
-      }
+
+      console.log("ASASA")
+      // if(this.state.debugOn !== gameEvent.debug_mode) {
+      //   this.setState({
+      //     debugOn: gameEvent.debug_mode
+      //   })
+      // }
 
     })
   }
@@ -48,8 +50,10 @@ class ToolBar extends React.Component {
           {
             'debug': <ToolBarTabDebug
               setup={this.state.setup}
-              gotoStateRearranging={this.props.gotoStateRearranging}
-              debugOn={this.state.debugOn} className="tab-content active-tab-content" />,
+              stadium_state={this.props.stadium_state}
+              gotoStateDebugging={this.props.gotoStateDebugging}
+              className="tab-content active-tab-content"
+            />,
             // 'a': <div>B</div>,
           }[this.state.open_tab]
         }

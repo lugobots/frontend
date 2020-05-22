@@ -138,7 +138,8 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 
 func makeSetupHandler(srv EventsBroker) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, srv.GetGameConfig())
+		c.JSON(http.StatusOK, srv.GetGameConfig(c.Param("uuid")))
+
 	}
 }
 
@@ -147,6 +148,19 @@ func makeGameStateHandler(srv EventsBroker) gin.HandlerFunc {
 		clientGone := c.Writer.CloseNotify()
 		uuid := c.Param("uuid")
 		streamChan := srv.StreamEventsTo(uuid)
+
+		//
+		//Problema para resolver:
+		//	O backend e o frontend estao perdendo sincronia quando a conectao eh aberta e o backend esta no mobo debug
+		//
+		//
+		//isso acontece pq o frontend processa o SETUP depois que a conecao com o stream ja enviou o ultimo quadro
+		//que diz que o modo debug is on.
+		//	I o frontend manda pra o "listening" depois de fazer o setup>
+		//
+		//	opcao 1: mandar um novo frame assim que o cara pede o setup
+		//opcao 2: fazer endpint pra solicitar ultimo evento
+		//opcao 3:  no frontend mudar a logic pra o setup nao definir proximo estado do frontend
 
 		log.Printf("streaming to %s", uuid)
 		c.Stream(func(w io.Writer) bool {

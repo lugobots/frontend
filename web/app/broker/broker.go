@@ -65,11 +65,20 @@ func (b *Binder) StreamEventsTo(uuid string) chan app.FrontEndUpdate {
 	return b.consumers[uuid]
 }
 
-func (b *Binder) GetGameConfig() app.FrontEndSet {
+func (b *Binder) GetGameConfig(uuid string) app.FrontEndSet {
 	state := app.ConnStateUp
 	if b.producerConn == nil {
 		state = app.ConnStateDown
 	}
+
+	go func() {
+		time.Sleep(1 * time.Second)
+		b.consumersMux.RLock()
+		defer b.consumersMux.RUnlock()
+		b.consumers[uuid] <- b.lastUpdate
+		b.Logger.Warn("sending last update")
+	}()
+
 	return app.FrontEndSet{
 		GameSetup:       b.gameSetup,
 		ConnectionState: state,

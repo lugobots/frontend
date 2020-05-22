@@ -77,6 +77,10 @@ class Stadium extends React.Component {
   }
 
   processGameEvent(event) {
+    if(!this.state.isLoaded) {
+      console.log("%cIgnoring event while not set up", "color: #AA0000")
+      return
+    }
     const g = JSON.parse(event.data);
     let team_goal = ""
     const s = this.getStadiumStateMode();
@@ -107,10 +111,10 @@ class Stadium extends React.Component {
         snapshot: g.game_event?.game_snapshot,
       }
     }
-    this.onNewEvent(state.event)
     if (team_goal !== "") {
       this.gotoStateGoal(team_goal)
     }
+    this.onNewEvent(state.event)
   }
 
   setMainColor(name, colors) {
@@ -123,7 +127,8 @@ class Stadium extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
-          console.log(`Setup: `, result)
+          console.log("%cSetup", "color: blue")
+          console.log(result)
           this.setState({
             isLoaded: true,
             setup: result.game_setup,
@@ -138,7 +143,7 @@ class Stadium extends React.Component {
         },
         (error) => {
           this.setState({
-            isLoaded: true,
+            isLoaded: false,
             upstream_up: false,
             error
           });
@@ -251,13 +256,13 @@ class Stadium extends React.Component {
       stadium: state,
       v: (new Date()).getTime(),
     })
+    console.log("New state: ", this.state.stadium)
   }
 
   resetStadiumState() {
     this.setState({
       stadium: {mode: null},
     })
-    console.log("New state: ", this.state.stadium)
   }
 
   getStadiumStateMode() {
@@ -301,8 +306,8 @@ class Stadium extends React.Component {
     this.setStadiumState({mode: StadiumStates.StadiumStateGoal, side: team_side})
   }
 
-  gotoStateRearranging() {
-    this.setStadiumState({mode: StadiumStates.StadiumStateRearranging})
+  gotoStateDebugging(action) {
+    this.setStadiumState({mode: StadiumStates.StadiumStateDebugging, action})
   }
 
   render() {
@@ -333,10 +338,11 @@ class Stadium extends React.Component {
       <ToolBar
         v={this.state.v}
         setup={this.state.setup}
+        stadium_state={this.state.stadium}
         setOnNewEventListener={(cb) => {
           this.addOnNewEventListener(cb)
         }}
-        gotoStateRearranging={this.gotoStateRearranging.bind(this)}
+        gotoStateDebugging={this.gotoStateDebugging.bind(this)}
       />
       <Events
         v={this.state.v}

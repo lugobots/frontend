@@ -42,7 +42,7 @@ const StadiumStates = {
   StadiumStateGoal: "goal",
 
   // dev mode
-  StadiumStateRearranging: "rearranging",
+  StadiumStateDebugging: "debugging",
 }
 
 const EventTypes = {
