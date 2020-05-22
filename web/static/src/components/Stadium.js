@@ -77,7 +77,7 @@ class Stadium extends React.Component {
   }
 
   processGameEvent(event) {
-    if(!this.state.isLoaded) {
+    if(!this.state.isSetup) {
       console.log("%cIgnoring event while not set up", "color: #AA0000")
       return
     }
@@ -130,7 +130,7 @@ class Stadium extends React.Component {
           console.log("%cSetup", "color: blue")
           console.log(result)
           this.setState({
-            isLoaded: true,
+            isSetup: true,
             setup: result.game_setup,
             upstream_state: result.connection_state === "up",
           });
@@ -143,7 +143,7 @@ class Stadium extends React.Component {
         },
         (error) => {
           this.setState({
-            isLoaded: false,
+            isSetup: false,
             upstream_up: false,
             error
           });
@@ -211,7 +211,7 @@ class Stadium extends React.Component {
     const initialState = {
       v: (new Date()).getTime(),
       isConnected: false,
-      isLoaded: false,
+      isSetup: false,
       upstream_up: false,
       error: null,
       setup: setup,
@@ -269,46 +269,46 @@ class Stadium extends React.Component {
     return this.state.stadium.mode
   }
 
-  gotoStateConnecting() {
-    this.reset()
-    this.setState({
-      isConnected: false,
-      isLoaded: false,
-    });
-    this.setStadiumState({mode: StadiumStates.StadiumStateConnecting})
-    this.openModal("Connecting to backend", <span>Wait the connection be established</span>)
-  }
-
-  gotoStateSettingUp() {
-    document.getElementById('lugobot-view').classList.remove("loading");
-    this.setState({
-      isConnected: true,
-    });
-    this.setStadiumState({mode: StadiumStates.StadiumStateSetting})
-    this.openModal("Loading game", <span>Loading game state</span>)
-    this.setup()
-  }
-
-  gotoStateListening() {
-    this.setStadiumState({mode: StadiumStates.StadiumStateListening})
-  }
-
-  gotoStateConnectingUpstream(tries) {
-    this.reset()
-    this.setStadiumState({mode: StadiumStates.StadiumStateConn})
-    this.openModal("Upstream connection lost",
-      <span>The frontend application is not connected to the GameServer.
-          <br/>Wait the connection be reestablished <br/><br/>Retrying {tries}</span>)
-
-  }
-
-  gotoStateGoal(team_side) {
-    this.setStadiumState({mode: StadiumStates.StadiumStateGoal, side: team_side})
-  }
-
-  gotoStateDebugging(action) {
-    this.setStadiumState({mode: StadiumStates.StadiumStateDebugging, action})
-  }
+  // gotoStateConnecting() {
+  //   this.reset()
+  //   this.setState({
+  //     isConnected: false,
+  //     isSetup: false,
+  //   });
+  //   this.setStadiumState({mode: StadiumStates.StadiumStateConnecting})
+  //   this.openModal("Connecting to backend", <span>Wait the connection be established</span>)
+  // }
+  //
+  // gotoStateSettingUp() {
+  //   document.getElementById('lugobot-view').classList.remove("loading");
+  //   this.setState({
+  //     isConnected: true,
+  //   });
+  //   this.setStadiumState({mode: StadiumStates.StadiumStateSetting})
+  //   this.openModal("Loading game", <span>Loading game state</span>)
+  //   this.setup()
+  // }
+  //
+  // gotoStateListening() {
+  //   this.setStadiumState({mode: StadiumStates.StadiumStateListening})
+  // }
+  //
+  // gotoStateConnectingUpstream(tries) {
+  //   this.reset()
+  //   this.setStadiumState({mode: StadiumStates.StadiumStateConn})
+  //   this.openModal("Upstream connection lost",
+  //     <span>The frontend application is not connected to the GameServer.
+  //         <br/>Wait the connection be reestablished <br/><br/>Retrying {tries}</span>)
+  //
+  // }
+  //
+  // gotoStateGoal(team_side) {
+  //   this.setStadiumState({mode: StadiumStates.StadiumStateGoal, side: team_side})
+  // }
+  //
+  // gotoStateDebugging(action) {
+  //   this.setStadiumState({mode: StadiumStates.StadiumStateDebugging, action})
+  // }
 
   render() {
     renderLogger(this.constructor.name)
