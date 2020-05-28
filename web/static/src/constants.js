@@ -33,6 +33,13 @@ const GameStates = {
   OVER: 99,
 }
 
+const AppStatus = {
+  Connecting: "connecting",
+  Setting: "setting-up",
+  Listening: "listening",
+  UpstreamDown: "upstream-down",
+  Debugging: "debugging",
+}
 
 const StadiumStates = {
   StadiumStateConnecting: "connecting",
@@ -73,4 +80,5 @@ export {
   EventTypes,
   BreakpointType,
   BackendConfig,
+  AppStatus,
 };
