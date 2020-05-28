@@ -14,6 +14,7 @@ class Stadium extends React.Component {
   constructor(props) {
     super(props);
     this.reset(true)
+    let evtSource = null
     let lastFrame = null
     let onNewEventListener = []
     this.onNewEvent = (snapshot) => {
@@ -38,25 +39,25 @@ class Stadium extends React.Component {
     updateRatio()
     const me = this;
     let upstreamConnTries = 0;
-    const evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
+    this.evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
     // addEventListener version
-    evtSource.addEventListener('open', () => {
+    this.evtSource.addEventListener('open', () => {
       console.log("%cconnection opened", "color: green")
       upstreamConnTries = 0;
       me.gotoStateSettingUp()
     });
-    evtSource.onerror = () => {
+    this.evtSource.onerror = () => {
       console.error("stream connection lost. trying to reconnect...");
       me.gotoStateConnecting()
     };
-    evtSource.addEventListener("ping", () => {
+    this.evtSource.addEventListener("ping", () => {
       console.debug("ping")
     });
-    evtSource.addEventListener(EventTypes.ConnectionLost, function (event) {
+    this.evtSource.addEventListener(EventTypes.ConnectionLost, function (event) {
       console.error("upstream connection lost")
       me.gotoStateConnectingUpstream(upstreamConnTries++)
     });
-    evtSource.addEventListener(EventTypes.ConnectionReestablished, function (event) {
+    this.evtSource.addEventListener(EventTypes.ConnectionReestablished, function (event) {
       console.log("%cupstream connection reestablished", "color: green")
       upstreamConnTries = 0;
       me.gotoStateSettingUp()
@@ -73,7 +74,6 @@ class Stadium extends React.Component {
       console.log("%cDEBUG OFF", "color: gray")
       this.processGameEvent(e)
     });
-
   }
 
   processGameEvent(event) {
@@ -269,46 +269,46 @@ class Stadium extends React.Component {
     return this.state.stadium.mode
   }
 
-  // gotoStateConnecting() {
-  //   this.reset()
-  //   this.setState({
-  //     isConnected: false,
-  //     isSetup: false,
-  //   });
-  //   this.setStadiumState({mode: StadiumStates.StadiumStateConnecting})
-  //   this.openModal("Connecting to backend", <span>Wait the connection be established</span>)
-  // }
-  //
-  // gotoStateSettingUp() {
-  //   document.getElementById('lugobot-view').classList.remove("loading");
-  //   this.setState({
-  //     isConnected: true,
-  //   });
-  //   this.setStadiumState({mode: StadiumStates.StadiumStateSetting})
-  //   this.openModal("Loading game", <span>Loading game state</span>)
-  //   this.setup()
-  // }
-  //
-  // gotoStateListening() {
-  //   this.setStadiumState({mode: StadiumStates.StadiumStateListening})
-  // }
-  //
-  // gotoStateConnectingUpstream(tries) {
-  //   this.reset()
-  //   this.setStadiumState({mode: StadiumStates.StadiumStateConn})
-  //   this.openModal("Upstream connection lost",
-  //     <span>The frontend application is not connected to the GameServer.
-  //         <br/>Wait the connection be reestablished <br/><br/>Retrying {tries}</span>)
-  //
-  // }
-  //
-  // gotoStateGoal(team_side) {
-  //   this.setStadiumState({mode: StadiumStates.StadiumStateGoal, side: team_side})
-  // }
-  //
-  // gotoStateDebugging(action) {
-  //   this.setStadiumState({mode: StadiumStates.StadiumStateDebugging, action})
-  // }
+  gotoStateConnecting() {
+    this.reset()
+    this.setState({
+      isConnected: false,
+      isSetup: false,
+    });
+    this.setStadiumState({mode: StadiumStates.StadiumStateConnecting})
+    this.openModal("Connecting to backend", <span>Wait the connection be established</span>)
+  }
+
+  gotoStateSettingUp() {
+    document.getElementById('lugobot-view').classList.remove("loading");
+    this.setState({
+      isConnected: true,
+    });
+    this.setStadiumState({mode: StadiumStates.StadiumStateSetting})
+    this.openModal("Loading game", <span>Loading game state</span>)
+    this.setup()
+  }
+
+  gotoStateListening() {
+    this.setStadiumState({mode: StadiumStates.StadiumStateListening})
+  }
+
+  gotoStateConnectingUpstream(tries) {
+    this.reset()
+    this.setStadiumState({mode: StadiumStates.StadiumStateConn})
+    this.openModal("Upstream connection lost",
+      <span>The frontend application is not connected to the GameServer.
+          <br/>Wait the connection be reestablished <br/><br/>Retrying {tries}</span>)
+
+  }
+
+  gotoStateGoal(team_side) {
+    this.setStadiumState({mode: StadiumStates.StadiumStateGoal, side: team_side})
+  }
+
+  gotoStateDebugging(action) {
+    this.setStadiumState({mode: StadiumStates.StadiumStateDebugging, action})
+  }
 
   render() {
     renderLogger(this.constructor.name)
