@@ -1,5 +1,5 @@
 import { createStore } from 'redux'
-import game from './reducers'
+import app from './redux/app/reducers'
 
-const store = createStore(game)
+const store = createStore(app)
 export default store;

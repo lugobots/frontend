@@ -1,5 +1,5 @@
 import {BACK_CONNECT, BACK_DISCONNECT, SETUP, UPSTREAM_CONNECT, UPSTREAM_DISCONNECT} from './actionTypes'
-import {AppStatus, GameSettings} from './constants'
+import {AppStatus, GameSettings} from '../../constants'
 
 const defaultSetup = {
   dev_mode: false,
@@ -46,7 +46,7 @@ const initialState = {
   error: null,
 }
 
-export default function game(state = initialState, action) {
+export default function app(state = initialState, action) {
   switch (action.type) {
     case BACK_CONNECT:
       return Object.assign({}, initialState, {

@@ -13,22 +13,22 @@ import {renderLogger, updateRatio} from "../helpers";
 class Stadium extends React.Component {
   constructor(props) {
     super(props);
-    this.reset(true)
-    let evtSource = null
-    let lastFrame = null
-    let onNewEventListener = []
-    this.onNewEvent = (snapshot) => {
-      lastFrame = snapshot
-      onNewEventListener.forEach(cb => {
-        cb(snapshot)
-      })
-    }
-    this.addOnNewEventListener = (cb) => {
-      if (lastFrame !== null) {
-        cb(lastFrame)
-      }
-      onNewEventListener.push(cb)
-    }
+    // this.reset(true)
+    // let evtSource = null
+    // let lastFrame = null
+    // let onNewEventListener = []
+    // this.onNewEvent = (snapshot) => {
+    //   lastFrame = snapshot
+    //   onNewEventListener.forEach(cb => {
+    //     cb(snapshot)
+    //   })
+    // }
+    // this.addOnNewEventListener = (cb) => {
+    //   if (lastFrame !== null) {
+    //     cb(lastFrame)
+    //   }
+    //   onNewEventListener.push(cb)
+    // }
   }
 
   componentDidMount() {
@@ -37,43 +37,43 @@ class Stadium extends React.Component {
     // });
     // AAAAA.play()
     updateRatio()
-    const me = this;
-    let upstreamConnTries = 0;
-    this.evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
-    // addEventListener version
-    this.evtSource.addEventListener('open', () => {
-      console.log("%cconnection opened", "color: green")
-      upstreamConnTries = 0;
-      me.gotoStateSettingUp()
-    });
-    this.evtSource.onerror = () => {
-      console.error("stream connection lost. trying to reconnect...");
-      me.gotoStateConnecting()
-    };
-    this.evtSource.addEventListener("ping", () => {
-      console.debug("ping")
-    });
-    this.evtSource.addEventListener(EventTypes.ConnectionLost, function (event) {
-      console.error("upstream connection lost")
-      me.gotoStateConnectingUpstream(upstreamConnTries++)
-    });
-    this.evtSource.addEventListener(EventTypes.ConnectionReestablished, function (event) {
-      console.log("%cupstream connection reestablished", "color: green")
-      upstreamConnTries = 0;
-      me.gotoStateSettingUp()
-    });
-
-    evtSource.addEventListener(EventTypes.StateChange, (e) => this.processGameEvent(e));
-    evtSource.addEventListener(EventTypes.NewPlayer, (e) => this.processGameEvent(e));
-    evtSource.addEventListener(EventTypes.Breakpoint, (e) => {
-      const g = JSON.parse(e.data);
-      console.log("%cDEBUG ON", "color: blue", g)
-      this.processGameEvent(e)
-    });
-    evtSource.addEventListener(EventTypes.DebugReleased, (e) => {
-      console.log("%cDEBUG OFF", "color: gray")
-      this.processGameEvent(e)
-    });
+    // const me = this;
+    // let upstreamConnTries = 0;
+    // this.evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
+    // // addEventListener version
+    // this.evtSource.addEventListener('open', () => {
+    //   console.log("%cconnection opened", "color: green")
+    //   upstreamConnTries = 0;
+    //   me.gotoStateSettingUp()
+    // });
+    // this.evtSource.onerror = () => {
+    //   console.error("stream connection lost. trying to reconnect...");
+    //   me.gotoStateConnecting()
+    // };
+    // this.evtSource.addEventListener("ping", () => {
+    //   console.debug("ping")
+    // });
+    // this.evtSource.addEventListener(EventTypes.ConnectionLost, function (event) {
+    //   console.error("upstream connection lost")
+    //   me.gotoStateConnectingUpstream(upstreamConnTries++)
+    // });
+    // this.evtSource.addEventListener(EventTypes.ConnectionReestablished, function (event) {
+    //   console.log("%cupstream connection reestablished", "color: green")
+    //   upstreamConnTries = 0;
+    //   me.gotoStateSettingUp()
+    // });
+    //
+    // evtSource.addEventListener(EventTypes.StateChange, (e) => this.processGameEvent(e));
+    // evtSource.addEventListener(EventTypes.NewPlayer, (e) => this.processGameEvent(e));
+    // evtSource.addEventListener(EventTypes.Breakpoint, (e) => {
+    //   const g = JSON.parse(e.data);
+    //   console.log("%cDEBUG ON", "color: blue", g)
+    //   this.processGameEvent(e)
+    // });
+    // evtSource.addEventListener(EventTypes.DebugReleased, (e) => {
+    //   console.log("%cDEBUG OFF", "color: gray")
+    //   this.processGameEvent(e)
+    // });
   }
 
   processGameEvent(event) {
@@ -313,45 +313,46 @@ class Stadium extends React.Component {
   render() {
     renderLogger(this.constructor.name)
     return <div>
-      <header id="lugobot-header"
-              className={`container ${
-                this.getStadiumStateMode() === StadiumStates.StadiumStateGoal ? 'active-modal' : ''}`}>
-        <Panel
-          v={this.state.v}
-          stadium_state={this.state.stadium}
-          setup={this.state.setup}
-          setOnNewEventListener={(cb) => {
-            this.addOnNewEventListener(cb)
-          }}
-        />
-      </header>
-      <main id="lugobot-stadium" className="container">
-        <Field
-          v={this.state.v}
-          stadium_state={this.state.stadium}
-          setup={this.state.setup}
-          setOnNewEventListener={(cb) => {
-            this.addOnNewEventListener(cb)
-          }}
-        />
-      </main>
-      <ToolBar
-        v={this.state.v}
-        setup={this.state.setup}
-        stadium_state={this.state.stadium}
-        setOnNewEventListener={(cb) => {
-          this.addOnNewEventListener(cb)
-        }}
-        gotoStateDebugging={this.gotoStateDebugging.bind(this)}
-      />
-      <Events
-        v={this.state.v}
-        stadium_state={this.state.stadium}
-        modal={this.state.modal}
-        setOnNewEventListener={(cb) => {
-          this.addOnNewEventListener(cb)
-        }}
-      />
+      <p>it is really creazy, hu? {this.props.setup.game_duration}</p>
+      {/*<header id="lugobot-header"*/}
+      {/*        className={`container ${*/}
+      {/*          this.getStadiumStateMode() === StadiumStates.StadiumStateGoal ? 'active-modal' : ''}`}>*/}
+      {/*  <Panel*/}
+      {/*    v={this.state.v}*/}
+      {/*    stadium_state={this.state.stadium}*/}
+      {/*    setup={this.state.setup}*/}
+      {/*    setOnNewEventListener={(cb) => {*/}
+      {/*      this.addOnNewEventListener(cb)*/}
+      {/*    }}*/}
+      {/*  />*/}
+      {/*</header>*/}
+      {/*<main id="lugobot-stadium" className="container">*/}
+      {/*  <Field*/}
+      {/*    v={this.state.v}*/}
+      {/*    stadium_state={this.state.stadium}*/}
+      {/*    setup={this.state.setup}*/}
+      {/*    setOnNewEventListener={(cb) => {*/}
+      {/*      this.addOnNewEventListener(cb)*/}
+      {/*    }}*/}
+      {/*  />*/}
+      {/*</main>*/}
+      {/*<ToolBar*/}
+      {/*  v={this.state.v}*/}
+      {/*  setup={this.state.setup}*/}
+      {/*  stadium_state={this.state.stadium}*/}
+      {/*  setOnNewEventListener={(cb) => {*/}
+      {/*    this.addOnNewEventListener(cb)*/}
+      {/*  }}*/}
+      {/*  gotoStateDebugging={this.gotoStateDebugging.bind(this)}*/}
+      {/*/>*/}
+      {/*<Events*/}
+      {/*  v={this.state.v}*/}
+      {/*  stadium_state={this.state.stadium}*/}
+      {/*  modal={this.state.modal}*/}
+      {/*  setOnNewEventListener={(cb) => {*/}
+      {/*    this.addOnNewEventListener(cb)*/}
+      {/*  }}*/}
+      {/*/>*/}
     </div>;
   }
 }

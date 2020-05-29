@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import action from "./actions";
+import action from "./redux/app/actions";
 import {AppStatus, BackendConfig, EventTypes} from "./constants";
 import store from "./store";
+import Stadium from "./components/Stadium";
 
 class App extends React.Component {
 
@@ -55,7 +56,9 @@ class App extends React.Component {
   }
 
   render() {
-    return <h1>Hello, {this.props.status}</h1>;
+    return <h1>Hello, {this.props.status}
+      <Stadium setup={this.props.setup} />
+    </h1>;
   }
 
 }
