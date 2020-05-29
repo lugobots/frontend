@@ -14,7 +14,7 @@ function updateRatio() {
 }
 
 function renderLogger(className) {
-   console.log(`${className} rendered`)
+   // console.log(`${className} rendered`)
 }
 
 

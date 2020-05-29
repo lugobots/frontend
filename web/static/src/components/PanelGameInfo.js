@@ -1,16 +1,12 @@
 import React from 'react';
 import {renderLogger} from "../helpers";
+import PropTypes from "prop-types";
+import {connect} from "react-redux";
 
 
 class PanelGameInfo extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      snapshot: null,
-      time_remaining: "00:00"
-    };
-
   }
 
 
@@ -54,5 +50,16 @@ class PanelGameInfo extends React.Component {
   }
 }
 
-export default PanelGameInfo;
+PanelGameInfo.propTypes = {
+  team_goal: PropTypes.string,
+  home_score: PropTypes.number,
+  away_score: PropTypes.number,
+  time_remaining: PropTypes.string,
+  shot_time: PropTypes.string,
+}
 
+const mapStateToProps = state => {
+  return state.match.panel
+}
+
+export default connect(mapStateToProps)(PanelGameInfo)

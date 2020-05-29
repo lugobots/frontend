@@ -9,9 +9,6 @@ import {faEnvelope, faKey} from '@fortawesome/free-solid-svg-icons';
 import App from "./App";
 library.add(faEnvelope, faKey);
 
-
-store.subscribe(() => console.log(store.getState().status))
-
 ReactDOM.render(
   <Provider store={store}>
     <App />

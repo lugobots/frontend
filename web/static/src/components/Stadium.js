@@ -8,6 +8,8 @@ import tickAudio from '../sounds/kick.wav';
 
 import {GameSettings, GameStates, StadiumStates, EventTypes, BackendConfig} from '../constants';
 import {renderLogger, updateRatio} from "../helpers";
+import PropTypes from "prop-types";
+import {connect} from "react-redux";
 
 
 class Stadium extends React.Component {
@@ -312,20 +314,14 @@ class Stadium extends React.Component {
 
   render() {
     renderLogger(this.constructor.name)
+    this.setMainColor('--team-home-color-primary', this.props.setup.home_team.colors.primary);
+    this.setMainColor('--team-home-color-secondary', this.props.setup.home_team.colors.secondary);
+    this.setMainColor('--team-away-color-primary', this.props.setup.away_team.colors.primary);
+    this.setMainColor('--team-away-color-secondary', this.props.setup.away_team.colors.secondary);
+
     return <div>
-      <p>it is really creazy, hu? {this.props.setup.game_duration}</p>
-      {/*<header id="lugobot-header"*/}
-      {/*        className={`container ${*/}
-      {/*          this.getStadiumStateMode() === StadiumStates.StadiumStateGoal ? 'active-modal' : ''}`}>*/}
-      {/*  <Panel*/}
-      {/*    v={this.state.v}*/}
-      {/*    stadium_state={this.state.stadium}*/}
-      {/*    setup={this.state.setup}*/}
-      {/*    setOnNewEventListener={(cb) => {*/}
-      {/*      this.addOnNewEventListener(cb)*/}
-      {/*    }}*/}
-      {/*  />*/}
-      {/*</header>*/}
+        <Panel />
+
       {/*<main id="lugobot-stadium" className="container">*/}
       {/*  <Field*/}
       {/*    v={this.state.v}*/}
@@ -357,5 +353,13 @@ class Stadium extends React.Component {
   }
 }
 
-export default Stadium;
+Stadium.propTypes = {
+  setup: PropTypes.object
+}
+
+const mapStateToProps = state => {
+  return state.app
+}
+
+export default connect(mapStateToProps)(Stadium)
 
