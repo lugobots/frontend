@@ -2,10 +2,37 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import action from "./actions";
-import {BackendConfig, EventTypes} from "./constants";
+import {AppStatus, BackendConfig, EventTypes} from "./constants";
+import store from "./store";
 
 class App extends React.Component {
+
+  setup() {
+    fetch(`${BackendConfig.BackEndPoint}/setup/${gameID}/${uuid}`)
+      .then(res => res.json())
+      .then(
+        (result) => {
+          // console.log("%cSetup", "color: blue")
+          // console.log(result)
+          this.props.dispatch(action.setup(result))
+        },
+        (error) => {
+          // @todo handle the error
+          alert("oops... something went wrong")
+        }
+      )
+
+
+
+  }
+
   componentDidMount() {
+    store.subscribe(() => {
+      if(store.getState().status === AppStatus.Setting) {
+        this.setup()
+      }
+    })
+
     this.evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
     // addEventListener version
     this.evtSource.addEventListener('open', () => {
