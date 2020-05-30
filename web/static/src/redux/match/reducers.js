@@ -1,4 +1,4 @@
-import {PANEL_UPDATE, STATE_CHANGE} from './actionTypes'
+import {GOAL, PANEL_UPDATE, STATE_CHANGE} from './actionTypes'
 
 const defaultPanel = {
   time_remaining: "--:--",
@@ -25,8 +25,14 @@ const defaultSnapshot = {
   }
 }
 
+const defaultModal = {
+  activate: false,
+  mode: null,
+}
+
 const initialState = {
   panel: defaultPanel,
+  modal: defaultModal,
   snapshot: defaultSnapshot,
   lastSnapshot: null,
 }
@@ -34,13 +40,19 @@ const initialState = {
 export default function match(state = initialState, action) {
   switch (action.type) {
     case PANEL_UPDATE:
-      return Object.assign({}, initialState, {
+      return Object.assign({}, state, {
         panel: action.data,
+        modal: defaultModal,
       })
-    case STATE_CHANGE:
-      return Object.assign({}, initialState, {
-        lastSnapshot: action.data,
-        snapshot: action.data,
+    // case STATE_CHANGE:
+    //   return Object.assign({}, state, {
+    //     lastSnapshot: action.data,
+    //     snapshot: action.data,
+    //     modal: defaultModal,
+    //   })
+    case GOAL:
+      return Object.assign({}, state, {
+        modal: action.data
       })
     default:
       return state

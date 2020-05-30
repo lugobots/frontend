@@ -58,6 +58,10 @@ class App extends React.Component {
       this.props.dispatch(appAction.upstreamConnect())
     });
     this.evtSource.addEventListener(EventTypes.StateChange, (e) => this.onStateChange(e));
+    this.evtSource.addEventListener(EventTypes.Goal, (e) => {
+      const g = JSON.parse(e.data);
+      this.props.dispatch(matchAction.displayGoal(g.game_event.goal.side.toLowerCase()))
+    });
   }
 
   render() {

@@ -1,23 +1,14 @@
 import React from 'react';
 import EventGoal from './EventGoal'
 import Modal from "./Modal";
-import {StadiumStates} from "../constants";
+import {ModalModes, StadiumStates} from "../constants";
 import {renderLogger} from "../helpers";
+import PropTypes from "prop-types";
+import {connect} from "react-redux";
 
 class Events extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      team_goal: "",
-    }
-  }
-
-  componentDidMount() {
-    this.props.setOnNewEventListener(gameEvent => {
-      if(gameEvent.team_goal !== this.state.team_goal) {
-        this.setState({team_goal: gameEvent.team_goal})
-      }
-    })
   }
 
   render() {
@@ -25,23 +16,34 @@ class Events extends React.Component {
     let classList = []
     let team_goal = ""
     let displayNone = {display: "none"}
-    if(this.props.modal !== null) {
+    if(this.props.activate) {
       displayNone = {}
       classList = ["zoom-In", "active-modal"];
-      switch (this.props.stadium_state.mode) {
-        case StadiumStates.StadiumStateGoal:
-          classList = ["zoom-In", "active-modal", "goal", `goal-${this.props.stadium_state.side }`];
-          team_goal = this.props.stadium_state.side
+      switch (this.props.mode) {
+        case ModalModes.GOAL:
+          classList = ["zoom-In", "active-modal", "goal", `goal-${this.props.team_side }`];
+          team_goal = this.props.team_side
           break;
       }
     }
 
     return <section id="event-view" style={displayNone} className={classList.join(" ")}>
-      <Modal modal={this.props.modal}/>
-      <EventGoal team_goal={team_goal}/>
+      Gool {this.props.team_side}
+      {/*<Modal modal={this.props.modal}/>*/}
+      {/*<EventGoal team_goal={team_goal}/>*/}
     </section>;
   }
 }
 
-export default Events;
+Events.propTypes = {
+  activate: PropTypes.bool,
+  mode: PropTypes.string,
+  team_side: PropTypes.string,
+}
 
+const mapStateToProps = state => {
+  return state.match.modal
+
+}
+
+export default connect(mapStateToProps)(Events)

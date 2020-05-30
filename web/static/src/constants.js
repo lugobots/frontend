@@ -41,22 +41,27 @@ const AppStatus = {
   Debugging: "debugging",
 }
 
-const StadiumStates = {
-  StadiumStateConnecting: "connecting",
-  StadiumStateSetting: "setting-up",
-  StadiumStateListening: "listening",
-  StadiumStateConn: "conn-upstream",
-  StadiumStateGoal: "goal",
-
-  // dev mode
-  StadiumStateDebugging: "debugging",
+const ModalModes = {
+  GOAL: "goal"
 }
+
+// const StadiumStates = {
+//   StadiumStateConnecting: "connecting",
+//   StadiumStateSetting: "setting-up",
+//   StadiumStateListening: "listening",
+//   StadiumStateConn: "conn-upstream",
+//   StadiumStateGoal: "goal",
+//
+//   // dev mode
+//   StadiumStateDebugging: "debugging",
+// }
 
 const EventTypes = {
   NewPlayer: "new_player",
   Breakpoint: "breakpoint",
   StateChange: "state_change",
   DebugReleased: "debug_released",
+  Goal: "goal",
   GameOver: "game_over",
   LostPlayer: "lost_player",
   ConnectionLost: "connection_lots",
@@ -76,9 +81,10 @@ export {
   GameDefinitions,
   GameSettings,
   GameStates,
-  StadiumStates,
+  // StadiumStates,
   EventTypes,
   BreakpointType,
   BackendConfig,
   AppStatus,
+  ModalModes,
 };

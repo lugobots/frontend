@@ -341,14 +341,7 @@ class Stadium extends React.Component {
       {/*  }}*/}
       {/*  gotoStateDebugging={this.gotoStateDebugging.bind(this)}*/}
       {/*/>*/}
-      {/*<Events*/}
-      {/*  v={this.state.v}*/}
-      {/*  stadium_state={this.state.stadium}*/}
-      {/*  modal={this.state.modal}*/}
-      {/*  setOnNewEventListener={(cb) => {*/}
-      {/*    this.addOnNewEventListener(cb)*/}
-      {/*  }}*/}
-      {/*/>*/}
+      <Events />
     </div>;
   }
 }
