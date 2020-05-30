@@ -1,4 +1,4 @@
-import {GOAL, PANEL_UPDATE, STATE_CHANGE} from './actionTypes'
+import {ALERT, GOAL, PANEL_UPDATE} from './actionTypes'
 
 const defaultPanel = {
   time_remaining: "--:--",
@@ -11,16 +11,16 @@ const defaultSnapshot = {
   turn: 0,
   home_team: {
     players: [],
-    Score: 0,
+    score: 0,
   },
   away_team: {
     players: [],
-    Score: 0,
+    score: 0,
   },
   ball: {
-    Position: {
-      X: 0,
-      Y: 0,
+    position: {
+      x: 0,
+      y: 0,
     }
   }
 }
@@ -51,6 +51,10 @@ export default function match(state = initialState, action) {
     //     modal: defaultModal,
     //   })
     case GOAL:
+      return Object.assign({}, state, {
+        modal: action.data
+      })
+    case ALERT:
       return Object.assign({}, state, {
         modal: action.data
       })

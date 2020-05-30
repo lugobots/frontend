@@ -76,7 +76,7 @@ $team-away-color-2 : var(--team-away-color-secondary);
   // max-height: 100vh;
 }
 
-#lugobot-page {
+#stadium {
   @include model-display($display:block, $position:relative);
   width: 100%;
   min-height: 100vh;

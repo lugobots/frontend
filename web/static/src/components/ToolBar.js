@@ -20,7 +20,6 @@ class ToolBar extends React.Component {
   componentDidMount() {
     this.props.setOnNewEventListener(gameEvent => {
 
-      console.log("ASASA")
       // if(this.state.debugOn !== gameEvent.debug_mode) {
       //   this.setState({
       //     debugOn: gameEvent.debug_mode

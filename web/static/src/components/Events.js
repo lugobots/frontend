@@ -16,6 +16,7 @@ class Events extends React.Component {
     let classList = []
     let team_goal = ""
     let displayNone = {display: "none"}
+    let modal = null
     if(this.props.activate) {
       displayNone = {}
       classList = ["zoom-In", "active-modal"];
@@ -24,13 +25,21 @@ class Events extends React.Component {
           classList = ["zoom-In", "active-modal", "goal", `goal-${this.props.team_side }`];
           team_goal = this.props.team_side
           break;
+        case ModalModes.ALERT:
+          modal = {
+            title: this.props.title,
+            text: this.props.text,
+          }
+          break;
       }
     }
 
     return <section id="event-view" style={displayNone} className={classList.join(" ")}>
-      Gool {this.props.team_side}
-      {/*<Modal modal={this.props.modal}/>*/}
+      {<Modal modal={modal}/>}
       {/*<EventGoal team_goal={team_goal}/>*/}
+      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" id="filter_blur">
+        <filter id="blur"> <feGaussianBlur stdDeviation="6" /></filter>
+      </svg>
     </section>;
   }
 }
@@ -39,6 +48,8 @@ Events.propTypes = {
   activate: PropTypes.bool,
   mode: PropTypes.string,
   team_side: PropTypes.string,
+  title: PropTypes.string,
+  text: PropTypes.object,
 }
 
 const mapStateToProps = state => {

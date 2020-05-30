@@ -1,7 +1,8 @@
-export const STATE_CHANGE = "state_change"
 export const PANEL_UPDATE = 'panel_update'
 export const GOAL = "goal"
+export const ALERT = "alert"
 
+// export const STATE_CHANGE = "state_change"
 // export const NEW_PLAYER = "new_player"
 // export const BREAKPOINT = "breakpoint"
 //

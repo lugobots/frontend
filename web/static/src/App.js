@@ -43,6 +43,7 @@ class App extends React.Component {
     });
     this.evtSource.onerror = () => {
       this.props.dispatch(appAction.backDisconnect())
+      this.props.dispatch(matchAction.displayModal("Connecting to backend", <span>Wait the connection be established</span>))
     };
 
     this.evtSource.addEventListener("ping", () => {
@@ -96,7 +97,7 @@ App.propTypes = {
 const mapStateToProps = state => {
 
   return {
-    status: state.app.status
+    status: state.app.status,
   }
 }
 

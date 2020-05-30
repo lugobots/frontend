@@ -319,7 +319,11 @@ class Stadium extends React.Component {
     this.setMainColor('--team-away-color-primary', this.props.setup.away_team.colors.primary);
     this.setMainColor('--team-away-color-secondary', this.props.setup.away_team.colors.secondary);
 
-    return <div>
+    let  stadium_class = ""
+    if(this.props.modal_active) {
+      stadium_class = "active-modal"
+    }
+    return <div id="stadium" className={stadium_class}>
         <Panel />
 
       {/*<main id="lugobot-stadium" className="container">*/}
@@ -347,11 +351,15 @@ class Stadium extends React.Component {
 }
 
 Stadium.propTypes = {
-  setup: PropTypes.object
+  setup: PropTypes.object,
+  modal_active: PropTypes.bool,
 }
 
 const mapStateToProps = state => {
-  return state.app
+  return {
+    setup: state.app.setup,
+    modal_active: state.match.modal.activate,
+  }
 }
 
 export default connect(mapStateToProps)(Stadium)
