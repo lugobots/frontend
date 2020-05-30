@@ -27,6 +27,7 @@ func SampleScoreTime() Sample {
 	lastSnap.State = lugo.GameSnapshot_GET_READY
 	lastSnap.ShotClock.TeamSide = lugo.Team_HOME
 	lastSnap.ShotClock.Turns = 300
+	sample.Events = append(sample.Events, newGoal(lastSnap, lugo.Team_AWAY))
 	sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
 
 	lastSnap = CopySnap(lastSnap)
@@ -41,6 +42,7 @@ func SampleScoreTime() Sample {
 	lastSnap = CopySnap(lastSnap)
 	lastSnap.HomeTeam.Score += 1
 	lastSnap.State = lugo.GameSnapshot_GET_READY
+	sample.Events = append(sample.Events, newGoal(lastSnap, lugo.Team_HOME))
 	sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
 
 	return sample

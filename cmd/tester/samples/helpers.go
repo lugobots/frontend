@@ -74,3 +74,14 @@ func newStateChangeEvent(snap *lugo.GameSnapshot, previous lugo.GameSnapshot_Sta
 		},
 	}
 }
+
+func newGoal(snap *lugo.GameSnapshot, side lugo.Team_Side) *lugo.GameEvent {
+	return &lugo.GameEvent{
+		GameSnapshot: snap,
+		Event: &lugo.GameEvent_Goal{
+			Goal: &lugo.EventGoal{
+				Side: side,
+			},
+		},
+	}
+}
