@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const PreloadWebpackPlugin = require('preload-webpack-plugin');
 
 module.exports = {
     // the output bundle won't be optimized for production but suitable for development
@@ -61,5 +62,17 @@ module.exports = {
         ]
     },
     // add a custom index.html as the template
-    plugins: [new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'src', 'index.html') })]
+    plugins: [
+      new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'src', 'index.html') }),
+        new PreloadWebpackPlugin({
+            rel: 'preload',
+            include: 'allAssets',
+            as(entry) {
+                if (/\.css$/.test(entry)) return 'style';
+                if (/\.woff$/.test(entry)) return 'font';
+                if (/\.png$/.test(entry)) return 'image';
+                return 'script';
+            }
+        })
+    ]
 };
