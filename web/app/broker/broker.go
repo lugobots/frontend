@@ -187,7 +187,8 @@ func (b *Binder) broadcast() error {
 		}
 
 		marshal := jsonpb.Marshaler{
-			OrigName: true,
+			OrigName:     true,
+			EmitDefaults: true,
 		}
 		raw, err := marshal.MarshalToString(event)
 		if err != nil {

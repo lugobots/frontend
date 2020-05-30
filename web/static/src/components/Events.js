@@ -36,7 +36,7 @@ class Events extends React.Component {
 
     return <section id="event-view" style={displayNone} className={classList.join(" ")}>
       {<Modal modal={modal}/>}
-      {/*<EventGoal team_goal={team_goal}/>*/}
+      {<EventGoal team_goal={team_goal}/>}
       <svg version="1.1" xmlns="http://www.w3.org/2000/svg" id="filter_blur">
         <filter id="blur"> <feGaussianBlur stdDeviation="6" /></filter>
       </svg>
