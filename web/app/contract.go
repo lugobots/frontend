@@ -1,6 +1,9 @@
 package app
 
-import "github.com/lugobots/lugo4go/v2/lugo"
+import (
+	"encoding/json"
+	"github.com/lugobots/lugo4go/v2/lugo"
+)
 
 type EventsBroker interface {
 	StreamEventsTo(uuid string) chan FrontEndUpdate
@@ -15,6 +18,7 @@ const (
 	EventDebugReleased = "debug_released"
 	EventGameOver      = "game_over"
 	EventLostPlayer    = "lost_player"
+	EventGoal          = "goal"
 
 	//events between frontend server and frontend
 	EventConnectionLost          = "connection_lots"
@@ -27,7 +31,7 @@ const (
 )
 
 type UpdateData struct {
-	GameEvent     *lugo.GameEvent `json:"game_event"`
+	GameEvent     json.RawMessage `json:"game_event"`
 	TimeRemaining string          `json:"time_remaining"`
 	ShotTime      string          `json:"shot_time"`
 	DebugMode     bool            `json:"debug_mode"`

@@ -3,7 +3,9 @@ package broker
 import (
 	"bitbucket.org/makeitplay/lugo-frontend/web/app"
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -100,7 +102,7 @@ func (b *Binder) connect() error {
 
 	b.producer = lugo.NewBroadcastClient(b.producerConn)
 	b.gameSetup, err = b.producer.GetGameSetup(ctx, &lugo.WatcherRequest{
-		UUID: "frontend",
+		Uuid: "frontend",
 	})
 
 	b.remoteConn = lugo.NewRemoteClient(b.producerConn)
@@ -159,7 +161,7 @@ func (b *Binder) Stop() error {
 func (b *Binder) broadcast() error {
 	ctx := context.Background()
 	receiver, err := b.producer.OnEvent(ctx, &lugo.WatcherRequest{
-		UUID: "frontend",
+		Uuid: "frontend",
 	})
 	if err != nil {
 		return err
@@ -184,6 +186,15 @@ func (b *Binder) broadcast() error {
 			continue
 		}
 
+		marshal := jsonpb.Marshaler{
+			OrigName: true,
+		}
+		raw, err := marshal.MarshalToString(event)
+		if err != nil {
+			b.Logger.With(err).Error("error marshalling event message")
+			continue
+		}
+
 		frameTime := time.Duration(b.gameSetup.ListeningDuration) * time.Millisecond
 		remaining := time.Duration(b.gameSetup.GameDuration-event.GameSnapshot.Turn) * frameTime
 		shotRemaining := time.Duration(0)
@@ -199,7 +210,7 @@ func (b *Binder) broadcast() error {
 		update := app.FrontEndUpdate{
 			Type: eventType,
 			Update: app.UpdateData{
-				GameEvent:     event,
+				GameEvent:     json.RawMessage(raw),
 				TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),
 				ShotTime:      fmt.Sprintf("%02d", int(shotRemaining.Seconds())),
 				DebugMode:     debugging,
@@ -270,6 +281,8 @@ func eventTypeTranslator(event interface{}) (string, error) {
 		return app.EventLostPlayer, nil
 	case *lugo.GameEvent_StateChange:
 		return app.EventStateChange, nil
+	case *lugo.GameEvent_Goal:
+		return app.EventGoal, nil
 	case *lugo.GameEvent_Breakpoint:
 		return app.EventBreakpoint, nil
 	case *lugo.GameEvent_DebugReleased:
