@@ -35,10 +35,11 @@ class App extends React.Component {
 
 
   componentDidMount() {
-
+    let upstreamConnTries = 0;
     this.evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
     // addEventListener version
     this.evtSource.addEventListener('open', () => {
+      upstreamConnTries = 0;
       this.props.dispatch(appAction.backConnect())
     });
     this.evtSource.onerror = () => {
@@ -52,9 +53,14 @@ class App extends React.Component {
 
     this.evtSource.addEventListener(EventTypes.ConnectionLost, () => {
       console.error("%cupstream connection lost", "color: #AA0000")
+      upstreamConnTries++
       this.props.dispatch(appAction.upstreamDisconnect())
+      this.props.dispatch(matchAction.displayModal("Upstream connection lost",
+        <span>The frontend application is not connected to the GameServer.
+          <br/>Wait the connection be reestablished <br/><br/>Retrying {upstreamConnTries}</span>))
     });
     this.evtSource.addEventListener(EventTypes.ConnectionReestablished, () => {
+      upstreamConnTries = 0;
       console.log("%cupstream connection reestablished", "color: green")
       this.props.dispatch(appAction.upstreamConnect())
     });
