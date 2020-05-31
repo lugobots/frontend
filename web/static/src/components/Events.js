@@ -1,7 +1,7 @@
 import React from 'react';
 import EventGoal from './EventGoal'
 import Modal from "./Modal";
-import {ModalModes, StadiumStates} from "../constants";
+import {StadiumStatus} from "../constants";
 import {renderLogger} from "../helpers";
 import PropTypes from "prop-types";
 import {connect} from "react-redux";
@@ -15,46 +15,52 @@ class Events extends React.Component {
     renderLogger(this.constructor.name)
     let classList = []
     let team_goal = ""
-    let displayNone = {display: "none"}
+    let displayNone = {}
+
+
     let modal = null
-    if(this.props.activate) {
-      displayNone = {}
-      classList = ["zoom-In", "active-modal"];
-      switch (this.props.mode) {
-        case ModalModes.GOAL:
-          classList = ["zoom-In", "active-modal", "goal", `goal-${this.props.team_side }`];
-          team_goal = this.props.team_side
-          break;
-        case ModalModes.ALERT:
-          modal = {
-            title: this.props.title,
-            text: this.props.text,
-          }
-          break;
-      }
+    switch (this.props.stadium_status) {
+      case StadiumStatus.ALERT:
+        classList = ["zoom-In", "active-modal"]
+        modal = {
+          title: this.props.title,
+          text: this.props.text,
+        }
+        break;
+      case StadiumStatus.GOAL:
+        classList = ["zoom-In", "active-modal", "goal", `goal-${this.props.team_goal}`];
+        team_goal = this.props.team_goal
+        break;
+      default:
+        displayNone = {display: "none"}
     }
 
     return <section id="event-view" style={displayNone} className={classList.join(" ")}>
       {<Modal modal={modal}/>}
       {<EventGoal team_goal={team_goal}/>}
       <svg version="1.1" xmlns="http://www.w3.org/2000/svg" id="filter_blur">
-        <filter id="blur"> <feGaussianBlur stdDeviation="6" /></filter>
+        <filter id="blur">
+          <feGaussianBlur stdDeviation="6"/>
+        </filter>
       </svg>
     </section>;
   }
 }
 
 Events.propTypes = {
-  activate: PropTypes.bool,
-  mode: PropTypes.string,
-  team_side: PropTypes.string,
+  stadium_status: PropTypes.string,
+  team_goal: PropTypes.string,
   title: PropTypes.string,
   text: PropTypes.object,
 }
 
 const mapStateToProps = state => {
-  return state.stadium.modal
-
+  return {
+    stadium_status: state.stadium.status,
+    team_goal: state.stadium.event_data?.team_goal,
+    title: state.stadium.event_data?.modal?.title,
+    text: state.stadium.event_data?.modal?.text,
+  }
 }
 
 export default connect(mapStateToProps)(Events)

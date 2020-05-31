@@ -47,10 +47,10 @@ const StadiumStatus = {
   ALERT: "ALERT",
 }
 
-const ModalModes = {
-  GOAL: "goal",
-  ALERT: "alert",
-}
+// const ModalModes = {
+//   GOAL: "goal",
+//   ALERT: "alert",
+// }
 
 // const StadiumStates = {
 //   StadiumStateConnecting: "connecting",
@@ -93,6 +93,6 @@ export {
   BreakpointType,
   BackendConfig,
   AppStatus,
-  ModalModes,
+  // ModalModes,
   StadiumStatus,
 };

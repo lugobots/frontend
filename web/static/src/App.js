@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
 import appAction from "./redux/app/actions";
 import stadiumAction from "./redux/stadium/actions";
-import {AppStatus, BackendConfig, EventTypes} from "./constants";
+import {AppStatus, BackendConfig, EventTypes, StadiumStatus} from "./constants";
 import store from "./store";
 import Stadium from "./components/Stadium";
 
@@ -29,6 +29,10 @@ class App extends React.Component {
 
   onStateChange(event) {
     const g = JSON.parse(event.data);
+    const s = store.getState().stadium.status
+    if(s !== StadiumStatus.ALERT && s !== StadiumStatus.PLAYING) {
+      this.props.dispatch(stadiumAction.resume())
+    }
     this.updateScoreBoard(g)
   }
 
@@ -36,15 +40,19 @@ class App extends React.Component {
 
   componentDidMount() {
     let upstreamConnTries = 0;
+    let backConnTries = 0;
     this.evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
     // addEventListener version
     this.evtSource.addEventListener('open', () => {
       upstreamConnTries = 0;
+      backConnTries = 0;
       this.props.dispatch(appAction.backConnect())
     });
     this.evtSource.onerror = () => {
+      backConnTries++
       this.props.dispatch(appAction.backDisconnect())
-      this.props.dispatch(stadiumAction.displayModal("Connecting to backend", <span>Wait the connection be established</span>))
+      this.props.dispatch(stadiumAction.displayAlert("Connecting to backend",
+        <span>Wait the connection be established<br/><br/>Retrying {backConnTries}</span>))
     };
 
     this.evtSource.addEventListener("ping", () => {
@@ -55,7 +63,7 @@ class App extends React.Component {
       console.error("%cupstream connection lost", "color: #AA0000")
       upstreamConnTries++
       this.props.dispatch(appAction.upstreamDisconnect())
-      this.props.dispatch(stadiumAction.displayModal("Upstream connection lost",
+      this.props.dispatch(stadiumAction.displayAlert("Upstream connection lost",
         <span>The frontend application is not connected to the GameServer.
           <br/>Wait the connection be reestablished <br/><br/>Retrying {upstreamConnTries}</span>))
     });
@@ -75,6 +83,7 @@ class App extends React.Component {
   render() {
     if (this.props.status === AppStatus.Setting) {
       this.setup()
+      this.props.dispatch(stadiumAction.resume())
     }
     return <Stadium/>;
   }

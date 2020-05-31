@@ -3,9 +3,12 @@ import app from './redux/app/reducers'
 import stadium from './redux/stadium/reducers'
 
 const loggingMiddleware = (store) => (next) => (action) => {
-  const previousState = store.getState().app.status
+  const previousAppState = store.getState().app.status
+  const previousStadiumState = store.getState().stadium.status
   next(action)
-  console.log(`${previousState} -> ${store.getState().app.status }: dispatching %c${action.type}`, "color: blue" )
+  console.log(`App (${previousAppState} -> ${store.getState().app.status }) `+
+          `Stadium (${previousStadiumState} -> ${store.getState().stadium.status }) `+
+          `dispatching %c${action.type}`, "color: blue" )
 }
 
 const rootReducer = combineReducers({

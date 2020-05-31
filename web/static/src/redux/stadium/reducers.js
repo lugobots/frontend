@@ -1,4 +1,4 @@
-import {ALERT, GOAL, PANEL_UPDATE} from './actionTypes'
+import {ALERT, GOAL, PANEL_UPDATE, RESUME} from './actionTypes'
 import {StadiumStatus} from "../../constants";
 
 const defaultPanel = {
@@ -26,25 +26,25 @@ const defaultSnapshot = {
   }
 }
 
-const defaultModal = {
-  activate: false,
-  mode: null,
-}
 
 const initialState = {
   status: StadiumStatus.PLAYING,
   panel: defaultPanel,
-  modal: defaultModal,
+  event_data: null,
   snapshot: defaultSnapshot,
   lastSnapshot: null,
 }
 
 export default function match(state = initialState, action) {
   switch (action.type) {
+    case RESUME:
+      return Object.assign({}, state, {
+        status: initialState.status,
+        event_data: null,
+      })
     case PANEL_UPDATE:
       return Object.assign({}, state, {
         panel: action.data,
-        modal: defaultModal,
       })
     // case STATE_CHANGE:
     //   return Object.assign({}, state, {
@@ -54,13 +54,13 @@ export default function match(state = initialState, action) {
     //   })
     case GOAL:
       return Object.assign({}, state, {
-        state: StadiumStatus.GOAL,
-        modal: action.data,
+        status: StadiumStatus.GOAL,
+        event_data: {team_goal: action.team_side},
       })
     case ALERT:
       return Object.assign({}, state, {
-        state: StadiumStatus.ALERT,
-        modal: action.data,
+        status: StadiumStatus.ALERT,
+        event_data: {modal: action.modal},
       })
     default:
       return state

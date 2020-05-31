@@ -1,5 +1,4 @@
-import {ALERT, GOAL, PANEL_UPDATE} from "./actionTypes";
-import {ModalModes} from "../../constants";
+import {ALERT, GOAL, PANEL_UPDATE, RESUME} from "./actionTypes";
 
 function updatePanel(data) {
   return {
@@ -11,28 +10,28 @@ function updatePanel(data) {
 function displayGoal(team_side) {
   return {
     type: GOAL,
-    data: {
-      activate: true,
-      mode: ModalModes.GOAL,
-      team_side,
-    }
+    team_side,
   }
 }
 
-function displayModal(title, text) {
+function displayAlert(title, text) {
   return {
     type: ALERT,
-    data: {
-      activate: true,
-      mode: ModalModes.ALERT,
+    modal: {
       title,
       text
     }
+  }
+}
+function resume() {
+  return {
+    type: RESUME,
   }
 }
 
 export default {
   updatePanel,
   displayGoal,
-  displayModal,
+  displayAlert,
+  resume,
 }
