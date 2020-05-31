@@ -6,6 +6,7 @@ import stadiumAction from "./redux/stadium/actions";
 import {AppStatus, BackendConfig, EventTypes, StadiumStatus} from "./constants";
 import store from "./store";
 import Stadium from "./components/Stadium";
+import channel from "./channel";
 
 class App extends React.Component {
 
@@ -34,6 +35,7 @@ class App extends React.Component {
       this.props.dispatch(stadiumAction.resume())
     }
     this.updateScoreBoard(g)
+    channel.newGameEvent(g)
   }
 
 

@@ -2,7 +2,7 @@ import React from 'react';
 import $ from 'jquery';
 import 'jquery-ui/ui/widgets/draggable';
 
-import {GameDefinitions, StadiumStates} from '../constants'
+import {GameDefinitions} from '../constants'
 import {ShouldRender, getSizeRatio} from "../helpers";
 
 import {SetPlayerProperties} from './ToolBarTabDebug'
@@ -13,7 +13,7 @@ class FieldPlayer extends React.Component {
     super(props);
     this.myDOM = React.createRef();
     this.myDirectionDOM = React.createRef();
-    this.position = {Y: 0, X: 0}
+    this.position = {y: 0, x: 0}
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -27,10 +27,10 @@ class FieldPlayer extends React.Component {
   componentDidMount() {
     const meInJquery = $(this.myDOM.current)
     this.props.setOnNewFrameListener(player => {
-      this.position.X = player.Position.X ?? 0
-      this.position.Y = player.Position.Y ?? 0
-      const left = 100 * this.position.X / GameDefinitions.Field.Width
-      const top = 100 * (GameDefinitions.Field.Height - this.position.Y) / GameDefinitions.Field.Height
+      this.position.x = player.position.x ?? 0
+      this.position.y = player.position.y ?? 0
+      const left = 100 * this.position.x / GameDefinitions.Field.Width
+      const top = 100 * (GameDefinitions.Field.Height - this.position.y) / GameDefinitions.Field.Height
 
       this.myDOM.current.style.left = `${left}%`;
       this.myDOM.current.style.top = `${top}%`;
@@ -54,8 +54,8 @@ class FieldPlayer extends React.Component {
         this.myDOM.current.style.top = `${100 * t}%`;
         console.log(GameDefinitions.Field.Height, top)
         SetPlayerProperties(this.props.team_side, this.props.number, {
-          X: left,
-          Y: GameDefinitions.Field.Height - top,
+          x: left,
+          y: GameDefinitions.Field.Height - top,
         })
       }
     });

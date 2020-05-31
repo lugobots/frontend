@@ -333,16 +333,9 @@ class Stadium extends React.Component {
     return <div id="stadium" className={stadium_class}>
         <Panel />
 
-      {/*<main id="lugobot-stadium" className="container">*/}
-      {/*  <Field*/}
-      {/*    v={this.state.v}*/}
-      {/*    stadium_state={this.state.stadium}*/}
-      {/*    setup={this.state.setup}*/}
-      {/*    setOnNewEventListener={(cb) => {*/}
-      {/*      this.addOnNewEventListener(cb)*/}
-      {/*    }}*/}
-      {/*  />*/}
-      {/*</main>*/}
+      <main id="lugobot-stadium" className="container">
+        <Field />
+      </main>
       {/*<ToolBar*/}
       {/*  v={this.state.v}*/}
       {/*  setup={this.state.setup}*/}

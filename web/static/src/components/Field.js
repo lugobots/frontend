@@ -1,10 +1,9 @@
 import React from 'react';
 import FieldPlayer from "./FieldPlayer";
-
-
-import {renderLogger, ShouldRender} from '../helpers';
+import {renderLogger} from '../helpers';
 import {GameDefinitions} from "../constants";
-const defaultPost = {Y: -1000, X: -10000}
+import channel from "../channel";
+const defaultPost = {x: -1000, y: -10000}
 
 class Field extends React.Component {
   constructor(props) {
@@ -14,15 +13,12 @@ class Field extends React.Component {
     this.onNewFrameListeners = {home: {}, away: {}};
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return ShouldRender(this.props, nextProps);
-  }
-
   componentDidMount() {
-    this.props.setOnNewEventListener(gameEvent => {
-      const snapshot = gameEvent.snapshot;
-      const left = 100 * (snapshot.ball.Position.X ?? 0) / GameDefinitions.Field.Width
-      const bottom = 100 * (snapshot.ball.Position.Y ?? 0) / GameDefinitions.Field.Height
+    channel.subscribe((data) => {
+      const gameEvent = data.game_event;
+      const snapshot = gameEvent.game_snapshot;
+      const left = 100 * (snapshot.ball.position.x ?? 0) / GameDefinitions.Field.Width
+      const bottom = 100 * (snapshot.ball.position.y ?? 0) / GameDefinitions.Field.Height
 
       this.ballDOM.current.style.left = `${left}%`;
       this.ballDOM.current.style.bottom = `calc(${bottom}%)`;
@@ -41,25 +37,23 @@ class Field extends React.Component {
     const items = []
     const fillPlayer = (p, side) => {
       const a = <FieldPlayer
-        v={this.props.v}
         setOnNewFrameListener={(cb) => this.onNewFrameListeners[side][`${side}_${p.number}`] = cb}
         key={`${side}-${p.number}`}
         number={p.number}
         team_side={side}
         ang={p.ang}
-        position={p.Position}
-        stadium_state={this.props.stadium_state}
+        position={p.position}
       />
       this.players[side][`${side}_${p.number}`] = a
       items.push(a)
     }
 
     for (let i = 1; i <= 11; i++) {
-        fillPlayer({ number: i, ang: 0, Position: defaultPost}, "home")
+        fillPlayer({ number: i, ang: 0, position: defaultPost}, "home")
     }
 
     for (let i = 1; i <= 11; i++) {
-      fillPlayer({ number: i, ang: 0, Position: defaultPost}, "away")
+      fillPlayer({ number: i, ang: 0, position: defaultPost}, "away")
     }
 
     return <div id="field">
