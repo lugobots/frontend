@@ -179,7 +179,6 @@ func (b *Binder) broadcast() error {
 			}
 			return app.ErrGRPCConnectionClosed
 		}
-
 		eventType, err := eventTypeTranslator(event.GetEvent())
 		if err != nil {
 			b.Logger.With(err).Error("ignoring game event")

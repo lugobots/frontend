@@ -2,6 +2,9 @@ import React from 'react';
 import PanelTeamsInfo from "./PanelTeamsInfo";
 import PanelGameInfo from "./PanelGameInfo";
 import {renderLogger} from "../helpers";
+import PropTypes from "prop-types";
+import {connect} from "react-redux";
+import {ModalModes} from "../constants";
 
 class Panel extends React.Component {
   constructor(props) {
@@ -10,10 +13,13 @@ class Panel extends React.Component {
 
   render() {
     renderLogger(this.constructor.name)
+    let  modal_class = ""
+    if(this.props.modal_mode === ModalModes.GOAL) {
+      modal_class = "active-modal"
+    }
+
     return <header id="lugobot-header"
-                   className={`container `}
-      // ${/*this.getStadiumStateMode() === StadiumStates.StadiumStateGoal ? 'active-modal' : ''*/}`
-    >
+                   className={`container ${modal_class}`}>
       <section id="game-panel">
         <PanelTeamsInfo/>
         <PanelGameInfo/>
@@ -22,4 +28,14 @@ class Panel extends React.Component {
   }
 }
 
-export default Panel;
+Panel.propTypes = {
+  modal_mode: PropTypes.string,
+}
+
+const mapStateToProps = state => {
+  return {
+    modal_mode: state.match.modal.mode,
+  }
+}
+
+export default connect(mapStateToProps)(Panel)

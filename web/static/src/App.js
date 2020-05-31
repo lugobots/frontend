@@ -87,8 +87,8 @@ class App extends React.Component {
       this.props.dispatch(matchAction.updatePanel({
         time_remaining: g.time_remaining,
         shot_time: g.shot_time,
-        home_score: g.game_event?.game_snapshot?.home_team?.Score ?? 0,
-        away_score: g.game_event?.game_snapshot?.away_team?.Score ?? 0,
+        home_score: g.game_event?.game_snapshot?.home_team?.score ?? 0,
+        away_score: g.game_event?.game_snapshot?.away_team?.score ?? 0,
         team_goal: "",
       }))
     }

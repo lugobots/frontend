@@ -6,7 +6,7 @@ import ToolBar from "./ToolBar";
 import {Howl, Howler} from 'howler';
 import tickAudio from '../sounds/kick.wav';
 
-import {GameSettings, GameStates, StadiumStates, EventTypes, BackendConfig} from '../constants';
+import {GameSettings, GameStates, StadiumStates, EventTypes, BackendConfig, ModalModes} from '../constants';
 import {renderLogger, updateRatio} from "../helpers";
 import PropTypes from "prop-types";
 import {connect} from "react-redux";
@@ -320,7 +320,7 @@ class Stadium extends React.Component {
     this.setMainColor('--team-away-color-secondary', this.props.setup.away_team.colors.secondary);
 
     let  stadium_class = ""
-    if(this.props.modal_active) {
+    if(this.props.modal_mode === ModalModes.ALERT) {
       stadium_class = "active-modal"
     }
     return <div id="stadium" className={stadium_class}>
@@ -352,13 +352,13 @@ class Stadium extends React.Component {
 
 Stadium.propTypes = {
   setup: PropTypes.object,
-  modal_active: PropTypes.bool,
+  modal_mode: PropTypes.string,
 }
 
 const mapStateToProps = state => {
   return {
     setup: state.app.setup,
-    modal_active: state.match.modal.activate,
+    modal_mode: state.match.modal.mode,
   }
 }
 
