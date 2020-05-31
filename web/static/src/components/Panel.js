@@ -4,7 +4,7 @@ import PanelGameInfo from "./PanelGameInfo";
 import {renderLogger} from "../helpers";
 import PropTypes from "prop-types";
 import {connect} from "react-redux";
-import {ModalModes} from "../constants";
+import {StadiumStatus} from "../constants";
 
 class Panel extends React.Component {
   constructor(props) {
@@ -14,7 +14,7 @@ class Panel extends React.Component {
   render() {
     renderLogger(this.constructor.name)
     let  modal_class = ""
-    if(this.props.modal_mode === ModalModes.GOAL) {
+    if(this.props.stadium_status === StadiumStatus.GOAL) {
       modal_class = "active-modal"
     }
 
@@ -29,12 +29,12 @@ class Panel extends React.Component {
 }
 
 Panel.propTypes = {
-  modal_mode: PropTypes.string,
+  stadium_status: PropTypes.string,
 }
 
 const mapStateToProps = state => {
   return {
-    modal_mode: state.stadium.modal.mode,
+    stadium_status: state.stadium.status,
   }
 }
 

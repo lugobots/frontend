@@ -52,16 +52,16 @@ const ModalModes = {
   ALERT: "alert",
 }
 
-const StadiumStates = {
-  StadiumStateConnecting: "connecting",
-  StadiumStateSetting: "setting-up",
-  StadiumStateListening: "listening",
-  StadiumStateConn: "conn-upstream",
-  StadiumStateGoal: "goal",
-
-  // dev mode
-  StadiumStateDebugging: "debugging",
-}
+// const StadiumStates = {
+//   StadiumStateConnecting: "connecting",
+//   StadiumStateSetting: "setting-up",
+//   StadiumStateListening: "listening",
+//   StadiumStateConn: "conn-upstream",
+//   StadiumStateGoal: "goal",
+//
+//   // dev mode
+//   StadiumStateDebugging: "debugging",
+// }
 
 const EventTypes = {
   NewPlayer: "new_player",
@@ -88,7 +88,7 @@ export {
   GameDefinitions,
   GameSettings,
   GameStates,
-  StadiumStates,
+  // StadiumStates,
   EventTypes,
   BreakpointType,
   BackendConfig,
