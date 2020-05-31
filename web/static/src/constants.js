@@ -41,6 +41,12 @@ const AppStatus = {
   Debugging: "debugging",
 }
 
+const StadiumStatus = {
+  PLAYING: "PLAYING",
+  GOAL: "GOAL",
+  ALERT: "ALERT",
+}
+
 const ModalModes = {
   GOAL: "goal",
   ALERT: "alert",
@@ -88,4 +94,5 @@ export {
   BackendConfig,
   AppStatus,
   ModalModes,
+  StadiumStatus,
 };

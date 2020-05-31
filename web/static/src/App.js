@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
 import appAction from "./redux/app/actions";
-import matchAction from "./redux/match/actions";
+import stadiumAction from "./redux/stadium/actions";
 import {AppStatus, BackendConfig, EventTypes} from "./constants";
 import store from "./store";
 import Stadium from "./components/Stadium";
@@ -44,7 +44,7 @@ class App extends React.Component {
     });
     this.evtSource.onerror = () => {
       this.props.dispatch(appAction.backDisconnect())
-      this.props.dispatch(matchAction.displayModal("Connecting to backend", <span>Wait the connection be established</span>))
+      this.props.dispatch(stadiumAction.displayModal("Connecting to backend", <span>Wait the connection be established</span>))
     };
 
     this.evtSource.addEventListener("ping", () => {
@@ -55,7 +55,7 @@ class App extends React.Component {
       console.error("%cupstream connection lost", "color: #AA0000")
       upstreamConnTries++
       this.props.dispatch(appAction.upstreamDisconnect())
-      this.props.dispatch(matchAction.displayModal("Upstream connection lost",
+      this.props.dispatch(stadiumAction.displayModal("Upstream connection lost",
         <span>The frontend application is not connected to the GameServer.
           <br/>Wait the connection be reestablished <br/><br/>Retrying {upstreamConnTries}</span>))
     });
@@ -67,7 +67,8 @@ class App extends React.Component {
     this.evtSource.addEventListener(EventTypes.StateChange, (e) => this.onStateChange(e));
     this.evtSource.addEventListener(EventTypes.Goal, (e) => {
       const g = JSON.parse(e.data);
-      this.props.dispatch(matchAction.displayGoal(g.game_event.goal.side.toLowerCase()))
+      console.log(g)
+      this.props.dispatch(stadiumAction.displayGoal(g.game_event.goal.side.toLowerCase()))
     });
   }
 
@@ -80,11 +81,11 @@ class App extends React.Component {
 
   updateScoreBoard(g) {
     if (
-      g.time_remaining !== store.getState().match.panel.time_remaining
+      g.time_remaining !== store.getState().stadium.panel.time_remaining
       ||
-      g.shot_time !== store.getState().match.panel.shot_time
+      g.shot_time !== store.getState().stadium.panel.shot_time
     ) {
-      this.props.dispatch(matchAction.updatePanel({
+      this.props.dispatch(stadiumAction.updatePanel({
         time_remaining: g.time_remaining,
         shot_time: g.shot_time,
         home_score: g.game_event?.game_snapshot?.home_team?.score ?? 0,

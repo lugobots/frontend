@@ -1,6 +1,6 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux'
 import app from './redux/app/reducers'
-import match from './redux/match/reducers'
+import stadium from './redux/stadium/reducers'
 
 const loggingMiddleware = (store) => (next) => (action) => {
   const previousState = store.getState().app.status
@@ -10,7 +10,7 @@ const loggingMiddleware = (store) => (next) => (action) => {
 
 const rootReducer = combineReducers({
   app,
-  match,
+  stadium,
 });
 
 const store = createStore(rootReducer,

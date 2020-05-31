@@ -53,7 +53,7 @@ Events.propTypes = {
 }
 
 const mapStateToProps = state => {
-  return state.match.modal
+  return state.stadium.modal
 
 }
 

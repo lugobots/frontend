@@ -358,7 +358,7 @@ Stadium.propTypes = {
 const mapStateToProps = state => {
   return {
     setup: state.app.setup,
-    modal_mode: state.match.modal.mode,
+    modal_mode: state.stadium.modal.mode,
   }
 }
 

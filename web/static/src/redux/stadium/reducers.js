@@ -1,4 +1,5 @@
 import {ALERT, GOAL, PANEL_UPDATE} from './actionTypes'
+import {StadiumStates} from "../../constants";
 
 const defaultPanel = {
   time_remaining: "--:--",
@@ -31,6 +32,7 @@ const defaultModal = {
 }
 
 const initialState = {
+  status: StadiumStates.PLAYING,
   panel: defaultPanel,
   modal: defaultModal,
   snapshot: defaultSnapshot,

@@ -34,7 +34,7 @@ Panel.propTypes = {
 
 const mapStateToProps = state => {
   return {
-    modal_mode: state.match.modal.mode,
+    modal_mode: state.stadium.modal.mode,
   }
 }
 
