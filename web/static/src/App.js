@@ -45,7 +45,7 @@ class App extends React.Component {
       this.props.dispatch(stadiumAction.resume())
     }
     this.updateScoreBoard(data)
-    channel.newGameEvent(data)
+    channel.newGameFrame(data.game_event.game_snapshot)
   }
 
   parse(event) {
@@ -89,8 +89,9 @@ class App extends React.Component {
       console.log(g)
       this.props.dispatch(stadiumAction.displayGoal(g.game_event.goal.side.toLowerCase()))
     });
-    this.evtSource.addEventListener(EventTypes.Breakpoint, () => {
+    this.evtSource.addEventListener(EventTypes.Breakpoint, (e) => {
       this.props.dispatch(stadiumAction.pauseForDebug());
+      this.onStateChange(this.parse(e))
     });
     this.evtSource.addEventListener(EventTypes.DebugReleased, () => {
       this.props.dispatch(stadiumAction.resume())
@@ -100,7 +101,7 @@ class App extends React.Component {
   render() {
     if (this.props.status === AppStatus.Setting) {
       this.setup()
-      this.props.dispatch(stadiumAction.resume())
+      this.props.dispatch(stadiumAction.reset())
     }
     return <Stadium/>;
   }

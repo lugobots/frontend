@@ -1,9 +1,11 @@
 import React from 'react';
 import $ from 'jquery';
 import {getSizeRatio, renderLogger} from "../helpers";
-import {GameDefinitions, BackendConfig, StadiumStates, StadiumStatus} from '../constants'
+import {GameDefinitions, BackendConfig, StadiumStatus} from '../constants'
+import stadiumActions from '../redux/stadium/actions'
 import PropTypes from "prop-types";
 import {connect} from "react-redux";
+import channel from "../channel";
 
 class ToolBarTabDebug extends React.Component {
   constructor(props) {
@@ -22,8 +24,8 @@ class ToolBarTabDebug extends React.Component {
   pauseResume() {
     sendDebug("pause-resume")
       .then(
-        (result) => {
-          console.log(`DEBG: `, result)
+        ({status, body}) => {
+          console.log(`DEBG: `, status, body)
         },
         (error) => {
           console.error(`Debug tool: `, error)
@@ -34,8 +36,8 @@ class ToolBarTabDebug extends React.Component {
   nextTurn() {
     sendDebug("next-turn")
       .then(
-        (result) => {
-          console.log(`DEBG: `, result)
+        ({status, body}) => {
+          console.log(`DEBG: `, status, body)
         },
         (error) => {
           console.error(`Debug tool: `, error)
@@ -46,8 +48,8 @@ class ToolBarTabDebug extends React.Component {
   nextOrder() {
     sendDebug("next-order")
       .then(
-        (result) => {
-          console.log(`DEBG: `, result)
+        ({status, body}) => {
+          console.log(`DEBG: `, status, body)
         },
         (error) => {
           console.error(`Debug tool: `, error)
@@ -56,30 +58,34 @@ class ToolBarTabDebug extends React.Component {
   }
 
   startDebuggingMode() {
-    this.props.gotoStateDebugging("rearranging")
+    this.props.dispatch(stadiumActions.pauseForRearrange())
   }
 
   confirmRearranging() {
     let newPositions = {};
+    let promisses = []
     $(".player").each(function () {
         let ui = $(this);
         let coordsScreen = ui.position();
         let coords = convertPixelToGameUnit(coordsScreen.left, coordsScreen.top);
         console.log(`Final position ${this.dataset.id} (${this.dataset.team}-${this.dataset.number}): (${coords.x.toFixed(2)}, ${coords.y.toFixed(2)})`)
-        newPositions[this.dataset.id] = {x: coords.x, y: coords.y};
+        newPositions[this.dataset.id] = {x: 0, y: 0};
 
-        sendDebug(`/players/${this.dataset.team}/:${this.dataset.number}`)
-          .then(
-            (result) => {
-              console.log(`DEBG: `, result)
+        promisses.push(sendDebug(`players/${this.dataset.team}/${this.dataset.number}`, newPositions, 'PATCH')
+          .then(({status, body}) => {
+              console.log(`DEBG: `,status,  body)
+              return body.game_snapshot
             },
             (error) => {
               console.error(`Debug tool: `, error)
             }
-          )
+          ))
       }
     );
-  }
+
+    Promise.all(promisses).then((values) => {
+      channel.newGameFrame(values.pop())
+    });  }
 
   componentDidMount() {
     let me = this;
@@ -99,6 +105,7 @@ class ToolBarTabDebug extends React.Component {
 
   render() {
     renderLogger(this.constructor.name)
+    let enabledPausePlay = true
     let enabledBreakPoint = false
     let enabledRearrange = false
     let enabledSavePos = false
@@ -109,10 +116,13 @@ class ToolBarTabDebug extends React.Component {
         break;
       case StadiumStatus.REARRANGING:
         enabledSavePos = true
+        enabledPausePlay = false
         break;
     }
     return <div className={`${this.props.className} debug-tab`}>
-      <button id="btn-resume" className="btn btn-main" onClick={this.pauseResume}>Resume</button>
+      <button id="btn-resume" disabled={!enabledPausePlay} className="btn btn-main"
+              onClick={this.pauseResume}>Resume
+      </button>
       <button id="btn-next-order" disabled={!enabledBreakPoint} className="btn"
               onClick={this.nextTurn}>Next Order
       </button>
@@ -151,8 +161,8 @@ class ToolBarTabDebug extends React.Component {
 function SetPlayerProperties(side, number, position) {
   sendDebug(`players/${side}/${number}`, {position}, 'PATCH')
     .then(
-      (result) => {
-        console.log(`Rearrange`, result)
+      ({status, body}) => {
+        console.log(`Rearrange`, status)
       },
       (error) => {
         console.error(`Debug tool: `, error)
@@ -161,6 +171,7 @@ function SetPlayerProperties(side, number, position) {
 }
 
 function sendDebug(path, payload = {}, method = "POST") {
+  let status = 0;
   return fetch(`${BackendConfig.BackEndPoint}/remote/${path}`, {
     method: method,
     body: JSON.stringify(payload),
@@ -168,13 +179,19 @@ function sendDebug(path, payload = {}, method = "POST") {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     }
-  }).then(res => res.json())
+  }).then(res => {
+    status = res.status
+    return res.json()
+  }).then(body => {
+    return {status, body}
+  })
 }
 
 
 function convertPixelToGameUnit(left, top) {
-  let xPos = (left / unit) + (GameDefinitions.Player.Size / 2);
-  let yPos = (top / unit) + (GameDefinitions.Player.Size / 2);
+  const ratio = getSizeRatio()
+  let xPos = (left / ratio) + (GameDefinitions.Player.Size / 2);
+  let yPos = (top / ratio) + (GameDefinitions.Player.Size / 2);
   yPos = GameDefinitions.Field.Height - yPos;
   return {x: xPos, y: yPos}
 }

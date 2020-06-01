@@ -14,9 +14,8 @@ class Field extends React.Component {
   }
 
   componentDidMount() {
-    channel.subscribe((data) => {
-      const gameEvent = data.game_event;
-      const snapshot = gameEvent.game_snapshot;
+    channel.subscribe((snapshot) => {
+      console.log(snapshot)
       const left = 100 * (snapshot.ball.position.x ?? 0) / GameDefinitions.Field.Width
       const bottom = 100 * (snapshot.ball.position.y ?? 0) / GameDefinitions.Field.Height
 

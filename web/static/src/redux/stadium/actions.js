@@ -1,4 +1,10 @@
-import {ALERT, DEBUG, GOAL, PANEL_UPDATE, RESUME} from "./actionTypes";
+import {ALERT, DEBUG, GOAL, PANEL_UPDATE, REARRANGE, RESET, RESUME} from "./actionTypes";
+
+function reset() {
+  return {
+    type: RESET,
+  }
+}
 
 function updatePanel(data) {
   return {
@@ -10,6 +16,12 @@ function updatePanel(data) {
 function pauseForDebug() {
   return {
     type: DEBUG,
+  }
+}
+
+function pauseForRearrange() {
+  return {
+    type: REARRANGE,
   }
 }
 
@@ -42,4 +54,6 @@ export default {
   displayAlert,
   resume,
   pauseForDebug,
+  pauseForRearrange,
+  reset,
 }

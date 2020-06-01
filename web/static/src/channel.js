@@ -8,7 +8,7 @@ class Channel {
     this.listener = cb
   }
 
-  newGameEvent(gameEvent) {
+  newGameFrame(gameEvent) {
     this.listener(gameEvent)
   }
 }

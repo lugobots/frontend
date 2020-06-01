@@ -1,8 +1,10 @@
+export const RESET = 'reset'
 export const PANEL_UPDATE = 'panel_update'
 export const GOAL = "goal"
 export const ALERT = "alert"
 export const RESUME = "resume"
 export const DEBUG = "debug"
+export const REARRANGE = "rearrange"
 
 // export const STATE_CHANGE = "state_change"
 // export const NEW_PLAYER = "new_player"

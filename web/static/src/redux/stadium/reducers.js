@@ -1,4 +1,4 @@
-import {ALERT, DEBUG, GOAL, PANEL_UPDATE, RESUME, BROKEN} from './actionTypes'
+import {RESET, ALERT, DEBUG, GOAL, PANEL_UPDATE, RESUME, REARRANGE} from './actionTypes'
 import {StadiumStatus} from "../../constants";
 
 
@@ -38,6 +38,8 @@ const initialState = {
 
 export default function match(state = initialState, action) {
   switch (action.type) {
+    case RESET:
+      return initialState
     case RESUME:
       return Object.assign({}, state, {
         status: initialState.status,
@@ -66,6 +68,11 @@ export default function match(state = initialState, action) {
     case DEBUG:
       return Object.assign({}, state, {
         status: StadiumStatus.DEBUGGING,
+        event_data: null,
+      })
+    case REARRANGE:
+      return Object.assign({}, state, {
+        status: StadiumStatus.REARRANGING,
         event_data: null,
       })
     default:
