@@ -67,7 +67,7 @@ func (b *Binder) StreamEventsTo(uuid string) chan app.FrontEndUpdate {
 	return b.consumers[uuid]
 }
 
-func (b *Binder) GetGameConfig(uuid string) app.FrontEndSet {
+func (b *Binder) GetGameConfig(uuid string) (app.FrontEndSet, error) {
 	state := app.ConnStateUp
 	if b.producerConn == nil {
 		state = app.ConnStateDown
@@ -80,11 +80,18 @@ func (b *Binder) GetGameConfig(uuid string) app.FrontEndSet {
 		b.consumers[uuid] <- b.lastUpdate
 		b.Logger.Warn("sending last update")
 	}()
-
-	return app.FrontEndSet{
-		GameSetup:       b.gameSetup,
-		ConnectionState: state,
+	marshal := jsonpb.Marshaler{
+		OrigName:     true,
+		EmitDefaults: true,
 	}
+	raw, err := marshal.MarshalToString(b.gameSetup)
+	if err != nil {
+		return app.FrontEndSet{}, fmt.Errorf("error marshalling event message: %w", err)
+	}
+	return app.FrontEndSet{
+		GameSetup:       json.RawMessage(raw),
+		ConnectionState: state,
+	}, nil
 }
 
 func (b *Binder) connect() error {

@@ -138,8 +138,11 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 
 func makeSetupHandler(srv EventsBroker) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, srv.GetGameConfig(c.Param("uuid")))
-
+		if config, err := srv.GetGameConfig(c.Param("uuid")); err == nil {
+			c.JSON(http.StatusOK, config)
+		} else {
+			c.JSON(http.StatusBadGateway, map[string]interface{}{"error": err.Error()})
+		}
 	}
 }
 

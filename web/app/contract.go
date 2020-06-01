@@ -7,7 +7,7 @@ import (
 
 type EventsBroker interface {
 	StreamEventsTo(uuid string) chan FrontEndUpdate
-	GetGameConfig(uuid string) FrontEndSet
+	GetGameConfig(uuid string) (FrontEndSet, error)
 	GetRemote() lugo.RemoteClient
 }
 
@@ -43,7 +43,7 @@ type FrontEndUpdate struct {
 	ConnectionState string     `json:"connection_state"`
 }
 type FrontEndSet struct {
-	GameSetup       *lugo.GameSetup `json:"game_setup"`
+	GameSetup       json.RawMessage `json:"game_setup"`
 	ConnectionState string          `json:"connection_state"`
 }
 
