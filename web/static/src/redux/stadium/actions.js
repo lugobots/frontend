@@ -1,9 +1,15 @@
-import {ALERT, GOAL, PANEL_UPDATE, RESUME} from "./actionTypes";
+import {ALERT, DEBUG, GOAL, PANEL_UPDATE, RESUME} from "./actionTypes";
 
 function updatePanel(data) {
   return {
     type: PANEL_UPDATE,
     data
+  }
+}
+
+function pauseForDebug() {
+  return {
+    type: DEBUG,
   }
 }
 
@@ -23,6 +29,7 @@ function displayAlert(title, text) {
     }
   }
 }
+
 function resume() {
   return {
     type: RESUME,
@@ -34,4 +41,5 @@ export default {
   displayGoal,
   displayAlert,
   resume,
+  pauseForDebug,
 }

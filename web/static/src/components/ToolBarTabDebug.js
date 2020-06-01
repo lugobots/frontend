@@ -1,7 +1,9 @@
 import React from 'react';
 import $ from 'jquery';
 import {getSizeRatio, renderLogger} from "../helpers";
-import {GameDefinitions, BackendConfig, StadiumStates} from '../constants'
+import {GameDefinitions, BackendConfig, StadiumStates, StadiumStatus} from '../constants'
+import PropTypes from "prop-types";
+import {connect} from "react-redux";
 
 class ToolBarTabDebug extends React.Component {
   constructor(props) {
@@ -66,15 +68,15 @@ class ToolBarTabDebug extends React.Component {
         console.log(`Final position ${this.dataset.id} (${this.dataset.team}-${this.dataset.number}): (${coords.x.toFixed(2)}, ${coords.y.toFixed(2)})`)
         newPositions[this.dataset.id] = {x: coords.x, y: coords.y};
 
-      sendDebug(`/players/${this.dataset.team}/:${this.dataset.number}`)
-        .then(
-          (result) => {
-            console.log(`DEBG: `, result)
-          },
-          (error) => {
-            console.error(`Debug tool: `, error)
-          }
-        )
+        sendDebug(`/players/${this.dataset.team}/:${this.dataset.number}`)
+          .then(
+            (result) => {
+              console.log(`DEBG: `, result)
+            },
+            (error) => {
+              console.error(`Debug tool: `, error)
+            }
+          )
       }
     );
   }
@@ -97,33 +99,30 @@ class ToolBarTabDebug extends React.Component {
 
   render() {
     renderLogger(this.constructor.name)
-    let rearrangeClass = "deactivated"
-    let breakPointClass = "deactivated"
-    let disabledBreakPoint = true
-    let disabledRearrange = true
-    console.log("props>>>>", this.props)
-    if (this.props.stadium_state.mode === StadiumStates.StadiumStateDebugging) {
-
-      disabledRearrange = true
-      rearrangeClass = ""
-      if(this.props.stadium_state.action !== "rearranging") {
-        disabledBreakPoint = true
-        breakPointClass = ""
-      }
-
+    let enabledBreakPoint = false
+    let enabledRearrange = false
+    let enabledSavePos = false
+    switch (this.props.stadium_status) {
+      case StadiumStatus.DEBUGGING:
+        enabledBreakPoint = true
+        enabledRearrange = true
+        break;
+      case StadiumStatus.REARRANGING:
+        enabledSavePos = true
+        break;
     }
     return <div className={`${this.props.className} debug-tab`}>
       <button id="btn-resume" className="btn btn-main" onClick={this.pauseResume}>Resume</button>
-      <button id="btn-next-order" aria-disabled={disabledBreakPoint} className={`btn ${breakPointClass}`}
+      <button id="btn-next-order" disabled={!enabledBreakPoint} className="btn"
               onClick={this.nextTurn}>Next Order
       </button>
-      <button id="btn-next-cycle" aria-disabled={disabledBreakPoint} className={`btn ${breakPointClass}`}
+      <button id="btn-next-cycle" disabled={!enabledBreakPoint} className="btn"
               onClick={this.nextOrder}>Next Cycle
       </button>
-      <button id="btn-rearrange" aria-disabled={disabledRearrange} className={`btn ${rearrangeClass}`}
+      <button id="btn-rearrange" disabled={!enabledRearrange} className="btn"
               onClick={this.startDebuggingMode}>Rearrange
       </button>
-      <button id="btn-save-positions" className={`btn ${breakPointClass}`}
+      <button id="btn-save-positions" disabled={!enabledSavePos} className="btn"
               onClick={this.confirmRearranging}>Save Positions
       </button>
       <span id="choose-preset">
@@ -135,7 +134,7 @@ class ToolBarTabDebug extends React.Component {
               <option value="preset-3">Pre-set 3</option>
             </select>
           </span>
-      <span id="coordenates">
+      <span id="coordinates">
             <span id="axis">
               <span id="axis-x" className="axis">X:
                 <span className="value-x" ref={this.coordXDOM}>1059.65</span></span>
@@ -149,11 +148,15 @@ class ToolBarTabDebug extends React.Component {
 
 }
 
-function SetPlayerProperties(side, number, Position) {
-  sendDebug(`players/${side}/${number}`, {Position}, 'PATCH')
+function SetPlayerProperties(side, number, position) {
+  sendDebug(`players/${side}/${number}`, {position}, 'PATCH')
     .then(
-      (result) => {console.log(`Rearrange`, result)},
-      (error) => {console.error(`Debug tool: `, error)}
+      (result) => {
+        console.log(`Rearrange`, result)
+      },
+      (error) => {
+        console.error(`Debug tool: `, error)
+      }
     )
 }
 
@@ -170,10 +173,25 @@ function sendDebug(path, payload = {}, method = "POST") {
 
 
 function convertPixelToGameUnit(left, top) {
-  let xPos = (left / unit) + (GameDefinitions.Player.Size/2);
-  let yPos = (top / unit) + (GameDefinitions.Player.Size/2);
+  let xPos = (left / unit) + (GameDefinitions.Player.Size / 2);
+  let yPos = (top / unit) + (GameDefinitions.Player.Size / 2);
   yPos = GameDefinitions.Field.Height - yPos;
-  return {x: xPos, y:yPos}
+  return {x: xPos, y: yPos}
 }
 
-export {ToolBarTabDebug, SetPlayerProperties};
+ToolBarTabDebug.propTypes = {
+  stadium_status: PropTypes.string,
+}
+
+const mapStateToProps = state => {
+  return {
+    stadium_status: state.stadium.status,
+  }
+}
+
+const bar = connect(mapStateToProps)(ToolBarTabDebug)
+export {
+  bar as ToolBarTabDebug,
+  SetPlayerProperties,
+}
+

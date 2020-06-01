@@ -38,13 +38,16 @@ const AppStatus = {
   Setting: "setting-up",
   Listening: "listening",
   UpstreamDown: "upstream-down",
-  Debugging: "debugging",
+  // Debugging: "debugging",
+  Broken: "broken",
 }
 
 const StadiumStatus = {
   PLAYING: "PLAYING",
   GOAL: "GOAL",
   ALERT: "ALERT",
+  DEBUGGING: "DEBUGGING",
+  REARRANGING: "REARRANGING",
 }
 
 // const ModalModes = {

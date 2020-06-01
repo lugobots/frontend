@@ -1639,7 +1639,7 @@ $team-away-color-2 : var(--team-away-color-secondary);
     }
   }
 
-  #coordenates {
+  #coordinates {
     @include model-flex(row, nowrap, center, false);
 
     #axis {
@@ -1807,7 +1807,7 @@ $team-away-color-2 : var(--team-away-color-secondary);
       }
     }
 
-    &.deactivated {
+    &:disabled {
       color: #4e6365 !important;
       border-color: rgba(93, 67, 67, 0);
     }

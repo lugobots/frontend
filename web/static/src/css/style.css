@@ -8397,7 +8397,7 @@ li {
   border: none;
 }
 
-#lugobot-admin-panel #coordenates {
+#lugobot-admin-panel #coordinates {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -8410,7 +8410,7 @@ li {
           align-items: center;
 }
 
-#lugobot-admin-panel #coordenates #axis {
+#lugobot-admin-panel #coordinates #axis {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -8427,11 +8427,11 @@ li {
   opacity: .6;
 }
 
-#lugobot-admin-panel #coordenates #axis span {
+#lugobot-admin-panel #coordinates #axis span {
   margin-left: 5px;
 }
 
-#lugobot-admin-panel #coordenates #icon {
+#lugobot-admin-panel #coordinates #icon {
   width: 30px;
   height: 30px;
   display: block;

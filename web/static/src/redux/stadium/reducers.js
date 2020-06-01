@@ -1,5 +1,6 @@
-import {ALERT, GOAL, PANEL_UPDATE, RESUME} from './actionTypes'
+import {ALERT, DEBUG, GOAL, PANEL_UPDATE, RESUME, BROKEN} from './actionTypes'
 import {StadiumStatus} from "../../constants";
+
 
 const defaultPanel = {
   time_remaining: "--:--",
@@ -61,6 +62,11 @@ export default function match(state = initialState, action) {
       return Object.assign({}, state, {
         status: StadiumStatus.ALERT,
         event_data: {modal: action.modal},
+      })
+    case DEBUG:
+      return Object.assign({}, state, {
+        status: StadiumStatus.DEBUGGING,
+        event_data: null,
       })
     default:
       return state

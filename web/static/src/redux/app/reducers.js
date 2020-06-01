@@ -1,4 +1,4 @@
-import {BACK_CONNECT, BACK_DISCONNECT, SETUP, UPSTREAM_CONNECT, UPSTREAM_DISCONNECT} from './actionTypes'
+import {BACK_CONNECT, BACK_DISCONNECT, BROKEN, SETUP, UPSTREAM_CONNECT, UPSTREAM_DISCONNECT} from './actionTypes'
 import {AppStatus, GameSettings} from '../../constants'
 
 const defaultSetup = {
@@ -66,6 +66,10 @@ export default function app(state = initialState, action) {
       return Object.assign({}, state, {
         setup: action.data.game_setup,
         status: action.data.connection_state ? AppStatus.Listening : AppStatus.UpstreamDown,
+      })
+    case BROKEN:
+      return Object.assign({}, initialState, {
+        status: AppStatus.Broken
       })
     default:
       return state

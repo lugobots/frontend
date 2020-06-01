@@ -11,56 +11,65 @@ import channel from "./channel";
 class App extends React.Component {
 
   setup() {
+    let status = false
     fetch(`${BackendConfig.BackEndPoint}/setup/${gameID}/${uuid}`)
-      .then(res => res.json())
-      .then(
-        (result) => {
-          // console.log("%cSetup", "color: blue")
-          // console.log(result)
+      .then(response => {
+        status = response.status
+        return response.json()
+      })
+      .then(result => {
+          if (status !== 200) {
+            throw new Error(result.error)
+          }
           this.props.dispatch(appAction.setup(result))
-        },
-        (error) => {
-          // @todo handle the error
-          alert("oops... something went wrong")
         }
-      )
+      ).catch(e => {
+      this.props.dispatch(appAction.broken())
+      this.props.dispatch(stadiumAction.displayAlert("Error getting game configuration",
+        <span>Error: {e.message}</span>
+      ))
+    })
 
 
   }
 
-  onStateChange(event) {
-    const g = JSON.parse(event.data);
+  onStateChange(data) {
     const s = store.getState().stadium.status
-    if(s !== StadiumStatus.ALERT && s !== StadiumStatus.PLAYING) {
+    const blockingStatus = [
+      StadiumStatus.ALERT,
+      StadiumStatus.PLAYING,
+      StadiumStatus.DEBUGGING,
+      StadiumStatus.REARRANGING,
+    ]
+    if (!blockingStatus.includes(s)) {
       this.props.dispatch(stadiumAction.resume())
     }
-    this.updateScoreBoard(g)
-    channel.newGameEvent(g)
+    this.updateScoreBoard(data)
+    channel.newGameEvent(data)
   }
 
-
+  parse(event) {
+    return JSON.parse(event.data);
+  }
 
   componentDidMount() {
     let upstreamConnTries = 0;
     let backConnTries = 0;
     this.evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
-    // addEventListener version
-    this.evtSource.addEventListener('open', () => {
-      upstreamConnTries = 0;
-      backConnTries = 0;
-      this.props.dispatch(appAction.backConnect())
-    });
     this.evtSource.onerror = () => {
       backConnTries++
       this.props.dispatch(appAction.backDisconnect())
       this.props.dispatch(stadiumAction.displayAlert("Connecting to backend",
         <span>Wait the connection be established<br/><br/>Retrying {backConnTries}</span>))
     };
-
+    this.evtSource.addEventListener('open', () => {
+      upstreamConnTries = 0;
+      backConnTries = 0;
+      this.props.dispatch(appAction.backConnect())
+    });
     this.evtSource.addEventListener("ping", () => {
       console.debug("ping")
     });
-
     this.evtSource.addEventListener(EventTypes.ConnectionLost, () => {
       console.error("%cupstream connection lost", "color: #AA0000")
       upstreamConnTries++
@@ -74,11 +83,17 @@ class App extends React.Component {
       console.log("%cupstream connection reestablished", "color: green")
       this.props.dispatch(appAction.upstreamConnect())
     });
-    this.evtSource.addEventListener(EventTypes.StateChange, (e) => this.onStateChange(e));
+    this.evtSource.addEventListener(EventTypes.StateChange, (e) => this.onStateChange(this.parse(e)));
     this.evtSource.addEventListener(EventTypes.Goal, (e) => {
-      const g = JSON.parse(e.data);
+      const g = this.parse(e);
       console.log(g)
       this.props.dispatch(stadiumAction.displayGoal(g.game_event.goal.side.toLowerCase()))
+    });
+    this.evtSource.addEventListener(EventTypes.Breakpoint, () => {
+      this.props.dispatch(stadiumAction.pauseForDebug());
+    });
+    this.evtSource.addEventListener(EventTypes.DebugReleased, () => {
+      this.props.dispatch(stadiumAction.resume())
     });
   }
 

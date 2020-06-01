@@ -22,22 +22,6 @@ import {connect} from "react-redux";
 class Stadium extends React.Component {
   constructor(props) {
     super(props);
-    // this.reset(true)
-    // let evtSource = null
-    // let lastFrame = null
-    // let onNewEventListener = []
-    // this.onNewEvent = (snapshot) => {
-    //   lastFrame = snapshot
-    //   onNewEventListener.forEach(cb => {
-    //     cb(snapshot)
-    //   })
-    // }
-    // this.addOnNewEventListener = (cb) => {
-    //   if (lastFrame !== null) {
-    //     cb(lastFrame)
-    //   }
-    //   onNewEventListener.push(cb)
-    // }
   }
 
   componentDidMount() {
@@ -46,34 +30,6 @@ class Stadium extends React.Component {
     // });
     // AAAAA.play()
     updateRatio()
-    // const me = this;
-    // let upstreamConnTries = 0;
-    // this.evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
-    // // addEventListener version
-    // this.evtSource.addEventListener('open', () => {
-    //   console.log("%cconnection opened", "color: green")
-    //   upstreamConnTries = 0;
-    //   me.gotoStateSettingUp()
-    // });
-    // this.evtSource.onerror = () => {
-    //   console.error("stream connection lost. trying to reconnect...");
-    //   me.gotoStateConnecting()
-    // };
-    // this.evtSource.addEventListener("ping", () => {
-    //   console.debug("ping")
-    // });
-    // this.evtSource.addEventListener(EventTypes.ConnectionLost, function (event) {
-    //   console.error("upstream connection lost")
-    //   me.gotoStateConnectingUpstream(upstreamConnTries++)
-    // });
-    // this.evtSource.addEventListener(EventTypes.ConnectionReestablished, function (event) {
-    //   console.log("%cupstream connection reestablished", "color: green")
-    //   upstreamConnTries = 0;
-    //   me.gotoStateSettingUp()
-    // });
-    //
-    // evtSource.addEventListener(EventTypes.StateChange, (e) => this.processGameEvent(e));
-    // evtSource.addEventListener(EventTypes.NewPlayer, (e) => this.processGameEvent(e));
     // evtSource.addEventListener(EventTypes.Breakpoint, (e) => {
     //   const g = JSON.parse(e.data);
     //   console.log("%cDEBUG ON", "color: blue", g)
@@ -330,21 +286,12 @@ class Stadium extends React.Component {
     if(this.props.stadium_status === StadiumStatus.ALERT) {
       stadium_class = "active-modal"
     }
-    return <div id="stadium" className={stadium_class}>
-        <Panel />
-
+    return<div id="stadium" className={stadium_class}>
+      <Panel />
       <main id="lugobot-stadium" className="container">
         <Field />
       </main>
-      {/*<ToolBar*/}
-      {/*  v={this.state.v}*/}
-      {/*  setup={this.state.setup}*/}
-      {/*  stadium_state={this.state.stadium}*/}
-      {/*  setOnNewEventListener={(cb) => {*/}
-      {/*    this.addOnNewEventListener(cb)*/}
-      {/*  }}*/}
-      {/*  gotoStateDebugging={this.gotoStateDebugging.bind(this)}*/}
-      {/*/>*/}
+      <ToolBar />
       <Events />
     </div>;
   }

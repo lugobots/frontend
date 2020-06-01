@@ -1,4 +1,4 @@
-import {BACK_CONNECT, BACK_DISCONNECT, SETUP, UPSTREAM_CONNECT, UPSTREAM_DISCONNECT} from "./actionTypes";
+import {BACK_CONNECT, BACK_DISCONNECT, SETUP, UPSTREAM_CONNECT, UPSTREAM_DISCONNECT, BROKEN} from "./actionTypes";
 
 function backConnect() {
   return {
@@ -30,10 +30,17 @@ function setup(gameSetup) {
   }
 }
 
+function broken() {
+  return {
+    type: BROKEN,
+  }
+}
+
 export default {
   backConnect,
   backDisconnect,
   upstreamConnect,
   upstreamDisconnect,
   setup,
+  broken,
 }
