@@ -17,18 +17,6 @@ class ToolBar extends React.Component {
     })
   }
 
-  componentDidMount() {
-    // this.props.setOnNewEventListener(gameEvent => {
-    //
-    //   // if(this.state.debugOn !== gameEvent.debug_mode) {
-    //   //   this.setState({
-    //   //     debugOn: gameEvent.debug_mode
-    //   //   })
-    //   // }
-    //
-    // })
-  }
-
   render() {
     renderLogger(this.constructor.name)
     return <footer id="lugobot-admin-panel" className="container debug-mode">

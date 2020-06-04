@@ -7,11 +7,6 @@ import {Howl, Howler} from 'howler';
 import tickAudio from '../sounds/kick.wav';
 
 import {
-  GameSettings,
-  GameStates,
-  EventTypes,
-  BackendConfig,
-  ModalModes,
   StadiumStatus
 } from '../constants';
 import {renderLogger, updateRatio} from "../helpers";

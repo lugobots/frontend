@@ -10,27 +10,27 @@ const GameDefinitions = {
 
 const GameSettings = {
   START_MODE: {
-    WAIT: 0,
-    NO_WAIT: 1,
-    DELAY: 2,
+    WAIT: 'WAIT',
+    NO_WAIT: 'NO_WAIT',
+    DELAY: 'DELAY',
   },
   LISTENING_MODE: {
     // respect the timer defined by listening duration
-    TIMER: 0,
+    TIMER: 'TIMER',
     // immediately after all orders
-    RUSH: 1,
+    RUSH: 'RUSH',
     // wait external remote control (dev only)
-    REMOTE: 2,
+    REMOTE: 'REMOTE',
   }
 }
 
 const GameStates = {
-  WAITING: 0,
-  GET_READY: 1,
-  LISTENING: 2,
-  PLAYING: 3,
-  SHIFTING: 4,
-  OVER: 99,
+  WAITING: 'WAITING',
+  GET_READY: 'GET_READY',
+  LISTENING: 'LISTENING',
+  PLAYING: 'PLAYING',
+  SHIFTING: 'SHIFTING',
+  OVER: 'OVER',
 }
 
 const AppStatus = {
@@ -38,7 +38,6 @@ const AppStatus = {
   Setting: "setting-up",
   Listening: "listening",
   UpstreamDown: "upstream-down",
-  // Debugging: "debugging",
   Broken: "broken",
 }
 
@@ -49,22 +48,6 @@ const StadiumStatus = {
   DEBUGGING: "DEBUGGING",
   REARRANGING: "REARRANGING",
 }
-
-// const ModalModes = {
-//   GOAL: "goal",
-//   ALERT: "alert",
-// }
-
-// const StadiumStates = {
-//   StadiumStateConnecting: "connecting",
-//   StadiumStateSetting: "setting-up",
-//   StadiumStateListening: "listening",
-//   StadiumStateConn: "conn-upstream",
-//   StadiumStateGoal: "goal",
-//
-//   // dev mode
-//   StadiumStateDebugging: "debugging",
-// }
 
 const EventTypes = {
   NewPlayer: "new_player",
@@ -79,8 +62,8 @@ const EventTypes = {
 }
 
 const BreakpointType = {
-  ORDERS: 0,
-  TURN: 1,
+  ORDERS: 'ORDERS',
+  TURN: 'TURN',
 }
 
 

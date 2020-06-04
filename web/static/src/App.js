@@ -45,6 +45,7 @@ class App extends React.Component {
       this.props.dispatch(stadiumAction.resume())
     }
     this.updateScoreBoard(data)
+    console.log(data.game_event.game_snapshot)
     channel.newGameFrame(data.game_event.game_snapshot)
   }
 
