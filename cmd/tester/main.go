@@ -73,6 +73,7 @@ func main() {
 		{command: "move_player", sample: samples.SampleMovePlayers()},
 		{command: "rotate_player", sample: samples.SampleRotatePlayers()},
 		{command: "score_time", sample: samples.SampleScoreTime()},
+		{command: "game_over", sample: samples.SampleGameOver()},
 	}
 
 	for _, opt := range cms {

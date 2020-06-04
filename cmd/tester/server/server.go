@@ -141,7 +141,7 @@ func (b *Broadcaster) OnEvent(request *lugo.WatcherRequest, server lugo.Broadcas
 		if b.breakpoint != nil {
 			<-b.breakpoint
 		}
-		b.logger.Infof("sending event %d", i)
+		b.logger.Infof("sending event %d (%s)", i, event.GameSnapshot.State)
 		if err := server.Send(event); err != nil {
 			b.logger.Errorf("error sending event %d: %s", i, err)
 		}

@@ -226,10 +226,10 @@ func (b *Binder) broadcast() error {
 		}
 		b.lastUpdate = update
 		b.sendToAll(update)
-		if eventType == app.EventGameOver {
-			// in this case we stop the connection before the server drop the broker
-			return app.ErrGameOver
-		}
+		//if eventType == app.EventGameOver {
+		//	// in this case we stop the connection before the server drop the broker
+		//	return app.ErrGameOver
+		//}
 	}
 }
 

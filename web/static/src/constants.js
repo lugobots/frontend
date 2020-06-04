@@ -47,6 +47,7 @@ const StadiumStatus = {
   ALERT: "ALERT",
   DEBUGGING: "DEBUGGING",
   REARRANGING: "REARRANGING",
+  OVER: "OVER",
 }
 
 const EventTypes = {

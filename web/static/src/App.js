@@ -72,6 +72,9 @@ class App extends React.Component {
       console.debug("ping")
     });
     this.evtSource.addEventListener(EventTypes.ConnectionLost, () => {
+      if (store.getState().stadium.status === StadiumStatus.OVER) {
+        return
+      }
       console.error("%cupstream connection lost", "color: #AA0000")
       upstreamConnTries++
       this.props.dispatch(appAction.upstreamDisconnect())
@@ -87,8 +90,11 @@ class App extends React.Component {
     this.evtSource.addEventListener(EventTypes.StateChange, (e) => this.onStateChange(this.parse(e)));
     this.evtSource.addEventListener(EventTypes.Goal, (e) => {
       const g = this.parse(e);
-      console.log(g)
       this.props.dispatch(stadiumAction.displayGoal(g.game_event.goal.side.toLowerCase()))
+    });
+    this.evtSource.addEventListener(EventTypes.GameOver, (e) => {
+      const g = this.parse(e);
+      this.props.dispatch(stadiumAction.over())
     });
     this.evtSource.addEventListener(EventTypes.Breakpoint, (e) => {
       this.props.dispatch(stadiumAction.pauseForDebug());

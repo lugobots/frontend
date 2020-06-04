@@ -1,4 +1,4 @@
-import {RESET, ALERT, DEBUG, GOAL, PANEL_UPDATE, RESUME, REARRANGE} from './actionTypes'
+import {RESET, ALERT, DEBUG, GOAL, PANEL_UPDATE, RESUME, REARRANGE, OVER} from './actionTypes'
 import {StadiumStatus} from "../../constants";
 
 
@@ -49,12 +49,6 @@ export default function match(state = initialState, action) {
       return Object.assign({}, state, {
         panel: action.data,
       })
-    // case STATE_CHANGE:
-    //   return Object.assign({}, state, {
-    //     lastSnapshot: action.data,
-    //     snapshot: action.data,
-    //     modal: defaultModal,
-    //   })
     case GOAL:
       return Object.assign({}, state, {
         status: StadiumStatus.GOAL,
@@ -73,6 +67,11 @@ export default function match(state = initialState, action) {
     case REARRANGE:
       return Object.assign({}, state, {
         status: StadiumStatus.REARRANGING,
+        event_data: null,
+      })
+    case OVER:
+      return Object.assign({}, state, {
+        status: StadiumStatus.OVER,
         event_data: null,
       })
     default:

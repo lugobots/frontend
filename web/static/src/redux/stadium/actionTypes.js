@@ -5,6 +5,7 @@ export const ALERT = "alert"
 export const RESUME = "resume"
 export const DEBUG = "debug"
 export const REARRANGE = "rearrange"
+export const OVER = "over"
 
 // export const STATE_CHANGE = "state_change"
 // export const NEW_PLAYER = "new_player"
