@@ -1,5 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
+import 'jquery-ui/ui/widgets/draggable';
+
 import {getSizeRatio, renderLogger} from "../helpers";
 import {GameDefinitions, BackendConfig, StadiumStatus} from '../constants'
 import stadiumActions from '../redux/stadium/actions'
@@ -17,7 +19,8 @@ class ToolBarTabDebug extends React.Component {
     this.pauseResume = this.pauseResume.bind(this);
     this.nextTurn = this.nextTurn.bind(this);
     this.nextOrder = this.nextOrder.bind(this);
-    this.startDebuggingMode = this.startDebuggingMode.bind(this);
+    this.startRearrange = this.startRearrange.bind(this);
+    this.confirmRearranging = this.confirmRearranging.bind(this);
   }
 
 
@@ -57,23 +60,26 @@ class ToolBarTabDebug extends React.Component {
       )
   }
 
-  startDebuggingMode() {
+  startRearrange() {
     this.props.dispatch(stadiumActions.pauseForRearrange())
+    $('.player').draggable("enable");
+  }
+
+  stopRearrange() {
+    this.props.dispatch(stadiumActions.pauseForDebug())
   }
 
   confirmRearranging() {
-    let newPositions = {};
     let promisses = []
     $(".player").each(function () {
         let ui = $(this);
         let coordsScreen = ui.position();
         let coords = convertPixelToGameUnit(coordsScreen.left, coordsScreen.top);
-        console.log(`Final position ${this.dataset.id} (${this.dataset.team}-${this.dataset.number}): (${coords.x.toFixed(2)}, ${coords.y.toFixed(2)})`)
-        newPositions[this.dataset.id] = {x: 0, y: 0};
+        const newPosition = {X: Math.round(coords.x), Y: Math.round(coords.y)};
 
-        promisses.push(sendDebug(`players/${this.dataset.team}/${this.dataset.number}`, newPositions, 'PATCH')
+        promisses.push(sendDebug(`players/${this.dataset.team}/${this.dataset.number}`, newPosition, 'PATCH')
           .then(({status, body}) => {
-              console.log(`DEBG: `,status,  body)
+              // console.log(`DEBG: `,status,  body)
               return body.game_snapshot
             },
             (error) => {
@@ -85,7 +91,9 @@ class ToolBarTabDebug extends React.Component {
 
     Promise.all(promisses).then((values) => {
       channel.newGameFrame(values.pop())
-    });  }
+      this.stopRearrange()
+    });
+  }
 
   componentDidMount() {
     let me = this;
@@ -130,7 +138,7 @@ class ToolBarTabDebug extends React.Component {
               onClick={this.nextOrder}>Next Cycle
       </button>
       <button id="btn-rearrange" disabled={!enabledRearrange} className="btn"
-              onClick={this.startDebuggingMode}>Rearrange
+              onClick={this.startRearrange}>Rearrange
       </button>
       <button id="btn-save-positions" disabled={!enabledSavePos} className="btn"
               onClick={this.confirmRearranging}>Save Positions
@@ -190,8 +198,8 @@ function sendDebug(path, payload = {}, method = "POST") {
 
 function convertPixelToGameUnit(left, top) {
   const ratio = getSizeRatio()
-  let xPos = (left / ratio) + (GameDefinitions.Player.Size / 2);
-  let yPos = (top / ratio) + (GameDefinitions.Player.Size / 2);
+  let xPos = (parseFloat(left) / ratio) //- (GameDefinitions.Player.Size / 2);
+  let yPos = (parseFloat(top) / ratio) //- (GameDefinitions.Player.Size / 2);
   yPos = GameDefinitions.Field.Height - yPos;
   return {x: xPos, y: yPos}
 }

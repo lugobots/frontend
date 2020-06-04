@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bitbucket.org/makeitplay/lugo-frontend/cmd/tester/samples"
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -96,17 +95,16 @@ func (b *Broadcaster) SetBallProperties(ctx context.Context, properties *lugo.Ba
 }
 
 func (b *Broadcaster) SetPlayerProperties(ctx context.Context, properties *lugo.PlayerProperties) (*lugo.CommandResponse, error) {
-	snap := samples.CopySnap(b.lastSnap)
-
-	p := field.GetPlayer(snap, properties.Side, properties.Number)
+	p := field.GetPlayer(b.lastSnap, properties.Side, properties.Number)
 	if p == nil {
 		return nil, fmt.Errorf("player not found: %s-%d", properties.Side, properties.Number)
 	}
 	p.Position = properties.Position
 
+	b.logger.Infof("player %s-%d moved to %v", properties.Side, properties.Number, p.Position)
 	return &lugo.CommandResponse{
 		Code:         lugo.CommandResponse_SUCCESS,
-		GameSnapshot: snap,
+		GameSnapshot: b.lastSnap,
 		Details:      "player moved",
 	}, nil
 }

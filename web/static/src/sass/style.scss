@@ -703,13 +703,6 @@ $team-away-color-2 : var(--team-away-color-secondary);
     z-index: 10;
   }
 
-  &.rearranging  {
-    cursor: move;
-    animation: shaking linear 1s;
-    animation-iteration-count: infinite;
-    transition: none;
-  }
-
   &.active-player {
     &::before { opacity: 1;}
   }
@@ -818,6 +811,14 @@ $team-away-color-2 : var(--team-away-color-secondary);
       bottom: -10px;
       clip-path: polygon(74% 0%, calc(100% - 11px) 75%, 11px 74%, 26% 0%);
     }
+  }
+}
+.rearranging  {
+  .player {
+    cursor: move;
+    animation: shaking linear 1s;
+    animation-iteration-count: infinite;
+    transition: none;
   }
 }
 
