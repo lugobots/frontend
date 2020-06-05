@@ -50,7 +50,7 @@ class Stadium extends React.Component {
       <main id="lugobot-stadium" className="container">
         <Field />
       </main>
-      <ToolBar />
+      { this.props.setup.dev_mode ? <ToolBar /> : null }
       <Events />
     </div>;
   }
