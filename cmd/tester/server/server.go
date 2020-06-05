@@ -147,6 +147,10 @@ func (b *Broadcaster) OnEvent(request *lugo.WatcherRequest, server lugo.Broadcas
 		}
 		b.lastSnap = event.GameSnapshot
 		time.Sleep(50 * time.Millisecond)
+		//if event.GetGoal() != nil {
+		//	b.logger.Infof("waiting GOAL time")
+		//	time.Sleep(3 * time.Second)
+		//}
 	}
 
 	<-server.Context().Done()
