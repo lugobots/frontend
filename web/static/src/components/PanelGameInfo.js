@@ -59,7 +59,10 @@ PanelGameInfo.propTypes = {
 }
 
 const mapStateToProps = state => {
-  return state.stadium.panel
+  return {
+    ...state.stadium.panel,
+    team_goal: state.stadium.event_data?.team_goal,
+  }
 }
 
 export default connect(mapStateToProps)(PanelGameInfo)

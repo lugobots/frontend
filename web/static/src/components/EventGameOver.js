@@ -8,6 +8,14 @@ class EventGameOver extends React.Component {
     if(!this.props.show) {
       return <span />
     }
+    let home_winner = ""
+    let away_winner = ""
+    if(this.props.home_score > this.props.away_score) {
+      home_winner = 'score-winner'
+    } else if(this.props.home_score < this.props.away_score) {
+      away_winner = 'score-winner'
+    }
+
     return <div id="modal-winner" className={`modal modal-bg active-modal zoom-In`}>
       <span className="close-modal" title="Close modal"><i className="fas fa-times"/></span>
       <span className="modal-content">
@@ -34,8 +42,8 @@ class EventGameOver extends React.Component {
         </div>
         <div id="modal-game-info">
             <span id="score-info">
-              <span id="score-home-team" className="score-team">{this.props.home_score}</span>
-              <span id="score-away-team" className="score-team">{this.props.away_score}</span>
+              <span id="score-home-team" className={`score-team ${home_winner}`}>{this.props.home_score}</span>
+              <span id="score-away-team" className={`score-team ${away_winner}`}>{this.props.away_score}</span>
             </span>
         </div>
       </section>
