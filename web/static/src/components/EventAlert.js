@@ -1,6 +1,6 @@
 import React from 'react';
 
-class Modal extends React.Component {
+class EventAlert extends React.Component {
   render() {
     if(this.props.modal === null) {
       return <span />
@@ -19,4 +19,4 @@ class Modal extends React.Component {
 
 }
 
-export default Modal;
+export default EventAlert;

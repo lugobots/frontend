@@ -41,7 +41,8 @@ class Stadium extends React.Component {
     this.setMainColor('--team-away-color-secondary', this.props.setup.away_team.colors.secondary);
 
     let  stadium_class = this.props.stadium_status.toLowerCase()
-    if(this.props.stadium_status === StadiumStatus.ALERT) {
+    if(this.props.stadium_status === StadiumStatus.ALERT ||
+      this.props.stadium_status === StadiumStatus.OVER) {
       stadium_class = " active-modal"
     }
     return<div id="stadium" className={stadium_class}>

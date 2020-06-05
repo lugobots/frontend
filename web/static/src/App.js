@@ -44,7 +44,7 @@ class App extends React.Component {
     if (!blockingStatus.includes(s)) {
       this.props.dispatch(stadiumAction.resume())
     }
-    this.updateScoreBoard(data)
+    this.updateTimer(data)
     console.log(data.game_event.game_snapshot)
     channel.newGameFrame(data.game_event.game_snapshot)
   }
@@ -90,10 +90,12 @@ class App extends React.Component {
     this.evtSource.addEventListener(EventTypes.StateChange, (e) => this.onStateChange(this.parse(e)));
     this.evtSource.addEventListener(EventTypes.Goal, (e) => {
       const g = this.parse(e);
+      this.updatePanel(g)
       this.props.dispatch(stadiumAction.displayGoal(g.game_event.goal.side.toLowerCase()))
     });
     this.evtSource.addEventListener(EventTypes.GameOver, (e) => {
       const g = this.parse(e);
+      this.updatePanel(g)
       this.props.dispatch(stadiumAction.over())
     });
     this.evtSource.addEventListener(EventTypes.Breakpoint, (e) => {
@@ -113,19 +115,23 @@ class App extends React.Component {
     return <Stadium/>;
   }
 
-  updateScoreBoard(g) {
+  updatePanel(g) {
+    this.props.dispatch(stadiumAction.updatePanel({
+      time_remaining: g.time_remaining,
+      shot_time: g.shot_time,
+      home_score: g.game_event?.game_snapshot?.home_team?.score ?? 0,
+      away_score: g.game_event?.game_snapshot?.away_team?.score ?? 0,
+      team_goal: "",
+    }))
+  }
+
+  updateTimer(g) {
     if (
       g.time_remaining !== store.getState().stadium.panel.time_remaining
       ||
       g.shot_time !== store.getState().stadium.panel.shot_time
     ) {
-      this.props.dispatch(stadiumAction.updatePanel({
-        time_remaining: g.time_remaining,
-        shot_time: g.shot_time,
-        home_score: g.game_event?.game_snapshot?.home_team?.score ?? 0,
-        away_score: g.game_event?.game_snapshot?.away_team?.score ?? 0,
-        team_goal: "",
-      }))
+      this.updatePanel(g)
     }
   }
 }

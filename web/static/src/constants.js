@@ -41,15 +41,6 @@ const AppStatus = {
   Broken: "broken",
 }
 
-const StadiumStatus = {
-  PLAYING: "PLAYING",
-  GOAL: "GOAL",
-  ALERT: "ALERT",
-  DEBUGGING: "DEBUGGING",
-  REARRANGING: "REARRANGING",
-  OVER: "OVER",
-}
-
 const EventTypes = {
   NewPlayer: "new_player",
   Breakpoint: "breakpoint",
@@ -60,6 +51,15 @@ const EventTypes = {
   LostPlayer: "lost_player",
   ConnectionLost: "connection_lots",
   ConnectionReestablished: "connection_Reestablished",
+}
+
+const StadiumStatus = {
+  PLAYING: "PLAYING",
+  GOAL: "GOAL",
+  ALERT: "ALERT",
+  DEBUGGING: "DEBUGGING",
+  REARRANGING: "REARRANGING",
+  OVER: "OVER",
 }
 
 const BreakpointType = {
