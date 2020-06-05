@@ -226,10 +226,6 @@ func (b *Binder) broadcast() error {
 		}
 		b.lastUpdate = update
 		b.sendToAll(update)
-		//if eventType == app.EventGameOver {
-		//	// in this case we stop the connection before the server drop the broker
-		//	return app.ErrGameOver
-		//}
 	}
 }
 
@@ -265,19 +261,23 @@ func (b *Binder) sendToAll(update app.FrontEndUpdate) {
 }
 
 func (b *Binder) broadcastConnectionLost() {
-	b.sendToAll(app.FrontEndUpdate{
+	update := app.FrontEndUpdate{
 		Type:            app.EventConnectionLost,
 		Update:          b.lastUpdate.Update,
 		ConnectionState: app.ConnStateDown,
-	})
+	}
+	b.lastUpdate = update
+	b.sendToAll(update)
 }
 
 func (b *Binder) broadcastConnectionRees() {
-	b.sendToAll(app.FrontEndUpdate{
+	update := app.FrontEndUpdate{
 		Type:            app.EventConnectionReestablished,
 		Update:          b.lastUpdate.Update,
 		ConnectionState: app.ConnStateUp,
-	})
+	}
+	b.lastUpdate = update
+	b.sendToAll(update)
 }
 
 func eventTypeTranslator(event interface{}) (string, error) {

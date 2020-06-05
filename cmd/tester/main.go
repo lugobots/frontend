@@ -78,14 +78,17 @@ func main() {
 
 	for _, opt := range cms {
 		ddd := opt
-		rootCmd.AddCommand(&cobra.Command{
+		cmd := &cobra.Command{
 			Use: ddd.command,
 			Run: func(cmd *cobra.Command, args []string) {
 				srv.EventQueue = ddd.sample.Events
 				srv.Setup = ddd.sample.Setup
+				srv.Setup.DevMode, _ = cmd.Flags().GetBool("dev-mode")
 				<-initTheServer(srv)
 			},
-		})
+		}
+		cmd.Flags().BoolP("dev-mode", "d", false, "Start on dev mode")
+		rootCmd.AddCommand(cmd)
 	}
 
 	if err := rootCmd.Execute(); err != nil {

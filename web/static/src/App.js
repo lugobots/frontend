@@ -91,7 +91,10 @@ class App extends React.Component {
     this.evtSource.addEventListener(EventTypes.Goal, (e) => {
       const g = this.parse(e);
       this.updatePanel(g)
-      this.props.dispatch(stadiumAction.displayGoal(g.game_event.goal.side.toLowerCase()))
+      //ignore celebrations on dev mode.
+      if (!store.getState().app.setup.dev_mode) {
+        this.props.dispatch(stadiumAction.displayGoal(g.game_event.goal.side.toLowerCase()))
+      }
     });
     this.evtSource.addEventListener(EventTypes.GameOver, (e) => {
       const g = this.parse(e);
