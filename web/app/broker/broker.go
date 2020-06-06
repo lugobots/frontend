@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/paulbellamy/ratecounter"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"io"
@@ -38,8 +39,15 @@ func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 			HomeTeam: defaultTeamColors,
 			AwayTeam: defaultTeamColors,
 		},
+		buffer: BufferHandler{
+			RateCounter:      ratecounter.NewRateCounter(time.Second),
+			Logger:           logger.Named("buffer"),
+			lastReceivedTurn: 0,
+		},
 	}
 }
+
+const MaxUpdateBuffer = 1200 // n / 20 = time in sec
 
 type Binder struct {
 	consumers    map[string]chan app.FrontEndUpdate
@@ -52,6 +60,7 @@ type Binder struct {
 	stopRequest  bool
 	Logger       *zap.SugaredLogger
 	lastUpdate   app.FrontEndUpdate
+	buffer       BufferHandler
 }
 
 func (b *Binder) GetRemote() lugo.RemoteClient {
@@ -111,12 +120,18 @@ func (b *Binder) connect() error {
 	b.gameSetup, err = b.producer.GetGameSetup(ctx, &lugo.WatcherRequest{
 		Uuid: "frontend",
 	})
-
-	b.remoteConn = lugo.NewRemoteClient(b.producerConn)
-
 	if err != nil {
 		return err
 	}
+	if !b.gameSetup.DevMode {
+		b.buffer.Start(func(data BufferedEvent) {
+			b.lastUpdate = data.Update
+			b.sendToAll(data.Update)
+		})
+	}
+
+	b.remoteConn = lugo.NewRemoteClient(b.producerConn)
+
 	return err
 }
 
@@ -137,6 +152,7 @@ func (b *Binder) ListenAndBroadcast() error {
 				finalErr = err
 				break
 			}
+			b.buffer.Stop()
 			b.broadcastConnectionLost()
 			b.Logger.Warnf("broadcast interrupted: %s", err)
 		}
@@ -178,6 +194,7 @@ func (b *Binder) broadcast() error {
 	@todo the frontend server currently has no accurate information about the debugging state, so we presume it is not paused
 	*/
 	debugging := false
+	currentTurn := uint32(0)
 	for {
 		event, err := receiver.Recv()
 		if err != nil {
@@ -186,46 +203,19 @@ func (b *Binder) broadcast() error {
 			}
 			return app.ErrGRPCConnectionClosed
 		}
-		eventType, err := eventTypeTranslator(event.GetEvent())
+		var update app.FrontEndUpdate
+		update, debugging, err = b.createFrame(event, debugging)
 		if err != nil {
 			b.Logger.With(err).Error("ignoring game event")
 			continue
 		}
-
-		marshal := jsonpb.Marshaler{
-			OrigName:     true,
-			EmitDefaults: true,
+		currentTurn = event.GameSnapshot.Turn
+		if b.gameSetup.DevMode {
+			b.lastUpdate = update
+			b.sendToAll(update)
+		} else if err := b.buffer.QueueUp(update, currentTurn); err != nil {
+			b.Logger.With(err).Error("ignoring game event")
 		}
-		raw, err := marshal.MarshalToString(event)
-		if err != nil {
-			b.Logger.With(err).Error("error marshalling event message")
-			continue
-		}
-
-		frameTime := time.Duration(b.gameSetup.ListeningDuration) * time.Millisecond
-		remaining := time.Duration(b.gameSetup.GameDuration-event.GameSnapshot.Turn) * frameTime
-		shotRemaining := time.Duration(0)
-		if event.GameSnapshot.ShotClock != nil {
-			shotRemaining = time.Duration(event.GameSnapshot.ShotClock.Turns) * frameTime
-		}
-		if eventType == app.EventBreakpoint {
-			debugging = true
-		} else if eventType == app.EventDebugReleased {
-			debugging = false
-		}
-
-		update := app.FrontEndUpdate{
-			Type: eventType,
-			Update: app.UpdateData{
-				GameEvent:     json.RawMessage(raw),
-				TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),
-				ShotTime:      fmt.Sprintf("%02d", int(shotRemaining.Seconds())),
-				DebugMode:     debugging,
-			},
-			ConnectionState: app.ConnStateUp,
-		}
-		b.lastUpdate = update
-		b.sendToAll(update)
 	}
 }
 
@@ -276,8 +266,48 @@ func (b *Binder) broadcastConnectionRees() {
 		Update:          b.lastUpdate.Update,
 		ConnectionState: app.ConnStateUp,
 	}
-	b.lastUpdate = update
+	//	b.lastUpdate = update
 	b.sendToAll(update)
+}
+
+func (b *Binder) createFrame(event *lugo.GameEvent, debugging bool) (app.FrontEndUpdate, bool, error) {
+	eventType, err := eventTypeTranslator(event.GetEvent())
+	if err != nil {
+		return app.FrontEndUpdate{}, false, err
+	}
+
+	marshal := jsonpb.Marshaler{
+		OrigName:     true,
+		EmitDefaults: true,
+	}
+	raw, err := marshal.MarshalToString(event)
+	if err != nil {
+		return app.FrontEndUpdate{}, false, fmt.Errorf("error marshalling event message: %w", err)
+	}
+
+	frameTime := time.Duration(b.gameSetup.ListeningDuration) * time.Millisecond
+	remaining := time.Duration(b.gameSetup.GameDuration-event.GameSnapshot.Turn) * frameTime
+	shotRemaining := time.Duration(0)
+	if event.GameSnapshot.ShotClock != nil {
+		shotRemaining = time.Duration(event.GameSnapshot.ShotClock.Turns) * frameTime
+	}
+	if eventType == app.EventBreakpoint {
+		debugging = true
+	} else if eventType == app.EventDebugReleased {
+		debugging = false
+	}
+
+	update := app.FrontEndUpdate{
+		Type: eventType,
+		Update: app.UpdateData{
+			GameEvent:     json.RawMessage(raw),
+			TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),
+			ShotTime:      fmt.Sprintf("%02d", int(shotRemaining.Seconds())),
+			DebugMode:     debugging,
+		},
+		ConnectionState: app.ConnStateUp,
+	}
+	return update, debugging, nil
 }
 
 func eventTypeTranslator(event interface{}) (string, error) {

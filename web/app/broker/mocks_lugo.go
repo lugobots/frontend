@@ -7,7 +7,6 @@ package broker
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	lugo "github.com/lugobots/lugo4go/v2/lugo"
 	grpc "google.golang.org/grpc"
 	metadata "google.golang.org/grpc/metadata"
@@ -37,8 +36,28 @@ func (m *MockBroadcastClient) EXPECT() *MockBroadcastClientMockRecorder {
 	return m.recorder
 }
 
+// GetGameSetup mocks base method.
+func (m *MockBroadcastClient) GetGameSetup(arg0 context.Context, arg1 *lugo.WatcherRequest, arg2 ...grpc.CallOption) (*lugo.GameSetup, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetGameSetup", varargs...)
+	ret0, _ := ret[0].(*lugo.GameSetup)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetGameSetup indicates an expected call of GetGameSetup.
+func (mr *MockBroadcastClientMockRecorder) GetGameSetup(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGameSetup", reflect.TypeOf((*MockBroadcastClient)(nil).GetGameSetup), varargs...)
+}
+
 // OnEvent mocks base method.
-func (m *MockBroadcastClient) OnEvent(arg0 context.Context, arg1 *empty.Empty, arg2 ...grpc.CallOption) (lugo.Broadcast_OnEventClient, error) {
+func (m *MockBroadcastClient) OnEvent(arg0 context.Context, arg1 *lugo.WatcherRequest, arg2 ...grpc.CallOption) (lugo.Broadcast_OnEventClient, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
@@ -80,8 +99,23 @@ func (m *MockBroadcastServer) EXPECT() *MockBroadcastServerMockRecorder {
 	return m.recorder
 }
 
+// GetGameSetup mocks base method.
+func (m *MockBroadcastServer) GetGameSetup(arg0 context.Context, arg1 *lugo.WatcherRequest) (*lugo.GameSetup, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetGameSetup", arg0, arg1)
+	ret0, _ := ret[0].(*lugo.GameSetup)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetGameSetup indicates an expected call of GetGameSetup.
+func (mr *MockBroadcastServerMockRecorder) GetGameSetup(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGameSetup", reflect.TypeOf((*MockBroadcastServer)(nil).GetGameSetup), arg0, arg1)
+}
+
 // OnEvent mocks base method.
-func (m *MockBroadcastServer) OnEvent(arg0 *empty.Empty, arg1 lugo.Broadcast_OnEventServer) error {
+func (m *MockBroadcastServer) OnEvent(arg0 *lugo.WatcherRequest, arg1 lugo.Broadcast_OnEventServer) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "OnEvent", arg0, arg1)
 	ret0, _ := ret[0].(error)
