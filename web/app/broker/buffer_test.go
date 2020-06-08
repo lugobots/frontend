@@ -3,6 +3,7 @@ package broker
 import (
 	"bitbucket.org/makeitplay/lugo-frontend/web/app"
 	"github.com/golang/mock/gomock"
+	"github.com/paulbellamy/ratecounter"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -10,9 +11,9 @@ import (
 
 func TestBufferHandler_stageUpdates(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	mockRateCounter := NewMockRateCounter(ctrl)
+	mockRateCounter := NewMockHitsCounter(ctrl)
 	b := BufferHandler{
-		RateCounter:     mockRateCounter,
+		HitsCounter:     mockRateCounter,
 		Logger:          zapLog,
 		bufferOn:        make(chan bool),
 		bufferedUpdates: make(chan app.FrontEndUpdate, MaxUpdateBuffer),
@@ -39,33 +40,33 @@ func TestBufferHandler_stageUpdates(t *testing.T) {
 	assert.Len(t, b.bufferStage, 2)
 }
 
-//func TestBufferHandler_rateCounter(t *testing.T) {
-//	c := ratecounter.NewRateCounter(time.Second)
-//
-//	stop := make(chan bool)
-//	go func() {
-//		for {
-//			select {
-//			case <-stop:
-//			case <-time.Tick(50 * time.Millisecond):
-//				//log.Printf("counted")
-//				c.Incr(1)
-//			}
-//		}
-//	}()
-//	time.Sleep(3 * time.Second)
-//	assert.Equal(t, int64(20), c.Rate())
-//	time.Sleep(time.Second)
-//	assert.Equal(t, int64(20), c.Rate())
-//	time.Sleep(time.Second)
-//	assert.Equal(t, int64(20), c.Rate())
-//	close(stop)
-//}
+func TestBufferHandler_rateCounter(t *testing.T) {
+	c := ratecounter.NewAvgRateCounter(5 * time.Second)
+
+	stop := make(chan bool)
+	go func() {
+		for {
+			select {
+			case <-stop:
+			case <-time.Tick(50 * time.Millisecond):
+				//log.Printf("counted")
+				c.Incr(1)
+			}
+		}
+	}()
+	time.Sleep(3 * time.Second)
+	assert.Equal(t, int64(20), c.Hits())
+	time.Sleep(time.Second)
+	assert.Equal(t, int64(20), c.Hits())
+	time.Sleep(time.Second)
+	assert.Equal(t, int64(20), c.Hits())
+	close(stop)
+}
 func TestBufferHandler_streamBuffer(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	mockRateCounter := NewMockRateCounter(ctrl)
+	mockRateCounter := NewMockHitsCounter(ctrl)
 	b := BufferHandler{
-		RateCounter:      mockRateCounter,
+		HitsCounter:      mockRateCounter,
 		Logger:           zapLog,
 		bufferOn:         make(chan bool),
 		bufferedUpdates:  make(chan app.FrontEndUpdate, MaxUpdateBuffer),
@@ -73,13 +74,15 @@ func TestBufferHandler_streamBuffer(t *testing.T) {
 		lastReceivedTurn: 100,
 	}
 	defer b.Stop()
-	mockRateCounter.EXPECT().Rate().Return(int64(20)).AnyTimes()
+	mockRateCounter.EXPECT().Hits().Return(int64(20)).AnyTimes()
 	called := false
 	pulse := make(chan bool)
-	go b.streamBuffer(func(data BufferedEvent) {
-		called = true
 
-	}, pulse)
+	callback := func(data BufferedEvent) {
+		called = true
+	}
+
+	go b.streamBuffer(callback, pulse)
 
 	assert.True(t, called)
 }
@@ -88,7 +91,7 @@ func TestBufferHandler_QueueUp(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	b := BufferHandler{
-		RateCounter: NewMockRateCounter(ctrl),
+		HitsCounter: NewMockHitsCounter(ctrl),
 		Logger:      zapLog,
 	}
 

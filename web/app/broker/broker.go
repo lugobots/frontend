@@ -29,6 +29,8 @@ var defaultTeamColors = &lugo.TeamSettings{
 	},
 }
 
+const MessagesRateMeasureTimeWindow = 5
+
 func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 	return &Binder{
 		consumers:    map[string]chan app.FrontEndUpdate{},
@@ -40,7 +42,7 @@ func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 			AwayTeam: defaultTeamColors,
 		},
 		buffer: BufferHandler{
-			RateCounter:      ratecounter.NewRateCounter(time.Second),
+			HitsCounter:      ratecounter.NewAvgRateCounter(MessagesRateMeasureTimeWindow * time.Second),
 			Logger:           logger.Named("buffer"),
 			lastReceivedTurn: 0,
 		},
@@ -125,6 +127,11 @@ func (b *Binder) connect() error {
 	}
 	if !b.gameSetup.DevMode {
 		b.buffer.Start(func(data BufferedEvent) {
+			if data.Update.Type == app.EventGoal {
+				time.Sleep(5 * time.Second)
+			} else if data.Update.Snapshot.State == lugo.GameSnapshot_LISTENING {
+				time.Sleep(50 * time.Millisecond)
+			}
 			b.lastUpdate = data.Update
 			b.sendToAll(data.Update)
 		})
@@ -206,7 +213,7 @@ func (b *Binder) broadcast() error {
 		var update app.FrontEndUpdate
 		update, debugging, err = b.createFrame(event, debugging)
 		if err != nil {
-			b.Logger.With(err).Error("ignoring game event")
+			b.Logger.Errorf("ignoring game event: %s", err)
 			continue
 		}
 		currentTurn = event.GameSnapshot.Turn
@@ -214,7 +221,7 @@ func (b *Binder) broadcast() error {
 			b.lastUpdate = update
 			b.sendToAll(update)
 		} else if err := b.buffer.QueueUp(update, currentTurn); err != nil {
-			b.Logger.With(err).Error("ignoring game event")
+			b.Logger.Errorf("ignoring game event: %s", err)
 		}
 	}
 }
@@ -291,14 +298,15 @@ func (b *Binder) createFrame(event *lugo.GameEvent, debugging bool) (app.FrontEn
 	if event.GameSnapshot.ShotClock != nil {
 		shotRemaining = time.Duration(event.GameSnapshot.ShotClock.Turns) * frameTime
 	}
+
 	if eventType == app.EventBreakpoint {
 		debugging = true
 	} else if eventType == app.EventDebugReleased {
 		debugging = false
 	}
-
 	update := app.FrontEndUpdate{
-		Type: eventType,
+		Type:     eventType,
+		Snapshot: event.GameSnapshot,
 		Update: app.UpdateData{
 			GameEvent:     json.RawMessage(raw),
 			TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),
@@ -310,7 +318,7 @@ func (b *Binder) createFrame(event *lugo.GameEvent, debugging bool) (app.FrontEn
 	return update, debugging, nil
 }
 
-func eventTypeTranslator(event interface{}) (string, error) {
+func eventTypeTranslator(event interface{}) (app.EventType, error) {
 	switch event.(type) {
 	case *lugo.GameEvent_NewPlayer:
 		return app.EventNewPlayer, nil

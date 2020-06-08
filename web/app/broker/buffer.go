@@ -17,13 +17,13 @@ type BufferedEvent struct {
 	Update app.FrontEndUpdate
 }
 
-type RateCounter interface {
+type HitsCounter interface {
 	Incr(int64)
-	Rate() int64
+	Hits() int64
 }
 
 type BufferHandler struct {
-	RateCounter      RateCounter
+	HitsCounter      HitsCounter
 	Logger           *zap.SugaredLogger
 	bufferedUpdates  chan app.FrontEndUpdate
 	bufferStage      chan app.FrontEndUpdate
@@ -51,7 +51,7 @@ func (h *BufferHandler) Start(callback func(data BufferedEvent)) {
 	h.bufferedUpdates = make(chan app.FrontEndUpdate, MaxUpdateBuffer)
 	h.bufferStage = make(chan app.FrontEndUpdate, MaxUpdateBuffer)
 	go h.stageUpdates()
-	pulse := make(chan bool)
+	pulse := make(chan float32)
 	go func() {
 		h.streamBuffer(callback, pulse)
 		close(pulse)
@@ -61,7 +61,7 @@ func (h *BufferHandler) Start(callback func(data BufferedEvent)) {
 		for {
 			select {
 			case on := <-pulse:
-				h.Logger.Infof("Streaming? %v", on)
+				h.Logger.Infof("buffer: %0.2f%%", on)
 			}
 		}
 	}()
@@ -71,7 +71,7 @@ func (h *BufferHandler) Start(callback func(data BufferedEvent)) {
 }
 
 func (h *BufferHandler) QueueUp(update app.FrontEndUpdate, currentTurn uint32) error {
-	h.Logger.Warnf("added update: %v", update.Type)
+	//h.Logger.Warnf("added update: %v", update.Type)
 	select {
 	case h.bufferedUpdates <- update:
 		h.lastReceivedTurn = currentTurn
@@ -82,18 +82,24 @@ func (h *BufferHandler) QueueUp(update app.FrontEndUpdate, currentTurn uint32) e
 }
 
 func (h *BufferHandler) stageUpdates() {
+	lastTurn := uint32(0)
 	for {
 		select {
 		case <-h.bufferOn:
 			return
-		case update := <-h.bufferedUpdates:
-			h.RateCounter.Incr(1)
-			h.bufferStage <- update
+		case update, ok := <-h.bufferedUpdates:
+			if ok {
+				if update.Snapshot.Turn > lastTurn {
+					lastTurn = update.Snapshot.Turn
+					h.HitsCounter.Incr(1)
+				}
+				h.bufferStage <- update
+			}
 		}
 	}
 }
 
-func (h *BufferHandler) streamBuffer(callback func(data BufferedEvent), pulse chan<- bool) {
+func (h *BufferHandler) streamBuffer(callback func(data BufferedEvent), pulse chan<- float32) {
 	var minBufferSize int
 	streamer := func() {
 		for {
@@ -111,31 +117,39 @@ func (h *BufferHandler) streamBuffer(callback func(data BufferedEvent), pulse ch
 	}
 	// ideally we want 20 FPS, but a little slower won't hurt and avoid buffering too much
 	minAcceptableRate := int64(17) // FPS
+	//the last 5 seconds we just buffer everything
+	minAcceptableBufferSize := 5 * float64(minAcceptableRate)
 	for {
-		rate := h.RateCounter.Rate()
+		histLast5Sec := h.HitsCounter.Hits()
+		rate := histLast5Sec / MessagesRateMeasureTimeWindow
 		missingFrames := float64(machine.GameDuration - int(h.lastReceivedTurn))
 		// timeToBeBuffered is the missing frames translated to the TIME dimension
 		timeToBeBuffered := missingFrames * (1 / float64(minAcceptableRate))
 
 		// s = s1 + vt --->
-		bufferSize := math.Floor(timeToBeBuffered * float64(rate-minAcceptableRate))
-		if bufferSize <= 0 {
+		bufferSize := math.Floor(timeToBeBuffered * float64(minAcceptableRate-rate))
+		if bufferSize <= minAcceptableBufferSize {
 			//even if the server is faster than necessary, let's buffer 5 secons
-			bufferSize = 5 * float64(minAcceptableRate)
+			bufferSize = minAcceptableBufferSize
+		} else if bufferSize > MaxUpdateBuffer {
+			bufferSize = MaxUpdateBuffer * 0.8
 		}
 		minBufferSize = int(math.Floor(bufferSize * 0.8)) //80% of the expected buffer
-
-		if len(h.bufferStage) >= int(bufferSize) {
-			helperNonBlockingPulse(true, pulse)
+		h.Logger.Infof("rate: %d (%d last sec) (missing frames: %f): buffering %f sec (size: %f): current: %d",
+			rate, histLast5Sec, missingFrames, timeToBeBuffered, bufferSize, len(h.bufferStage),
+		)
+		currentSize := len(h.bufferStage)
+		if currentSize >= int(bufferSize) {
+			helperNonBlockingPulse(1.0, pulse)
 			streamer()
 		} else {
-			helperNonBlockingPulse(false, pulse)
+			helperNonBlockingPulse(float32(currentSize)/float32(bufferSize), pulse)
 			time.Sleep(1 * time.Second)
 		}
 	}
 }
 
-func helperNonBlockingPulse(p bool, pulse chan<- bool) {
+func helperNonBlockingPulse(p float32, pulse chan<- float32) {
 	select {
 	case pulse <- p:
 	default:

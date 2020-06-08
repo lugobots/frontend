@@ -11,18 +11,20 @@ type EventsBroker interface {
 	GetRemote() lugo.RemoteClient
 }
 
+type EventType string
+
 const (
-	EventNewPlayer     = "new_player"
-	EventBreakpoint    = "breakpoint"
-	EventStateChange   = "state_change"
-	EventDebugReleased = "debug_released"
-	EventGameOver      = "game_over"
-	EventLostPlayer    = "lost_player"
-	EventGoal          = "goal"
+	EventNewPlayer     EventType = "new_player"
+	EventBreakpoint    EventType = "breakpoint"
+	EventStateChange   EventType = "state_change"
+	EventDebugReleased EventType = "debug_released"
+	EventGameOver      EventType = "game_over"
+	EventLostPlayer    EventType = "lost_player"
+	EventGoal          EventType = "goal"
 
 	//events between frontend server and frontend
-	EventConnectionLost          = "connection_lots"
-	EventConnectionReestablished = "connection_Reestablished"
+	EventConnectionLost          EventType = "connection_lots"
+	EventConnectionReestablished EventType = "connection_Reestablished"
 )
 
 const (
@@ -38,9 +40,11 @@ type UpdateData struct {
 }
 
 type FrontEndUpdate struct {
-	Type            string     `json:"type"`
-	Update          UpdateData `json:"data"`
-	ConnectionState string     `json:"connection_state"`
+	// speed up the rate calc
+	Snapshot        *lugo.GameSnapshot `json:"-"`
+	Type            EventType          `json:"type"`
+	Update          UpdateData         `json:"data"`
+	ConnectionState string             `json:"connection_state"`
 }
 type FrontEndSet struct {
 	GameSetup       json.RawMessage `json:"game_setup"`

@@ -175,7 +175,7 @@ func makeGameStateHandler(srv EventsBroker) gin.HandlerFunc {
 					return false
 				}
 				log.Printf("Sending type %s", m.Type)
-				c.SSEvent(m.Type, m.Update)
+				c.SSEvent(string(m.Type), m.Update)
 			case <-time.After(500 * time.Millisecond):
 				c.SSEvent("ping", "ping")
 			}
