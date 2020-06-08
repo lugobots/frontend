@@ -2,7 +2,6 @@ package broker
 
 import (
 	"bitbucket.org/makeitplay/lugo-frontend/web/app"
-	"bitbucket.org/makeitplay/lugo-server/machine"
 	"errors"
 	"go.uber.org/zap"
 	"math"
@@ -29,6 +28,7 @@ type BufferHandler struct {
 	bufferStage      chan app.FrontEndUpdate
 	bufferOn         chan bool
 	lastReceivedTurn uint32
+	expectedTurns    uint32
 }
 
 func (h *BufferHandler) Stop() {
@@ -43,13 +43,14 @@ func (h *BufferHandler) Stop() {
 	}
 }
 
-func (h *BufferHandler) Start(callback func(data BufferedEvent)) {
+func (h *BufferHandler) Start(callback func(data BufferedEvent), expectedTurns uint32) {
 	if h.bufferedUpdates != nil {
 		close(h.bufferedUpdates)
 	}
 	h.bufferOn = make(chan bool)
 	h.bufferedUpdates = make(chan app.FrontEndUpdate, MaxUpdateBuffer)
 	h.bufferStage = make(chan app.FrontEndUpdate, MaxUpdateBuffer)
+	h.expectedTurns = expectedTurns
 	go h.stageUpdates()
 	pulse := make(chan float32)
 	go func() {
@@ -106,7 +107,11 @@ func (h *BufferHandler) streamBuffer(callback func(data BufferedEvent), pulse ch
 			select {
 			case <-h.bufferOn:
 				return
-			case update := <-h.bufferStage:
+			case update, ok := <-h.bufferStage:
+				if !ok {
+					h.Logger.Infof("buffer closed")
+					return
+				}
 				h.Logger.Infof("buffer size: %d", len(h.bufferStage))
 				callback(BufferedEvent{Update: update})
 				if len(h.bufferStage) < minBufferSize {
@@ -117,18 +122,19 @@ func (h *BufferHandler) streamBuffer(callback func(data BufferedEvent), pulse ch
 	}
 	// ideally we want 20 FPS, but a little slower won't hurt and avoid buffering too much
 	minAcceptableRate := int64(17) // FPS
-	//the last 5 seconds we just buffer everything
 	minAcceptableBufferSize := 5 * float64(minAcceptableRate)
 	for {
 		histLast5Sec := h.HitsCounter.Hits()
 		rate := histLast5Sec / MessagesRateMeasureTimeWindow
-		missingFrames := float64(machine.GameDuration - int(h.lastReceivedTurn))
+		missingFrames := float64(int(h.expectedTurns) - int(h.lastReceivedTurn))
 		// timeToBeBuffered is the missing frames translated to the TIME dimension
 		timeToBeBuffered := missingFrames * (1 / float64(minAcceptableRate))
 
 		// s = s1 + vt --->
 		bufferSize := math.Floor(timeToBeBuffered * float64(minAcceptableRate-rate))
-		if bufferSize <= minAcceptableBufferSize {
+		if missingFrames <= 0 {
+			bufferSize = 0
+		} else if bufferSize <= 0 {
 			//even if the server is faster than necessary, let's buffer 5 secons
 			bufferSize = minAcceptableBufferSize
 		} else if bufferSize > MaxUpdateBuffer {

@@ -15,5 +15,6 @@ func SampleGameOver() Sample {
 			GameOver: &lugo.EventGameOver{},
 		},
 	})
+	sample.Setup.GameDuration = lastSnap.Turn
 	return sample
 }

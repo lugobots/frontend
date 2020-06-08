@@ -146,7 +146,7 @@ func (b *Broadcaster) OnEvent(request *lugo.WatcherRequest, server lugo.Broadcas
 			b.logger.Errorf("error sending event %d: %s", i, err)
 		}
 		b.lastSnap = event.GameSnapshot
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(time.Duration(b.Setup.ListeningDuration) * time.Millisecond)
 		//if event.GetGoal() != nil {
 		//	b.logger.Infof("waiting GOAL time")
 		//	time.Sleep(3 * time.Second)

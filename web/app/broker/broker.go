@@ -134,7 +134,7 @@ func (b *Binder) connect() error {
 			}
 			b.lastUpdate = data.Update
 			b.sendToAll(data.Update)
-		})
+		}, b.gameSetup.GameDuration)
 	}
 
 	b.remoteConn = lugo.NewRemoteClient(b.producerConn)
