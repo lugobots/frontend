@@ -22,13 +22,14 @@ type HitsCounter interface {
 }
 
 type BufferHandler struct {
-	HitsCounter     HitsCounter
-	Logger          *zap.SugaredLogger
-	bufferedUpdates chan app.FrontEndUpdate
-	bufferStage     chan app.FrontEndUpdate
-	bufferOn        chan bool
-	lastSentTurn    uint32
-	expectedTurns   uint32
+	HitsCounter      HitsCounter
+	Logger           *zap.SugaredLogger
+	bufferedUpdates  chan app.FrontEndUpdate
+	bufferStage      chan app.FrontEndUpdate
+	bufferOn         chan bool
+	lastReceivedTurn uint32
+	lastSentTurn     uint32
+	expectedTurns    uint32
 }
 
 func (h *BufferHandler) Stop() {
@@ -41,9 +42,11 @@ func (h *BufferHandler) Stop() {
 	if h.bufferStage != nil {
 		close(h.bufferStage)
 	}
+	h.lastReceivedTurn = 0
+	h.lastSentTurn = 0
 }
 
-func (h *BufferHandler) Start(callback func(data BufferedEvent), expectedTurns uint32) <- chan float32 {
+func (h *BufferHandler) Start(callback func(data BufferedEvent), expectedTurns uint32) <-chan float32 {
 	h.bufferOn = make(chan bool)
 	h.bufferedUpdates = make(chan app.FrontEndUpdate, MaxUpdateBuffer)
 	h.bufferStage = make(chan app.FrontEndUpdate, MaxUpdateBuffer)
@@ -54,22 +57,10 @@ func (h *BufferHandler) Start(callback func(data BufferedEvent), expectedTurns u
 		h.streamBuffer(callback, pulse)
 		close(pulse)
 	}()
-
-	go func() {
-		for {
-			select {
-			case on := <-pulse:
-				h.Logger.Infof("buffer: %0.2f%%", on)
-			}
-		}
-	}()
 	return pulse
-	//h.Logger.Infof("TURNING BUFFER ON")
-	//time.Sleep(5 * time.Second)
 }
 
 func (h *BufferHandler) QueueUp(update app.FrontEndUpdate) error {
-	//h.Logger.Warnf("added update: %v", update.Type)
 	select {
 	case h.bufferedUpdates <- update:
 	default:
@@ -79,7 +70,6 @@ func (h *BufferHandler) QueueUp(update app.FrontEndUpdate) error {
 }
 
 func (h *BufferHandler) stageUpdates() {
-	lastTurn := uint32(0)
 	for {
 		select {
 		case <-h.bufferOn:
@@ -88,8 +78,8 @@ func (h *BufferHandler) stageUpdates() {
 			if !ok {
 				return
 			}
-			if update.Snapshot.Turn > lastTurn {
-				lastTurn = update.Snapshot.Turn
+			if update.Snapshot.Turn > h.lastReceivedTurn {
+				h.lastReceivedTurn = update.Snapshot.Turn
 				h.HitsCounter.Incr(1)
 			}
 			h.bufferStage <- update
@@ -126,67 +116,40 @@ func (h *BufferHandler) streamBuffer(callback func(data BufferedEvent), pulse ch
 		select {
 		case <-h.bufferOn:
 			return
-
-
-
-
-
-
-
-			O calculo do buffer ta sendo feito em cima do numero de itens no channel stage, porem
-			o calculo do andamento do jogo eh feito baseado no numero do turn, e o numero to turn eh usado
-			como base pra estimar quantos frames faltam/
-				Entao o calculo da errado pq vai ter muito mais items no channel do que turnos :
-
-					solucao: esquecer a contagem dos channels e usar um inteiro simples ou talvez atomico
-			pra contar quantos turnos faltam, e estimar o tempo baseado em turnos, nao em eventos.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		case <-time.Tick(1 * time.Second):
 			histLast5Sec := h.HitsCounter.Hits()
 			rate := histLast5Sec / MessagesRateMeasureTimeWindow
-			missingFrames := float64(int(h.expectedTurns) - int(h.lastSentTurn))
+			missingTurns := h.expectedTurns - h.lastReceivedTurn
 			// timeToBeBuffered is the missing frames translated to the TIME dimension
-			timeToBeBuffered := missingFrames * (1 / float64(minAcceptableRate))
+			timeToBeBuffered := float64(missingTurns) * (1 / float64(minAcceptableRate))
 
 			// s = s1 + vt --->
-			bufferSize := math.Floor(timeToBeBuffered * float64(minAcceptableRate-rate))
-			if missingFrames <= 0 {
-				bufferSize = 0
-			} else if bufferSize <= 0 {
+			desiredBufferSize := math.Floor(timeToBeBuffered * float64(minAcceptableRate-rate))
+			if missingTurns <= 0 {
+				desiredBufferSize = 0
+			} else if desiredBufferSize <= 0 {
 				//even if the server is faster than necessary, let's buffer 5 secons
-				bufferSize = minAcceptableBufferSize
-			} else if bufferSize > MaxUpdateBuffer {
-				bufferSize = MaxUpdateBuffer * 0.8
+				desiredBufferSize = minAcceptableBufferSize
+			} else if desiredBufferSize > MaxUpdateBuffer {
+				desiredBufferSize = MaxUpdateBuffer * 0.8
 			}
-			h.Logger.Infof("rate: %d (%d last sec) (missing frames: %f): buffering %f sec (size: %f): current: %d",
-				rate, histLast5Sec, missingFrames, timeToBeBuffered, bufferSize, len(h.bufferStage),
+			currentSize := int(h.lastReceivedTurn - h.lastSentTurn)
+			h.Logger.Infof("rate: %d (%d last sec) (missing turns: %d): buffering %.0f sec (desired: %f): current: %d (%d -> %d)",
+				rate, histLast5Sec, missingTurns, timeToBeBuffered, desiredBufferSize, currentSize,
+				h.lastReceivedTurn, h.lastSentTurn,
 			)
-			currentSize := len(h.bufferStage)
+
 			if stream {
-				if currentSize < int(math.Floor(bufferSize * 0.8)) { //80% of the expected buffer {
+				if currentSize < int(math.Floor(desiredBufferSize*0.8)) { //80% of the expected buffer {
 					stream = false
-					helperNonBlockingPulse(float32(currentSize)/float32(bufferSize), pulse)
+					helperNonBlockingPulse(float32(currentSize)/float32(desiredBufferSize), pulse)
 				}
-			} else if currentSize >= int(bufferSize) {
-					stream = true
-					go streamer()
-					helperNonBlockingPulse(1.0, pulse)
+			} else if currentSize >= int(desiredBufferSize) {
+				stream = true
+				go streamer()
+				helperNonBlockingPulse(1.0, pulse)
 			} else {
-				helperNonBlockingPulse(float32(currentSize)/float32(bufferSize), pulse)
+				helperNonBlockingPulse(float32(currentSize)/float32(desiredBufferSize), pulse)
 			}
 		}
 	}

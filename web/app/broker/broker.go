@@ -42,9 +42,9 @@ func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 			AwayTeam: defaultTeamColors,
 		},
 		buffer: BufferHandler{
-			HitsCounter:  ratecounter.NewAvgRateCounter(MessagesRateMeasureTimeWindow * time.Second),
-			Logger:       logger.Named("buffer"),
-			lastSentTurn: 0,
+			HitsCounter:      ratecounter.NewAvgRateCounter(MessagesRateMeasureTimeWindow * time.Second),
+			Logger:           logger.Named("buffer"),
+			lastReceivedTurn: 0,
 		},
 	}
 }
@@ -214,7 +214,6 @@ func (b *Binder) broadcast() error {
 	@todo the frontend server currently has no accurate information about the debugging state, so we presume it is not paused
 	*/
 	debugging := false
-	currentTurn := uint32(0)
 	for {
 		event, err := receiver.Recv()
 		if err != nil {
@@ -229,7 +228,6 @@ func (b *Binder) broadcast() error {
 			b.Logger.Errorf("ignoring game event: %s", err)
 			continue
 		}
-		currentTurn = event.GameSnapshot.Turn
 		if b.gameSetup.DevMode {
 			b.lastUpdate = update
 			b.sendToAll(update)
