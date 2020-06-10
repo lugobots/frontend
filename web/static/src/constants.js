@@ -50,7 +50,9 @@ const EventTypes = {
   GameOver: "game_over",
   LostPlayer: "lost_player",
   ConnectionLost: "connection_lots",
-  ConnectionReestablished: "connection_Reestablished",
+  ConnectionReestablished: "connection_reestablished",
+  Buffering: "buffering",
+  BufferReady: "buffer_ready",
 }
 
 const StadiumStatus = {
@@ -60,6 +62,7 @@ const StadiumStatus = {
   DEBUGGING: "DEBUGGING",
   REARRANGING: "REARRANGING",
   OVER: "OVER",
+  BUFFERING: "BUFFERING",
 }
 
 const BreakpointType = {

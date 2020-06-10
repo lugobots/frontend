@@ -24,7 +24,9 @@ const (
 
 	//events between frontend server and frontend
 	EventConnectionLost          EventType = "connection_lots"
-	EventConnectionReestablished EventType = "connection_Reestablished"
+	EventConnectionReestablished EventType = "connection_reestablished"
+	EventBuffering               EventType = "buffering"
+	EventBufferReady             EventType = "buffer_ready"
 )
 
 const (
@@ -37,6 +39,7 @@ type UpdateData struct {
 	TimeRemaining string          `json:"time_remaining"`
 	ShotTime      string          `json:"shot_time"`
 	DebugMode     bool            `json:"debug_mode"`
+	Buffer        int             `json:"buffer_percentile"`
 }
 
 type FrontEndUpdate struct {

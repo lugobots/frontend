@@ -1,7 +1,8 @@
-package broker
+package buffer
 
 import (
 	"bitbucket.org/makeitplay/lugo-frontend/web/app"
+	"bitbucket.org/makeitplay/lugo-frontend/web/app/broker"
 	"errors"
 	"go.uber.org/zap"
 	"math"
@@ -12,16 +13,19 @@ var (
 	ErrBufferNotInitialized = errors.New("buffer not initialized")
 )
 
-type BufferedEvent struct {
-	Update app.FrontEndUpdate
-}
-
 type HitsCounter interface {
 	Incr(int64)
 	Hits() int64
 }
 
-type BufferHandler struct {
+func NewBufferizer(log *zap.SugaredLogger, counter HitsCounter) *Bufferizer {
+	return &Bufferizer{
+		HitsCounter: counter,
+		Logger:      log,
+	}
+}
+
+type Bufferizer struct {
 	HitsCounter      HitsCounter
 	Logger           *zap.SugaredLogger
 	bufferedUpdates  chan app.FrontEndUpdate
@@ -32,7 +36,7 @@ type BufferHandler struct {
 	expectedTurns    uint32
 }
 
-func (h *BufferHandler) Stop() {
+func (h *Bufferizer) Stop() {
 	if h.bufferOn != nil {
 		close(h.bufferOn)
 	}
@@ -46,10 +50,10 @@ func (h *BufferHandler) Stop() {
 	h.lastSentTurn = 0
 }
 
-func (h *BufferHandler) Start(callback func(data BufferedEvent), expectedTurns uint32) <-chan float32 {
+func (h *Bufferizer) Start(callback func(data broker.BufferedEvent), expectedTurns uint32) <-chan float32 {
 	h.bufferOn = make(chan bool)
-	h.bufferedUpdates = make(chan app.FrontEndUpdate, MaxUpdateBuffer)
-	h.bufferStage = make(chan app.FrontEndUpdate, MaxUpdateBuffer)
+	h.bufferedUpdates = make(chan app.FrontEndUpdate, broker.MaxUpdateBuffer)
+	h.bufferStage = make(chan app.FrontEndUpdate, broker.MaxUpdateBuffer)
 	h.expectedTurns = expectedTurns
 	go h.stageUpdates()
 	pulse := make(chan float32)
@@ -60,7 +64,7 @@ func (h *BufferHandler) Start(callback func(data BufferedEvent), expectedTurns u
 	return pulse
 }
 
-func (h *BufferHandler) QueueUp(update app.FrontEndUpdate) error {
+func (h *Bufferizer) QueueUp(update app.FrontEndUpdate) error {
 	select {
 	case h.bufferedUpdates <- update:
 	default:
@@ -69,7 +73,7 @@ func (h *BufferHandler) QueueUp(update app.FrontEndUpdate) error {
 	return nil
 }
 
-func (h *BufferHandler) stageUpdates() {
+func (h *Bufferizer) stageUpdates() {
 	for {
 		select {
 		case <-h.bufferOn:
@@ -87,7 +91,7 @@ func (h *BufferHandler) stageUpdates() {
 	}
 }
 
-func (h *BufferHandler) streamBuffer(callback func(data BufferedEvent), pulse chan<- float32) {
+func (h *Bufferizer) streamBuffer(callback func(data broker.BufferedEvent), pulse chan<- float32) {
 	//var minBufferSize int
 	stream := true
 	streamer := func() {
@@ -102,10 +106,7 @@ func (h *BufferHandler) streamBuffer(callback func(data BufferedEvent), pulse ch
 				}
 				h.lastSentTurn = update.Snapshot.Turn
 				h.Logger.Infof("buffer size: %d", len(h.bufferStage))
-				callback(BufferedEvent{Update: update})
-				//if len(h.bufferStage) < minBufferSize {
-				//	return
-				//}
+				callback(broker.BufferedEvent{Update: update})
 			}
 		}
 	}
@@ -118,7 +119,7 @@ func (h *BufferHandler) streamBuffer(callback func(data BufferedEvent), pulse ch
 			return
 		case <-time.Tick(1 * time.Second):
 			histLast5Sec := h.HitsCounter.Hits()
-			rate := histLast5Sec / MessagesRateMeasureTimeWindow
+			rate := histLast5Sec / broker.MessagesRateMeasureTimeWindow
 			missingTurns := h.expectedTurns - h.lastReceivedTurn
 			// timeToBeBuffered is the missing frames translated to the TIME dimension
 			timeToBeBuffered := float64(missingTurns) * (1 / float64(minAcceptableRate))
@@ -130,8 +131,8 @@ func (h *BufferHandler) streamBuffer(callback func(data BufferedEvent), pulse ch
 			} else if desiredBufferSize <= 0 {
 				//even if the server is faster than necessary, let's buffer 5 secons
 				desiredBufferSize = minAcceptableBufferSize
-			} else if desiredBufferSize > MaxUpdateBuffer {
-				desiredBufferSize = MaxUpdateBuffer * 0.8
+			} else if desiredBufferSize > broker.MaxUpdateBuffer {
+				desiredBufferSize = broker.MaxUpdateBuffer * 0.8
 			}
 			currentSize := int(h.lastReceivedTurn - h.lastSentTurn)
 			h.Logger.Infof("rate: %d (%d last sec) (missing turns: %d): buffering %.0f sec (desired: %f): current: %d (%d -> %d)",

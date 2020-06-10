@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/lugobots/lugo4go/v2/lugo"
-	"github.com/paulbellamy/ratecounter"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"io"
+	"math"
 	"sync"
 	"time"
 )
@@ -31,7 +31,7 @@ var defaultTeamColors = &lugo.TeamSettings{
 
 const MessagesRateMeasureTimeWindow = 5
 
-func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
+func NewBinder(config app.Config, logger *zap.SugaredLogger, buffer BufferHandler) *Binder {
 	return &Binder{
 		consumers:    map[string]chan app.FrontEndUpdate{},
 		consumersMux: sync.RWMutex{},
@@ -41,11 +41,7 @@ func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 			HomeTeam: defaultTeamColors,
 			AwayTeam: defaultTeamColors,
 		},
-		buffer: BufferHandler{
-			HitsCounter:      ratecounter.NewAvgRateCounter(MessagesRateMeasureTimeWindow * time.Second),
-			Logger:           logger.Named("buffer"),
-			lastReceivedTurn: 0,
-		},
+		buffer: buffer,
 	}
 }
 
@@ -135,19 +131,7 @@ func (b *Binder) connect() error {
 			b.lastUpdate = data.Update
 			b.sendToAll(data.Update)
 		}, b.gameSetup.GameDuration)
-
-		go func() {
-			for {
-				select {
-				case percentile, ok := <-bufferLoad:
-					if !ok {
-						return
-					}
-					b.Logger.Infof("Buffer load %f", percentile)
-				}
-			}
-		}()
-
+		go b.watchBufferNotifications(bufferLoad)
 	}
 
 	b.remoteConn = lugo.NewRemoteClient(b.producerConn)
@@ -231,8 +215,20 @@ func (b *Binder) broadcast() error {
 		if b.gameSetup.DevMode {
 			b.lastUpdate = update
 			b.sendToAll(update)
-		} else if err := b.buffer.QueueUp(update); err != nil {
-			b.Logger.Errorf("ignoring game event: %s", err)
+		} else {
+			if err := b.buffer.QueueUp(update); err != nil {
+				b.Logger.Errorf("ignoring game event: %s", err)
+			}
+			//if the game is ended, the grpx will be dropped soon, we must wait the buffer be consumed.
+			if update.Type == app.EventGameOver {
+				for range time.Tick(1 * time.Second) {
+					b.Logger.Info("game ended, waiting buffer be consumed")
+					// very ugly solution!
+					if b.lastUpdate.Type == app.EventGameOver {
+						return app.ErrGameOver
+					}
+				}
+			}
 		}
 	}
 }
@@ -284,7 +280,7 @@ func (b *Binder) broadcastConnectionRees() {
 		Update:          b.lastUpdate.Update,
 		ConnectionState: app.ConnStateUp,
 	}
-	//	b.lastUpdate = update
+	b.lastUpdate = update
 	b.sendToAll(update)
 }
 
@@ -327,6 +323,29 @@ func (b *Binder) createFrame(event *lugo.GameEvent, debugging bool) (app.FrontEn
 		ConnectionState: app.ConnStateUp,
 	}
 	return update, debugging, nil
+}
+
+func (b *Binder) watchBufferNotifications(bufferLoad <-chan float32) {
+	for {
+		select {
+		case percentile, ok := <-bufferLoad:
+			if !ok {
+				return
+			}
+			b.lastUpdate.Update.Buffer = int(math.Round(float64(percentile) * 100))
+			update := app.FrontEndUpdate{
+				Update:          b.lastUpdate.Update,
+				ConnectionState: app.ConnStateUp,
+			}
+			update.Type = app.EventBufferReady
+			if percentile < 1 {
+				update.Type = app.EventBuffering
+			}
+			b.lastUpdate = update
+			b.sendToAll(update)
+			b.Logger.Infof("Buffer load %f", percentile)
+		}
+	}
 }
 
 func eventTypeTranslator(event interface{}) (app.EventType, error) {

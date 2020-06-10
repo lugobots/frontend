@@ -1,4 +1,4 @@
-import {RESET, ALERT, DEBUG, GOAL, PANEL_UPDATE, RESUME, REARRANGE, OVER} from './actionTypes'
+import {RESET, ALERT, DEBUG, GOAL, PANEL_UPDATE, RESUME, REARRANGE, OVER, BUFFERING} from './actionTypes'
 import {StadiumStatus} from "../../constants";
 
 
@@ -48,6 +48,11 @@ export default function match(state = initialState, action) {
     case PANEL_UPDATE:
       return Object.assign({}, state, {
         panel: action.data,
+      })
+    case BUFFERING:
+      return Object.assign({}, state, {
+        status: StadiumStatus.BUFFERING,
+        event_data: {percentile: action.percentile},
       })
     case GOAL:
       return Object.assign({}, state, {

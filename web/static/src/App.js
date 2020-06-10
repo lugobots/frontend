@@ -108,6 +108,12 @@ class App extends React.Component {
     this.evtSource.addEventListener(EventTypes.DebugReleased, () => {
       this.props.dispatch(stadiumAction.resume())
     });
+    this.evtSource.addEventListener(EventTypes.Buffering, (e) => {
+      this.props.dispatch(stadiumAction.buffering(this.parse(e).buffer_percentile))
+    });
+    this.evtSource.addEventListener(EventTypes.BufferReady, () => {
+      this.props.dispatch(stadiumAction.resume())
+    });
   }
 
   render() {

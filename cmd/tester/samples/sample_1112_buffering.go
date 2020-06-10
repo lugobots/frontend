@@ -16,6 +16,6 @@ func SampleBuffering() Sample {
 		},
 	})
 	sample.Setup.GameDuration = lastSnap.Turn
-	sample.Setup.ListeningDuration = 60
+	sample.Setup.ListeningDuration = 80
 	return sample
 }

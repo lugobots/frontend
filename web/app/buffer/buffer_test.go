@@ -1,7 +1,8 @@
-package broker
+package buffer
 
 import (
 	"bitbucket.org/makeitplay/lugo-frontend/web/app"
+	"bitbucket.org/makeitplay/lugo-frontend/web/app/broker"
 	"github.com/golang/mock/gomock"
 	"github.com/paulbellamy/ratecounter"
 	"github.com/stretchr/testify/assert"
@@ -11,13 +12,13 @@ import (
 
 func TestBufferHandler_stageUpdates(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	mockRateCounter := NewMockHitsCounter(ctrl)
-	b := BufferHandler{
+	mockRateCounter := broker.NewMockHitsCounter(ctrl)
+	b := Bufferizer{
 		HitsCounter:     mockRateCounter,
-		Logger:          zapLog,
+		Logger:          broker.zapLog,
 		bufferOn:        make(chan bool),
-		bufferedUpdates: make(chan app.FrontEndUpdate, MaxUpdateBuffer),
-		bufferStage:     make(chan app.FrontEndUpdate, MaxUpdateBuffer),
+		bufferedUpdates: make(chan app.FrontEndUpdate, broker.MaxUpdateBuffer),
+		bufferStage:     make(chan app.FrontEndUpdate, broker.MaxUpdateBuffer),
 	}
 	defer b.Stop()
 
@@ -64,13 +65,13 @@ func TestBufferHandler_rateCounter(t *testing.T) {
 }
 func TestBufferHandler_streamBuffer(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	mockRateCounter := NewMockHitsCounter(ctrl)
-	b := BufferHandler{
+	mockRateCounter := broker.NewMockHitsCounter(ctrl)
+	b := Bufferizer{
 		HitsCounter:      mockRateCounter,
-		Logger:           zapLog,
+		Logger:           broker.zapLog,
 		bufferOn:         make(chan bool),
-		bufferedUpdates:  make(chan app.FrontEndUpdate, MaxUpdateBuffer),
-		bufferStage:      make(chan app.FrontEndUpdate, MaxUpdateBuffer),
+		bufferedUpdates:  make(chan app.FrontEndUpdate, broker.MaxUpdateBuffer),
+		bufferStage:      make(chan app.FrontEndUpdate, broker.MaxUpdateBuffer),
 		lastReceivedTurn: 100,
 	}
 	defer b.Stop()
@@ -78,7 +79,7 @@ func TestBufferHandler_streamBuffer(t *testing.T) {
 	called := false
 	pulse := make(chan bool)
 
-	callback := func(data BufferedEvent) {
+	callback := func(data broker.BufferedEvent) {
 		called = true
 	}
 
@@ -90,13 +91,13 @@ func TestBufferHandler_streamBuffer(t *testing.T) {
 func TestBufferHandler_QueueUp(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	b := BufferHandler{
-		HitsCounter: NewMockHitsCounter(ctrl),
-		Logger:      zapLog,
+	b := Bufferizer{
+		HitsCounter: broker.NewMockHitsCounter(ctrl),
+		Logger:      broker.zapLog,
 	}
 
 	called := false
-	b.Start(func(data BufferedEvent) {
+	b.Start(func(data broker.BufferedEvent) {
 		called = true
 	})
 

@@ -555,7 +555,6 @@ $team-away-color-2 : var(--team-away-color-secondary);
     }
 
     #remaining {
-      display: none;
       @include model-square(100%);
       @include font-size(28, 48);
       padding-top: 21px;

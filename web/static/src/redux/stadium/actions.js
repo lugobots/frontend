@@ -1,8 +1,15 @@
-import {ALERT, DEBUG, GOAL, OVER, PANEL_UPDATE, REARRANGE, RESET, RESUME} from "./actionTypes";
+import {ALERT, DEBUG, GOAL, OVER, PANEL_UPDATE, REARRANGE, RESET, RESUME, BUFFERING} from "./actionTypes";
 
 function reset() {
   return {
     type: RESET,
+  }
+}
+
+function buffering(percentile) {
+  return {
+    type: BUFFERING,
+    percentile
   }
 }
 
@@ -63,4 +70,5 @@ export default {
   pauseForRearrange,
   reset,
   over,
+  buffering,
 }
