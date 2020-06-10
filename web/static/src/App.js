@@ -21,6 +21,7 @@ class App extends React.Component {
           if (status !== 200) {
             throw new Error(result.error)
           }
+          console.log(result)
           this.props.dispatch(appAction.setup(result))
         }
       ).catch(e => {

@@ -42,9 +42,9 @@ func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 			AwayTeam: defaultTeamColors,
 		},
 		buffer: BufferHandler{
-			HitsCounter:      ratecounter.NewAvgRateCounter(MessagesRateMeasureTimeWindow * time.Second),
-			Logger:           logger.Named("buffer"),
-			lastReceivedTurn: 0,
+			HitsCounter:  ratecounter.NewAvgRateCounter(MessagesRateMeasureTimeWindow * time.Second),
+			Logger:       logger.Named("buffer"),
+			lastSentTurn: 0,
 		},
 	}
 }
@@ -126,7 +126,7 @@ func (b *Binder) connect() error {
 		return err
 	}
 	if !b.gameSetup.DevMode {
-		b.buffer.Start(func(data BufferedEvent) {
+		bufferLoad := b.buffer.Start(func(data BufferedEvent) {
 			if data.Update.Type == app.EventGoal {
 				time.Sleep(5 * time.Second)
 			} else if data.Update.Snapshot.State == lugo.GameSnapshot_LISTENING {
@@ -135,6 +135,19 @@ func (b *Binder) connect() error {
 			b.lastUpdate = data.Update
 			b.sendToAll(data.Update)
 		}, b.gameSetup.GameDuration)
+
+		go func() {
+			for {
+				select {
+				case percentile, ok := <-bufferLoad:
+					if !ok {
+						return
+					}
+					b.Logger.Infof("Buffer load %f", percentile)
+				}
+			}
+		}()
+
 	}
 
 	b.remoteConn = lugo.NewRemoteClient(b.producerConn)
@@ -220,7 +233,7 @@ func (b *Binder) broadcast() error {
 		if b.gameSetup.DevMode {
 			b.lastUpdate = update
 			b.sendToAll(update)
-		} else if err := b.buffer.QueueUp(update, currentTurn); err != nil {
+		} else if err := b.buffer.QueueUp(update); err != nil {
 			b.Logger.Errorf("ignoring game event: %s", err)
 		}
 	}

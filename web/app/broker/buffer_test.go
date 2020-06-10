@@ -66,12 +66,12 @@ func TestBufferHandler_streamBuffer(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockRateCounter := NewMockHitsCounter(ctrl)
 	b := BufferHandler{
-		HitsCounter:      mockRateCounter,
-		Logger:           zapLog,
-		bufferOn:         make(chan bool),
-		bufferedUpdates:  make(chan app.FrontEndUpdate, MaxUpdateBuffer),
-		bufferStage:      make(chan app.FrontEndUpdate, MaxUpdateBuffer),
-		lastReceivedTurn: 100,
+		HitsCounter:     mockRateCounter,
+		Logger:          zapLog,
+		bufferOn:        make(chan bool),
+		bufferedUpdates: make(chan app.FrontEndUpdate, MaxUpdateBuffer),
+		bufferStage:     make(chan app.FrontEndUpdate, MaxUpdateBuffer),
+		lastSentTurn:    100,
 	}
 	defer b.Stop()
 	mockRateCounter.EXPECT().Hits().Return(int64(20)).AnyTimes()
