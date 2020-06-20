@@ -5,7 +5,8 @@ const GameDefinitions = {
   },
   Player: {
     Size:400,
-  }
+  },
+  BallTimeInGoalZone: 40, // two sec
 }
 
 const GameSettings = {

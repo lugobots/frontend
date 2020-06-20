@@ -123,13 +123,13 @@ func (b *Binder) connect() error {
 	}
 	if !b.gameSetup.DevMode {
 		bufferLoad := b.buffer.Start(func(data BufferedEvent) {
+			b.lastUpdate = data.Update
+			b.sendToAll(data.Update)
 			if data.Update.Type == app.EventGoal {
 				time.Sleep(5 * time.Second)
 			} else if data.Update.Snapshot.State == lugo.GameSnapshot_LISTENING {
 				time.Sleep(50 * time.Millisecond)
 			}
-			b.lastUpdate = data.Update
-			b.sendToAll(data.Update)
 		}, b.gameSetup.GameDuration)
 		go b.watchBufferNotifications(bufferLoad)
 	}

@@ -21,6 +21,11 @@ class Field extends React.Component {
       this.ballDOM.current.style.left = `${left}%`;
       this.ballDOM.current.style.bottom = `calc(${bottom}%)`;
 
+      if (snapshot.turns_ball_in_goal_zone > 0) {
+        this.ballDOM.current.className = 'within_goal_zone'
+      } else {
+        this.ballDOM.current.className = ''
+      }
       snapshot.home_team?.players?.forEach( (player) =>{
         this.onNewFrameListeners["home"][`home_${player.number}`](player)
       })

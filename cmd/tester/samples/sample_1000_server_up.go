@@ -18,7 +18,6 @@ func SampleServerIsUp() Sample {
 			GameDuration:      5 * 60 * (1000 / 50),
 			HomeTeam: &lugo.TeamSettings{
 				Name:   "Team A (setup)",
-				Side:   lugo.Team_HOME,
 				Avatar: "external/profile-team-home.jpg",
 				Colors: &lugo.TeamColors{
 					Primary: &lugo.TeamColor{
@@ -35,7 +34,6 @@ func SampleServerIsUp() Sample {
 			},
 			AwayTeam: &lugo.TeamSettings{
 				Name:   "Team B (setup)",
-				Side:   lugo.Team_AWAY,
 				Avatar: "external/profile-team-away.jpg",
 				Colors: &lugo.TeamColors{
 					Primary: &lugo.TeamColor{

@@ -821,6 +821,9 @@ $team-away-color-2 : var(--team-away-color-secondary);
   }
 }
 
+
+
+
 /* Soccer Ball */
 #ball {
   @include model-flex(column, nowrap, center, center);
@@ -859,7 +862,10 @@ $team-away-color-2 : var(--team-away-color-secondary);
     background-size: contain;
   }
 
-
+  &.within_goal_zone {
+    animation: glowing linear 0.3s;
+    animation-iteration-count: infinite;
+  }
 
   @include breakpoint(m) {
     &::before {
