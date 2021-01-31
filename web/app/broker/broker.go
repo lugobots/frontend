@@ -303,7 +303,7 @@ func (b *Binder) createFrame(event *lugo.GameEvent, debugging bool) (app.FrontEn
 	remaining := time.Duration(b.gameSetup.GameDuration-event.GameSnapshot.Turn) * frameTime
 	shotRemaining := time.Duration(0)
 	if event.GameSnapshot.ShotClock != nil {
-		shotRemaining = time.Duration(event.GameSnapshot.ShotClock.Turns) * frameTime
+		shotRemaining = time.Duration(event.GameSnapshot.ShotClock.RemainingTurns) * frameTime
 	}
 
 	if eventType == app.EventBreakpoint {

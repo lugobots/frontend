@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"go.uber.org/zap"
@@ -33,7 +32,7 @@ type Broadcaster struct {
 	shortcutHole chan *lugo.GameEvent
 }
 
-func (b *Broadcaster) PauseOrResume(ctx context.Context, empty *empty.Empty) (*lugo.CommandResponse, error) {
+func (b *Broadcaster) PauseOrResume(ctx context.Context, _ *lugo.PauseResumeRequest) (*lugo.CommandResponse, error) {
 	if b.breakpoint == nil {
 		b.breakpoint = make(chan bool)
 		b.shortcutHole <- &lugo.GameEvent{
@@ -59,11 +58,11 @@ func (b *Broadcaster) PauseOrResume(ctx context.Context, empty *empty.Empty) (*l
 	}, nil
 }
 
-func (b *Broadcaster) NextTurn(ctx context.Context, empty *empty.Empty) (*lugo.CommandResponse, error) {
+func (b *Broadcaster) NextTurn(ctx context.Context, empty *lugo.NextTurnRequest) (*lugo.CommandResponse, error) {
 	return b.sendBreakpoint(lugo.EventDebugBreakpoint_TURN)
 }
 
-func (b *Broadcaster) NextOrder(ctx context.Context, empty *empty.Empty) (*lugo.CommandResponse, error) {
+func (b *Broadcaster) NextOrder(ctx context.Context, empty *lugo.NextOrderRequest) (*lugo.CommandResponse, error) {
 	return b.sendBreakpoint(lugo.EventDebugBreakpoint_ORDERS)
 }
 

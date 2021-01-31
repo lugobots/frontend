@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"html/template"
 	"io"
@@ -65,7 +64,7 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 	remote := r.Group("/remote")
 	{
 		remote.POST("/pause-resume", func(context *gin.Context) {
-			resp, err := srv.GetRemote().PauseOrResume(context, &empty.Empty{})
+			resp, err := srv.GetRemote().PauseOrResume(context, &lugo.PauseResumeRequest{})
 			if err != nil {
 				context.JSON(http.StatusInternalServerError, err)
 				return
@@ -73,7 +72,7 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 			context.JSON(http.StatusOK, resp)
 		})
 		remote.POST("/next-turn", func(context *gin.Context) {
-			resp, err := srv.GetRemote().NextTurn(context, &empty.Empty{})
+			resp, err := srv.GetRemote().NextTurn(context, &lugo.NextTurnRequest{})
 			if err != nil {
 				context.JSON(http.StatusInternalServerError, err)
 				return
@@ -81,7 +80,7 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 			context.JSON(http.StatusOK, resp)
 		})
 		remote.POST("/next-order", func(context *gin.Context) {
-			resp, err := srv.GetRemote().NextTurn(context, &empty.Empty{})
+			resp, err := srv.GetRemote().NextTurn(context, &lugo.NextTurnRequest{})
 			if err != nil {
 				context.JSON(http.StatusInternalServerError, err)
 				return
