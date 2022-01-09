@@ -58,8 +58,8 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 		})
 	})
 
-	r.GET("/setup/:gameID/:uuid/", makeSetupHandler(srv))
-	r.GET("/game-state/:gameID/:uuid/", makeGameStateHandler(srv))
+	r.GET("/setup/:gameID/:uuid", makeSetupHandler(srv))
+	r.GET("/game-state/:gameID/:uuid", makeGameStateHandler(srv))
 
 	remote := r.Group("/remote")
 	{

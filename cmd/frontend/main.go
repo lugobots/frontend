@@ -92,7 +92,7 @@ func main() {
 		GRPCInsecure: true,
 	}, zapLog.Named("broker"), bufferizer)
 
-	server := app.NewHandler("/home/rubens/go/src/bitbucket.org/makeitplay/lugo-frontend/web", "local", eventBroker)
+	server := app.NewHandler("/home/rubens/projects/lugo/lugo-frontend/web", "local", eventBroker)
 	httpServer := &http.Server{
 		Addr:    ":8080",
 		Handler: server,
