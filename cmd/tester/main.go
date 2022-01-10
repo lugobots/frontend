@@ -84,7 +84,7 @@ func main() {
 			Run: func(cmd *cobra.Command, args []string) {
 				srv.EventQueue = ddd.sample.Events
 				srv.Setup = ddd.sample.Setup
-				srv.Setup.DevMode, _ = cmd.Flags().GetBool("dev-mode")
+				srv.Setup.DevMode = true
 				<-initTheServer(srv)
 			},
 		}

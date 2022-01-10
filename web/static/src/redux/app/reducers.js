@@ -65,7 +65,7 @@ export default function app(state = initialState, action) {
     case SETUP:
       return Object.assign({}, state, {
         setup: action.data.game_setup,
-        status: action.data.connection_state ? AppStatus.Listening : AppStatus.UpstreamDown,
+        status: action.data.connection_state === 'up' ? AppStatus.Listening : AppStatus.UpstreamDown,
       })
     case BROKEN:
       return Object.assign({}, initialState, {

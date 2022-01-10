@@ -21,7 +21,6 @@ class App extends React.Component {
           if (status !== 200) {
             throw new Error(result.error)
           }
-          console.log(result)
           this.props.dispatch(appAction.setup(result))
         }
       ).catch(e => {
@@ -59,7 +58,7 @@ class App extends React.Component {
     this.evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
     this.evtSource.onerror = () => {
       backConnTries++
-      this.props.dispatch(appAction.backDisconnect())
+      this.props.dispatch(appAction.backendDisconnected())
       this.props.dispatch(stadiumAction.displayAlert("Connecting to backend",
         <span>Wait the connection be established<br/><br/>Retrying {backConnTries}</span>))
     };
@@ -80,12 +79,12 @@ class App extends React.Component {
       this.props.dispatch(appAction.upstreamDisconnect())
       this.props.dispatch(stadiumAction.displayAlert("Upstream connection lost",
         <span>The frontend application is not connected to the GameServer.
-          <br/>Wait the connection be reestablished <br/><br/>Retrying {upstreamConnTries}</span>))
+           <br/>Wait the connection be reestablished <br/><br/>Retrying {upstreamConnTries}</span>))
     });
     this.evtSource.addEventListener(EventTypes.ConnectionReestablished, () => {
       upstreamConnTries = 0;
       console.log("%cupstream connection reestablished", "color: green")
-      this.props.dispatch(appAction.upstreamConnect())
+      this.props.dispatch(appAction.upstreamConnected())
     });
     this.evtSource.addEventListener(EventTypes.StateChange, (e) => this.onStateChange(this.parse(e)));
     this.evtSource.addEventListener(EventTypes.Goal, (e) => {
@@ -118,6 +117,7 @@ class App extends React.Component {
 
   render() {
     if (this.props.status === AppStatus.Setting) {
+      console.log(`CHAAAME`)
       this.setup()
       this.props.dispatch(stadiumAction.reset())
     }

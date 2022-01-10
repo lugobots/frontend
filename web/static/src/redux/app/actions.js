@@ -1,4 +1,4 @@
-import {BACK_CONNECT, BACK_DISCONNECT, SETUP, UPSTREAM_CONNECT, UPSTREAM_DISCONNECT, BROKEN} from "./actionTypes";
+import {BACK_CONNECT, BACK_DISCONNECT, BROKEN, SETUP, UPSTREAM_CONNECT, UPSTREAM_DISCONNECT} from "./actionTypes";
 
 function backConnect() {
   return {
@@ -6,12 +6,13 @@ function backConnect() {
   }
 }
 
-function backDisconnect() {
+function backendDisconnected() {
   return {
     type: BACK_DISCONNECT,
   }
 }
-function upstreamConnect() {
+
+function upstreamConnected() {
   return {
     type: UPSTREAM_CONNECT,
   }
@@ -38,8 +39,8 @@ function broken() {
 
 export default {
   backConnect,
-  backDisconnect,
-  upstreamConnect,
+  backendDisconnected,
+  upstreamConnected,
   upstreamDisconnect,
   setup,
   broken,
