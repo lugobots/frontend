@@ -1,10 +1,10 @@
 @charset "UTF-8";
 /*!
  * Framework SASS para o partida de Lugobot
- * @version 2 
+ * @version 2
  * @Data de ínicio - 04 / 12 / 2019
  * @autor Weliton Martins.
- * 
+ *
  */
 /* #region -> Reset */
 /* #region -> Reset do HTML */
@@ -154,6 +154,9 @@ li {
   /* Colors Team Away */
   --team-away-color-primary: 188, 75, 55;
   --team-away-color-secondary: 180, 189, 191;
+
+  --grid-cols: 1;
+  --grid-rows: 1;
 }
 
 /* #endregion -- Section End Root definitions  */
@@ -8719,3 +8722,4 @@ li {
 }
 
 /* #endregion -- Section END General classes */
+

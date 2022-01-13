@@ -11,6 +11,9 @@ class Field extends React.Component {
     this.ballDOM = React.createRef();
     this.players = {home: {}, away: {}};
     this.onNewFrameListeners = {home: {}, away: {}};
+    const params = new URLSearchParams(window.location.search);
+    this.grid_cols = parseInt(params.get("c")) ?? 1
+    this.grid_rows = parseInt(params.get("r")) ?? 1
   }
 
   componentDidMount() {
@@ -26,10 +29,10 @@ class Field extends React.Component {
       } else {
         this.ballDOM.current.className = ''
       }
-      snapshot.home_team?.players?.forEach( (player) =>{
+      snapshot.home_team?.players?.forEach((player) => {
         this.onNewFrameListeners["home"][`home_${player.number}`](player)
       })
-      snapshot.away_team?.players?.forEach( (player) =>{
+      snapshot.away_team?.players?.forEach((player) => {
         this.onNewFrameListeners["away"][`away_${player.number}`](player)
       })
     })
@@ -52,17 +55,22 @@ class Field extends React.Component {
     }
 
     for (let i = 1; i <= 11; i++) {
-        fillPlayer({ number: i, ang: 0, position: defaultPost}, "home")
+      fillPlayer({number: i, ang: 0, position: defaultPost}, "home")
     }
 
     for (let i = 1; i <= 11; i++) {
-      fillPlayer({ number: i, ang: 0, position: defaultPost}, "away")
+      fillPlayer({number: i, ang: 0, position: defaultPost}, "away")
     }
 
+    const vGrid = <div id="grid" key={"grid"}></div>
+    document.documentElement.style.setProperty("--grid-cols", `${this.grid_cols}`);
+    document.documentElement.style.setProperty("--grid-rows", `${this.grid_rows}`);
+
+    items.push(vGrid)
     return <div id="field">
-            <span id="ball" style={{}} ref={this.ballDOM} />
-            {items}
-          </div>;
+      <span id="ball" style={{}} ref={this.ballDOM}/>
+      {items}
+    </div>;
   }
 }
 

@@ -142,7 +142,7 @@ func (b *Binder) connect() error {
 func (b *Binder) ListenAndBroadcast() error {
 	tries := 0
 	var finalErr error
-	for tries < maxGRPCReconnect && !b.stopRequest {
+	for !b.stopRequest && (b.config.StaysIfDisconnected || tries < maxGRPCReconnect) {
 		if err := b.connect(); err != nil {
 			b.broadcastConnectionLost()
 			b.Logger.Warnf("failure on connecting to the game server: %s", err)
@@ -164,7 +164,7 @@ func (b *Binder) ListenAndBroadcast() error {
 	if b.stopRequest {
 		finalErr = app.ErrStopRequested
 	}
-	if tries >= maxGRPCReconnect {
+	if !b.config.StaysIfDisconnected && tries >= maxGRPCReconnect {
 		finalErr = ErrMaxConnectionAttemptsReached
 	}
 	if err := b.Stop(); err != nil {

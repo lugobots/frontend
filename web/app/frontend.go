@@ -38,7 +38,7 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 	r.Static("/external", path.Join(whereAmI, "/static/external"))
 
 	//temp
-	r.Static("/velho", path.Join(whereAmI, "/static/"))
+	//r.Static("/velho", path.Join(whereAmI, "/static/"))
 
 	uniquer := Uniquer{}
 

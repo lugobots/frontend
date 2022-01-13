@@ -88,8 +88,9 @@ func main() {
 
 	bufferizer := buffer.NewBufferizer(zapLog.Named("broker"), counter)
 	eventBroker := broker.NewBinder(app.Config{
-		GRPCAddress:  "localhost:9090",
-		GRPCInsecure: true,
+		GRPCAddress:         "localhost:9090",
+		GRPCInsecure:        true,
+		StaysIfDisconnected: true,
 	}, zapLog.Named("broker"), bufferizer)
 
 	server := app.NewHandler("/home/rubens/projects/lugo/lugo-frontend/web", "local", eventBroker)

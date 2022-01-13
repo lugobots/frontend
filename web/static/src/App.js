@@ -113,6 +113,10 @@ class App extends React.Component {
     this.evtSource.addEventListener(EventTypes.BufferReady, () => {
       this.props.dispatch(stadiumAction.resume())
     });
+
+    this.evtSource.addEventListener(EventTypes.NewPlayer, (e) => {
+      this.onStateChange(this.parse(e))
+    });
   }
 
   render() {

@@ -585,7 +585,7 @@ $team-away-color-2 : var(--team-away-color-secondary);
     @include model-square(100%);
     position: relative;
     margin: 20px 25px !important;
-    height: 605px;
+    aspect-ratio: 2/1;
     background: url("../img/bg/field/Field_2.svg") no-repeat;
     background-size: contain;
 
@@ -1833,4 +1833,14 @@ $team-away-color-2 : var(--team-away-color-secondary);
 
   }
 /* #endregion -- Section END General classes */
+
+
+
+#grid {
+  background-size: calc(100%/var(--grid-cols)) calc(100%/var(--grid-rows));
+  background-image:
+          linear-gradient(to right, #cfcfcf 1px, transparent 1px),
+          linear-gradient(to bottom, #cfcfcf 1px, transparent 1px);
+  width: 100%;
+}
 
