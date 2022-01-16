@@ -3,12 +3,39 @@ import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
 import appAction from "./redux/app/actions";
 import stadiumAction from "./redux/stadium/actions";
-import {AppStatus, BackendConfig, EventTypes, StadiumStatus} from "./constants";
+import {AppStatus, BackendConfig, EventTypes, GameStates, StadiumStatus} from "./constants";
 import store from "./store";
 import Stadium from "./components/Stadium";
 import channel from "./channel";
+import {Howl} from "howler";
+import audioKick from "./sounds/kick.mp3";
+import audioNewPlayer from "./sounds/new-player.wav";
+import audioRefereeStart from "./sounds/referee-whistle.mp3";
+import audioBackground from "./sounds/backgound.mp3";
 
 class App extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.audio = {
+      background: new Howl({
+        src: [audioBackground]
+      }),
+      kick: new Howl({
+        src: [audioKick]
+      }),
+      newPlayer: new Howl({
+        src: [audioNewPlayer]
+      }),
+      refereeStart: new Howl({
+        src: [audioRefereeStart]
+      }),
+    }
+
+    this.ballOnHold = false;
+    this.previousState = GameStates.WAITING;
+  }
+
 
   setup() {
     let status = false
@@ -44,6 +71,29 @@ class App extends React.Component {
     if (!blockingStatus.includes(s)) {
       this.props.dispatch(stadiumAction.resume())
     }
+
+    if(data.game_event.game_snapshot?.state !== GameStates.PLAYING && data.game_event.game_snapshot?.state !== "LISTENING") {
+      console.log(data.game_event.game_snapshot?.state)
+    }
+
+    // detecting game start or restart
+    if(data.game_event.game_snapshot?.state === GameStates.LISTENING && this.previousState === GameStates.GET_READY) {
+      this.audio.refereeStart.play()
+    }
+
+    // detecting ball kick
+    if(!data.game_event.game_snapshot?.ball?.holder) {
+      if(this.ballOnHold) {
+        this.audio.kick.play()
+
+        this.ballOnHold = false
+      }
+    } else {
+      this.ballOnHold = true
+    }
+
+
+    this.previousState = data.game_event.game_snapshot?.state
     this.updateTimer(data)
     channel.newGameFrame(data.game_event.game_snapshot)
   }
@@ -116,12 +166,12 @@ class App extends React.Component {
 
     this.evtSource.addEventListener(EventTypes.NewPlayer, (e) => {
       this.onStateChange(this.parse(e))
+      this.audio.newPlayer.play()
     });
   }
 
   render() {
     if (this.props.status === AppStatus.Setting) {
-      console.log(`CHAAAME`)
       this.setup()
       this.props.dispatch(stadiumAction.reset())
     }

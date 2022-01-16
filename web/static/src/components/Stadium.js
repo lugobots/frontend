@@ -3,12 +3,10 @@ import Panel from "./Panel";
 import Field from "./Field";
 import Events from "./Events";
 import ToolBar from "./ToolBar";
-import {Howl, Howler} from 'howler';
-import tickAudio from '../sounds/kick.wav';
+import {Howl} from 'howler';
+import tickAudio from '../sounds/kick.mp3';
 
-import {
-  StadiumStatus
-} from '../constants';
+import {StadiumStatus} from '../constants';
 import {renderLogger, updateRatio} from "../helpers";
 import PropTypes from "prop-types";
 import {connect} from "react-redux";
@@ -20,10 +18,7 @@ class Stadium extends React.Component {
   }
 
   componentDidMount() {
-    // let AAAAA = new Howl({
-    //   src: [tickAudio]
-    // });
-    // AAAAA.play()
+
     updateRatio()
 
   }
@@ -40,18 +35,18 @@ class Stadium extends React.Component {
     this.setMainColor('--team-away-color-primary', this.props.setup.away_team.colors.primary);
     this.setMainColor('--team-away-color-secondary', this.props.setup.away_team.colors.secondary);
 
-    let  stadium_class = this.props.stadium_status.toLowerCase()
-    if(this.props.stadium_status === StadiumStatus.ALERT ||
+    let stadium_class = this.props.stadium_status.toLowerCase()
+    if (this.props.stadium_status === StadiumStatus.ALERT ||
       this.props.stadium_status === StadiumStatus.OVER) {
       stadium_class = " active-modal"
     }
-    return<div id="stadium" className={stadium_class}>
-      <Panel />
+    return <div id="stadium" className={stadium_class}>
+      <Panel/>
       <main id="lugobot-stadium" className="container">
-        <Field />
+        <Field/>
       </main>
-      { this.props.setup.dev_mode ? <ToolBar /> : null }
-      <Events />
+      {this.props.setup.dev_mode ? <ToolBar/> : null}
+      <Events/>
     </div>;
   }
 }
