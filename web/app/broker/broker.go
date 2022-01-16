@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"io"
@@ -21,9 +21,9 @@ var grpcReconnectInterval = time.Second
 
 const ErrMaxConnectionAttemptsReached = app.Error("did not connect to the game server")
 
-var defaultColor = &lugo.TeamColor{}
-var defaultTeamColors = &lugo.TeamSettings{
-	Colors: &lugo.TeamColors{
+var defaultColor = &proto.TeamColor{}
+var defaultTeamColors = &proto.TeamSettings{
+	Colors: &proto.TeamColors{
 		Primary:   defaultColor,
 		Secondary: defaultColor,
 	},
@@ -37,7 +37,7 @@ func NewBinder(config app.Config, logger *zap.SugaredLogger, buffer BufferHandle
 		consumersMux: sync.RWMutex{},
 		config:       config,
 		Logger:       logger,
-		gameSetup: &lugo.GameSetup{
+		gameSetup: &proto.GameSetup{
 			HomeTeam: defaultTeamColors,
 			AwayTeam: defaultTeamColors,
 		},
@@ -51,17 +51,17 @@ type Binder struct {
 	consumers    map[string]chan app.FrontEndUpdate
 	consumersMux sync.RWMutex
 	config       app.Config
-	gameSetup    *lugo.GameSetup
+	gameSetup    *proto.GameSetup
 	producerConn *grpc.ClientConn
-	producer     lugo.BroadcastClient
-	remoteConn   lugo.RemoteClient
+	producer     proto.BroadcastClient
+	remoteConn   proto.RemoteClient
 	stopRequest  bool
 	Logger       *zap.SugaredLogger
 	lastUpdate   app.FrontEndUpdate
 	buffer       BufferHandler
 }
 
-func (b *Binder) GetRemote() lugo.RemoteClient {
+func (b *Binder) GetRemote() proto.RemoteClient {
 	return b.remoteConn
 }
 
@@ -114,8 +114,8 @@ func (b *Binder) connect() error {
 		return err
 	}
 
-	b.producer = lugo.NewBroadcastClient(b.producerConn)
-	b.gameSetup, err = b.producer.GetGameSetup(ctx, &lugo.WatcherRequest{
+	b.producer = proto.NewBroadcastClient(b.producerConn)
+	b.gameSetup, err = b.producer.GetGameSetup(ctx, &proto.WatcherRequest{
 		Uuid: "frontend",
 	})
 	if err != nil {
@@ -127,14 +127,14 @@ func (b *Binder) connect() error {
 			b.sendToAll(data.Update)
 			if data.Update.Type == app.EventGoal {
 				time.Sleep(5 * time.Second)
-			} else if data.Update.Snapshot.State == lugo.GameSnapshot_LISTENING {
+			} else if data.Update.Snapshot.State == proto.GameSnapshot_LISTENING {
 				time.Sleep(50 * time.Millisecond)
 			}
 		}, b.gameSetup.GameDuration)
 		go b.watchBufferNotifications(bufferLoad)
 	}
 
-	b.remoteConn = lugo.NewRemoteClient(b.producerConn)
+	b.remoteConn = proto.NewRemoteClient(b.producerConn)
 
 	return err
 }
@@ -187,7 +187,7 @@ func (b *Binder) Stop() error {
 
 func (b *Binder) broadcast() error {
 	ctx := context.Background()
-	receiver, err := b.producer.OnEvent(ctx, &lugo.WatcherRequest{
+	receiver, err := b.producer.OnEvent(ctx, &proto.WatcherRequest{
 		Uuid: "frontend",
 	})
 	if err != nil {
@@ -284,7 +284,7 @@ func (b *Binder) broadcastConnectionRees() {
 	b.sendToAll(update)
 }
 
-func (b *Binder) createFrame(event *lugo.GameEvent, debugging bool) (app.FrontEndUpdate, bool, error) {
+func (b *Binder) createFrame(event *proto.GameEvent, debugging bool) (app.FrontEndUpdate, bool, error) {
 	eventType, err := eventTypeTranslator(event.GetEvent())
 	if err != nil {
 		return app.FrontEndUpdate{}, false, err
@@ -351,19 +351,19 @@ func (b *Binder) watchBufferNotifications(bufferLoad <-chan float32) {
 
 func eventTypeTranslator(event interface{}) (app.EventType, error) {
 	switch event.(type) {
-	case *lugo.GameEvent_NewPlayer:
+	case *proto.GameEvent_NewPlayer:
 		return app.EventNewPlayer, nil
-	case *lugo.GameEvent_LostPlayer:
+	case *proto.GameEvent_LostPlayer:
 		return app.EventLostPlayer, nil
-	case *lugo.GameEvent_StateChange:
+	case *proto.GameEvent_StateChange:
 		return app.EventStateChange, nil
-	case *lugo.GameEvent_Goal:
+	case *proto.GameEvent_Goal:
 		return app.EventGoal, nil
-	case *lugo.GameEvent_Breakpoint:
+	case *proto.GameEvent_Breakpoint:
 		return app.EventBreakpoint, nil
-	case *lugo.GameEvent_DebugReleased:
+	case *proto.GameEvent_DebugReleased:
 		return app.EventDebugReleased, nil
-	case *lugo.GameEvent_GameOver:
+	case *proto.GameEvent_GameOver:
 		return app.EventGameOver, nil
 	default:
 		return "unknown", app.ErrUnknownGameEvent

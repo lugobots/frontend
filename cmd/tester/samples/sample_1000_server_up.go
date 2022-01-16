@@ -1,47 +1,47 @@
 package samples
 
 import (
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 func SampleServerIsUp() Sample {
-	var events []*lugo.GameEvent
+	var events []*proto.GameEvent
 	lastSnap := getInitSnap()
-	events = append(events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+	events = append(events, newStateChangeEvent(lastSnap, proto.GameSnapshot_WAITING))
 	return Sample{
 		Events: events,
-		Setup: &lugo.GameSetup{
+		Setup: &proto.GameSetup{
 			DevMode:           false,
-			StartMode:         lugo.GameSetup_DELAY,
-			ListeningMode:     lugo.GameSetup_REMOTE,
+			StartMode:         proto.GameSetup_DELAY,
+			ListeningMode:     proto.GameSetup_REMOTE,
 			ListeningDuration: 50,
 			GameDuration:      5 * 60 * (1000 / 50),
-			HomeTeam: &lugo.TeamSettings{
+			HomeTeam: &proto.TeamSettings{
 				Name:   "Team A (setup)",
 				Avatar: "external/profile-team-home.jpg",
-				Colors: &lugo.TeamColors{
-					Primary: &lugo.TeamColor{
+				Colors: &proto.TeamColors{
+					Primary: &proto.TeamColor{
 						Red:   240,
 						Green: 0,
 						Blue:  0,
 					},
-					Secondary: &lugo.TeamColor{
+					Secondary: &proto.TeamColor{
 						Red:   255,
 						Green: 255,
 						Blue:  255,
 					},
 				},
 			},
-			AwayTeam: &lugo.TeamSettings{
+			AwayTeam: &proto.TeamSettings{
 				Name:   "Team B (setup)",
 				Avatar: "external/profile-team-away.jpg",
-				Colors: &lugo.TeamColors{
-					Primary: &lugo.TeamColor{
+				Colors: &proto.TeamColors{
+					Primary: &proto.TeamColor{
 						Red:   0,
 						Green: 200,
 						Blue:  0,
 					},
-					Secondary: &lugo.TeamColor{
+					Secondary: &proto.TeamColor{
 						Red:   255,
 						Green: 211,
 						Blue:  0,

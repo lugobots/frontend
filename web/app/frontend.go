@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"html/template"
 	"io"
 	"log"
@@ -64,7 +64,7 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 	remote := r.Group("/remote")
 	{
 		remote.POST("/pause-resume", func(context *gin.Context) {
-			resp, err := srv.GetRemote().PauseOrResume(context, &lugo.PauseResumeRequest{})
+			resp, err := srv.GetRemote().PauseOrResume(context, &proto.PauseResumeRequest{})
 			if err != nil {
 				context.JSON(http.StatusInternalServerError, err)
 				return
@@ -72,7 +72,7 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 			context.JSON(http.StatusOK, resp)
 		})
 		remote.POST("/next-turn", func(context *gin.Context) {
-			resp, err := srv.GetRemote().NextTurn(context, &lugo.NextTurnRequest{})
+			resp, err := srv.GetRemote().NextTurn(context, &proto.NextTurnRequest{})
 			if err != nil {
 				context.JSON(http.StatusInternalServerError, err)
 				return
@@ -80,7 +80,7 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 			context.JSON(http.StatusOK, resp)
 		})
 		remote.POST("/next-order", func(context *gin.Context) {
-			resp, err := srv.GetRemote().NextTurn(context, &lugo.NextTurnRequest{})
+			resp, err := srv.GetRemote().NextTurn(context, &proto.NextTurnRequest{})
 			if err != nil {
 				context.JSON(http.StatusInternalServerError, err)
 				return
@@ -88,9 +88,9 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 			context.JSON(http.StatusOK, resp)
 		})
 		remote.PATCH("/players/:team/:number", func(context *gin.Context) {
-			side := lugo.Team_HOME
+			side := proto.Team_HOME
 			if context.Param("team") == "away" {
-				side = lugo.Team_AWAY
+				side = proto.Team_AWAY
 			}
 			n, err := strconv.Atoi(context.Param("number"))
 			if err != nil {
@@ -107,10 +107,10 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 				context.JSON(http.StatusInternalServerError, e)
 				return
 			}
-			playerProperties := &lugo.PlayerProperties{
+			playerProperties := &proto.PlayerProperties{
 				Side:     side,
 				Number:   uint32(n),
-				Position: &lugo.Point{},
+				Position: &proto.Point{},
 				Velocity: nil,
 			}
 

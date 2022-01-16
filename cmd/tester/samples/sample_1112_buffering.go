@@ -1,18 +1,18 @@
 package samples
 
 import (
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 func SampleBuffering() Sample {
 	sample := SampleScoreTime()
 	lastSnap := CopySnap(getLastSampleSnap(sample))
 
-	lastSnap.State = lugo.GameSnapshot_OVER
-	sample.Events = append(sample.Events, &lugo.GameEvent{
+	lastSnap.State = proto.GameSnapshot_OVER
+	sample.Events = append(sample.Events, &proto.GameEvent{
 		GameSnapshot: lastSnap,
-		Event: &lugo.GameEvent_GameOver{
-			GameOver: &lugo.EventGameOver{},
+		Event: &proto.GameEvent_GameOver{
+			GameOver: &proto.EventGameOver{},
 		},
 	})
 	sample.Setup.GameDuration = lastSnap.Turn

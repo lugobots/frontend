@@ -1,8 +1,8 @@
 package samples
 
 import (
-	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 func SampleMovePlayers() Sample {
@@ -17,7 +17,7 @@ func SampleMovePlayers() Sample {
 		if lastSnap.HomeTeam.Players[playerTestIndex].Position.X > field.FieldWidth {
 			lastSnap.HomeTeam.Players[playerTestIndex].Position.X = field.FieldWidth
 		}
-		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, proto.GameSnapshot_WAITING))
 	}
 
 	for lastSnap.HomeTeam.Players[playerTestIndex].Position.Y < field.FieldHeight {
@@ -27,7 +27,7 @@ func SampleMovePlayers() Sample {
 		if lastSnap.HomeTeam.Players[playerTestIndex].Position.Y > field.FieldHeight {
 			lastSnap.HomeTeam.Players[playerTestIndex].Position.Y = field.FieldHeight
 		}
-		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, proto.GameSnapshot_WAITING))
 	}
 
 	for lastSnap.HomeTeam.Players[playerTestIndex].Position.X > 0 {
@@ -37,7 +37,7 @@ func SampleMovePlayers() Sample {
 		if lastSnap.HomeTeam.Players[playerTestIndex].Position.X < 0 {
 			lastSnap.HomeTeam.Players[playerTestIndex].Position.X = 0
 		}
-		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, proto.GameSnapshot_WAITING))
 	}
 
 	for lastSnap.HomeTeam.Players[playerTestIndex].Position.Y > 0 {
@@ -47,7 +47,7 @@ func SampleMovePlayers() Sample {
 		if lastSnap.HomeTeam.Players[playerTestIndex].Position.Y < 0 {
 			lastSnap.HomeTeam.Players[playerTestIndex].Position.Y = 0
 		}
-		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, proto.GameSnapshot_WAITING))
 	}
 
 	for lastSnap.HomeTeam.Players[playerTestIndex].Position.X < field.FieldWidth {
@@ -57,9 +57,9 @@ func SampleMovePlayers() Sample {
 		if lastSnap.HomeTeam.Players[playerTestIndex].Position.X > field.FieldWidth {
 			lastSnap.HomeTeam.Players[playerTestIndex].Position.X = field.FieldWidth
 		}
-		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, proto.GameSnapshot_WAITING))
 	}
 
-	sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+	sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, proto.GameSnapshot_WAITING))
 	return sample
 }

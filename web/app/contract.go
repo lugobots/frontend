@@ -2,13 +2,13 @@ package app
 
 import (
 	"encoding/json"
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 type EventsBroker interface {
 	StreamEventsTo(uuid string) chan FrontEndUpdate
 	GetGameConfig(uuid string) (FrontEndSet, error)
-	GetRemote() lugo.RemoteClient
+	GetRemote() proto.RemoteClient
 }
 
 type EventType string
@@ -44,10 +44,10 @@ type UpdateData struct {
 
 type FrontEndUpdate struct {
 	// speed up the rate calc
-	Snapshot        *lugo.GameSnapshot `json:"-"`
-	Type            EventType          `json:"type"`
-	Update          UpdateData         `json:"data"`
-	ConnectionState string             `json:"connection_state"`
+	Snapshot        *proto.GameSnapshot `json:"-"`
+	Type            EventType           `json:"type"`
+	Update          UpdateData          `json:"data"`
+	ConnectionState string              `json:"connection_state"`
 }
 type FrontEndSet struct {
 	GameSetup       json.RawMessage `json:"game_setup"`

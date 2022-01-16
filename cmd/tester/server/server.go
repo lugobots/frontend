@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"go.uber.org/zap"
 	"sync"
 	"time"
@@ -12,88 +12,88 @@ import (
 
 func NewServer(logger *zap.SugaredLogger) *Broadcaster {
 	return &Broadcaster{
-		conns:   make([]lugo.Broadcast_OnEventServer, 0),
+		conns:   make([]proto.Broadcast_OnEventServer, 0),
 		connMux: sync.Mutex{},
 		logger:  logger,
 	}
 }
 
 type Broadcaster struct {
-	conns      []lugo.Broadcast_OnEventServer
+	conns      []proto.Broadcast_OnEventServer
 	connMux    sync.Mutex
 	logger     *zap.SugaredLogger
-	EventQueue []*lugo.GameEvent
-	Setup      *lugo.GameSetup
+	EventQueue []*proto.GameEvent
+	Setup      *proto.GameSetup
 
 	breakpoint chan bool
-	lastSnap   *lugo.GameSnapshot
+	lastSnap   *proto.GameSnapshot
 
 	// gambiarra pra nao precisar fazer lista de conecoes. Nao vai funcionar se tiver mais de um front end connectado!
-	shortcutHole chan *lugo.GameEvent
+	shortcutHole chan *proto.GameEvent
 }
 
-func (b *Broadcaster) PauseOrResume(ctx context.Context, _ *lugo.PauseResumeRequest) (*lugo.CommandResponse, error) {
+func (b *Broadcaster) PauseOrResume(ctx context.Context, _ *proto.PauseResumeRequest) (*proto.CommandResponse, error) {
 	if b.breakpoint == nil {
 		b.breakpoint = make(chan bool)
-		b.shortcutHole <- &lugo.GameEvent{
+		b.shortcutHole <- &proto.GameEvent{
 			GameSnapshot: b.lastSnap,
-			Event: &lugo.GameEvent_Breakpoint{
-				Breakpoint: &lugo.EventDebugBreakpoint{Breakpoint: lugo.EventDebugBreakpoint_ORDERS},
+			Event: &proto.GameEvent_Breakpoint{
+				Breakpoint: &proto.EventDebugBreakpoint{Breakpoint: proto.EventDebugBreakpoint_ORDERS},
 			},
 		}
 	} else {
-		b.shortcutHole <- &lugo.GameEvent{
+		b.shortcutHole <- &proto.GameEvent{
 			GameSnapshot: b.lastSnap,
-			Event: &lugo.GameEvent_DebugReleased{
-				DebugReleased: &lugo.EventDebugReleased{},
+			Event: &proto.GameEvent_DebugReleased{
+				DebugReleased: &proto.EventDebugReleased{},
 			},
 		}
 		close(b.breakpoint)
 		b.breakpoint = nil
 	}
-	return &lugo.CommandResponse{
-		Code:         lugo.CommandResponse_SUCCESS,
+	return &proto.CommandResponse{
+		Code:         proto.CommandResponse_SUCCESS,
 		GameSnapshot: b.lastSnap,
 		Details:      ":-)",
 	}, nil
 }
 
-func (b *Broadcaster) NextTurn(ctx context.Context, empty *lugo.NextTurnRequest) (*lugo.CommandResponse, error) {
-	return b.sendBreakpoint(lugo.EventDebugBreakpoint_TURN)
+func (b *Broadcaster) NextTurn(ctx context.Context, empty *proto.NextTurnRequest) (*proto.CommandResponse, error) {
+	return b.sendBreakpoint(proto.EventDebugBreakpoint_TURN)
 }
 
-func (b *Broadcaster) NextOrder(ctx context.Context, empty *lugo.NextOrderRequest) (*lugo.CommandResponse, error) {
-	return b.sendBreakpoint(lugo.EventDebugBreakpoint_ORDERS)
+func (b *Broadcaster) NextOrder(ctx context.Context, empty *proto.NextOrderRequest) (*proto.CommandResponse, error) {
+	return b.sendBreakpoint(proto.EventDebugBreakpoint_ORDERS)
 }
 
-func (b *Broadcaster) sendBreakpoint(breakType lugo.EventDebugBreakpoint_Breakpoint) (*lugo.CommandResponse, error) {
+func (b *Broadcaster) sendBreakpoint(breakType proto.EventDebugBreakpoint_Breakpoint) (*proto.CommandResponse, error) {
 	if b.breakpoint == nil {
-		return &lugo.CommandResponse{
-			Code:         lugo.CommandResponse_OTHER,
+		return &proto.CommandResponse{
+			Code:         proto.CommandResponse_OTHER,
 			GameSnapshot: b.lastSnap,
 			Details:      ":-)",
 		}, nil
 	}
-	b.shortcutHole <- &lugo.GameEvent{
+	b.shortcutHole <- &proto.GameEvent{
 		GameSnapshot: b.lastSnap,
-		Event: &lugo.GameEvent_Breakpoint{
-			Breakpoint: &lugo.EventDebugBreakpoint{Breakpoint: breakType},
+		Event: &proto.GameEvent_Breakpoint{
+			Breakpoint: &proto.EventDebugBreakpoint{Breakpoint: breakType},
 		},
 	}
 	close(b.breakpoint)
 	b.breakpoint = make(chan bool)
-	return &lugo.CommandResponse{
-		Code:         lugo.CommandResponse_SUCCESS,
+	return &proto.CommandResponse{
+		Code:         proto.CommandResponse_SUCCESS,
 		GameSnapshot: b.lastSnap,
 		Details:      ":-)",
 	}, nil
 }
 
-func (b *Broadcaster) SetBallProperties(ctx context.Context, properties *lugo.BallProperties) (*lugo.CommandResponse, error) {
+func (b *Broadcaster) SetBallProperties(ctx context.Context, properties *proto.BallProperties) (*proto.CommandResponse, error) {
 	panic("implement me")
 }
 
-func (b *Broadcaster) SetPlayerProperties(ctx context.Context, properties *lugo.PlayerProperties) (*lugo.CommandResponse, error) {
+func (b *Broadcaster) SetPlayerProperties(ctx context.Context, properties *proto.PlayerProperties) (*proto.CommandResponse, error) {
 	p := field.GetPlayer(b.lastSnap, properties.Side, properties.Number)
 	if p == nil {
 		return nil, fmt.Errorf("player not found: %s-%d", properties.Side, properties.Number)
@@ -101,22 +101,22 @@ func (b *Broadcaster) SetPlayerProperties(ctx context.Context, properties *lugo.
 	p.Position = properties.Position
 
 	b.logger.Infof("player %s-%d moved to %v", properties.Side, properties.Number, p.Position)
-	return &lugo.CommandResponse{
-		Code:         lugo.CommandResponse_SUCCESS,
+	return &proto.CommandResponse{
+		Code:         proto.CommandResponse_SUCCESS,
 		GameSnapshot: b.lastSnap,
 		Details:      "player moved",
 	}, nil
 }
 
-func (b *Broadcaster) SetGameProperties(ctx context.Context, properties *lugo.GameProperties) (*lugo.CommandResponse, error) {
+func (b *Broadcaster) SetGameProperties(ctx context.Context, properties *proto.GameProperties) (*proto.CommandResponse, error) {
 	panic("implement me")
 }
 
-func (b *Broadcaster) GetGameSetup(ctx context.Context, request *lugo.WatcherRequest) (*lugo.GameSetup, error) {
+func (b *Broadcaster) GetGameSetup(ctx context.Context, request *proto.WatcherRequest) (*proto.GameSetup, error) {
 	return b.Setup, nil
 }
 
-func (b *Broadcaster) OnEvent(request *lugo.WatcherRequest, server lugo.Broadcast_OnEventServer) error {
+func (b *Broadcaster) OnEvent(request *proto.WatcherRequest, server proto.Broadcast_OnEventServer) error {
 	b.connMux.Lock()
 	b.conns = append(b.conns, server)
 	b.connMux.Unlock()
@@ -125,7 +125,7 @@ func (b *Broadcaster) OnEvent(request *lugo.WatcherRequest, server lugo.Broadcas
 
 	b.logger.Infof("starting stream")
 	go func() {
-		b.shortcutHole = make(chan *lugo.GameEvent)
+		b.shortcutHole = make(chan *proto.GameEvent)
 		for {
 			v, ok := <-b.shortcutHole
 			if !ok {

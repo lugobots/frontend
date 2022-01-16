@@ -7,7 +7,7 @@ package broker
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	lugo "github.com/lugobots/lugo4go/v2/lugo"
+	lugo "github.com/lugobots/lugo4go/v2/proto"
 	grpc "google.golang.org/grpc"
 	metadata "google.golang.org/grpc/metadata"
 	reflect "reflect"

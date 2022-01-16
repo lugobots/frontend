@@ -4,7 +4,7 @@ import (
 	"bitbucket.org/makeitplay/lugo-frontend/cmd/tester/samples"
 	"bitbucket.org/makeitplay/lugo-frontend/cmd/tester/server"
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -40,8 +40,8 @@ func initTheServer(srv *server.Broadcaster) chan bool {
 
 	grpcServer := grpc.NewServer()
 
-	lugo.RegisterBroadcastServer(grpcServer, srv)
-	lugo.RegisterRemoteServer(grpcServer, srv)
+	proto.RegisterBroadcastServer(grpcServer, srv)
+	proto.RegisterRemoteServer(grpcServer, srv)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9090))
 	if err != nil {

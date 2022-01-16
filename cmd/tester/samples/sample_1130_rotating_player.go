@@ -1,7 +1,7 @@
 package samples
 
 import (
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 func SampleRotatePlayers() Sample {
@@ -10,15 +10,15 @@ func SampleRotatePlayers() Sample {
 
 	playerTestIndex := 4
 
-	dirs := []lugo.Vector{
-		lugo.NorthEast(),
-		lugo.North(),
-		lugo.NorthWest(),
-		lugo.West(),
-		lugo.SouthWest(),
-		lugo.South(),
-		lugo.SouthEast(),
-		lugo.East(),
+	dirs := []proto.Vector{
+		proto.NorthEast(),
+		proto.North(),
+		proto.NorthWest(),
+		proto.West(),
+		proto.SouthWest(),
+		proto.South(),
+		proto.SouthEast(),
+		proto.East(),
 	}
 
 	for _, d := range dirs {
@@ -26,7 +26,7 @@ func SampleRotatePlayers() Sample {
 		lastSnap = CopySnap(lastSnap)
 		lastSnap.HomeTeam.Players[playerTestIndex].Velocity.Direction = &x
 		for i := 0; i < 20; i++ {
-			sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, lugo.GameSnapshot_WAITING))
+			sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, proto.GameSnapshot_WAITING))
 		}
 	}
 
