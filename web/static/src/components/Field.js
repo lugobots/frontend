@@ -41,6 +41,18 @@ class Field extends React.Component {
   render() {
     renderLogger(this.constructor.name)
     const items = []
+
+    const gridRows = []
+    for (let j = this.grid_rows - 1; j >= 0 ; j--) {
+      const lineCols = []
+      for (let i = 0; i < this.grid_cols; i++) {
+        lineCols.push(<span className="grid_cell" key={i}>{i}x{j}</span>)
+      }
+      gridRows.push(<span className="grid_lines" key={`line-${j}`}>{lineCols}</span>)
+    }
+    const vGrid = <div id="grid" key={"grid"}>{gridRows}</div>
+    items.push(vGrid)
+
     const fillPlayer = (p, side) => {
       const a = <FieldPlayer
         setOnNewFrameListener={(cb) => this.onNewFrameListeners[side][`${side}_${p.number}`] = cb}
@@ -62,21 +74,6 @@ class Field extends React.Component {
       fillPlayer({number: i, ang: 0, position: defaultPost}, "away")
     }
 
-    const gridRows = []
-    for (let j = this.grid_rows - 1; j >= 0 ; j--) {
-      const lineCols = []
-      for (let i = 0; i < this.grid_cols; i++) {
-        lineCols.push(<span className="grid_cell" key={i}>{i}x{j}</span>)
-      }
-      gridRows.push(<span className="grid_lines" key={`line-${j}`}>{lineCols}</span>)
-    }
-
-
-    const vGrid = <div id="grid" key={"grid"}>{gridRows}</div>
-    // document.documentElement.style.setProperty("--grid-cols", `${this.grid_cols}`);
-    // document.documentElement.style.setProperty("--grid-rows", `${this.grid_rows}`);
-
-    items.push(vGrid)
     return <div id="field">
       <span id="ball" style={{}} ref={this.ballDOM}/>
       {items}
