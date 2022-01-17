@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bitbucket.org/makeitplay/lugo-frontend/web/app"
-	"bitbucket.org/makeitplay/lugo-frontend/web/app/broker"
-	"bitbucket.org/makeitplay/lugo-frontend/web/app/buffer"
 	"context"
+	"github.com/lugobots/frontend/web/app"
+	"github.com/lugobots/frontend/web/app/broker"
+	"github.com/lugobots/frontend/web/app/buffer"
 	"github.com/paulbellamy/ratecounter"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

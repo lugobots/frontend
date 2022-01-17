@@ -1,9 +1,9 @@
 package buffer
 
 import (
-	"bitbucket.org/makeitplay/lugo-frontend/web/app"
-	"bitbucket.org/makeitplay/lugo-frontend/web/app/broker"
 	"github.com/golang/mock/gomock"
+	"github.com/lugobots/frontend/web/app"
+	"github.com/lugobots/frontend/web/app/broker"
 	"github.com/paulbellamy/ratecounter"
 	"github.com/stretchr/testify/assert"
 	"testing"

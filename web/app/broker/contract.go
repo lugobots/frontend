@@ -1,6 +1,6 @@
 package broker
 
-import "bitbucket.org/makeitplay/lugo-frontend/web/app"
+import "github.com/lugobots/frontend/web/app"
 
 type BufferedEvent struct {
 	Update app.FrontEndUpdate

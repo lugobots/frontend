@@ -6,4 +6,4 @@ mockgen -package=broker \
 
 mockgen -package=broker \
         -destination=./web/app/broker/mocks_internal.go \
-        bitbucket.org/makeitplay/lugo-frontend/web/app/broker HitsCounter
+        github.com/lugobots/frontend/web/app/broker HitsCounter

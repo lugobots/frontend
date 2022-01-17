@@ -1,4 +1,4 @@
-module bitbucket.org/makeitplay/lugo-frontend
+module github.com/lugobots/frontend
 
 go 1.14
 

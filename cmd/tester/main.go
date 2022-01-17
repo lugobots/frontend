@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bitbucket.org/makeitplay/lugo-frontend/cmd/tester/samples"
-	"bitbucket.org/makeitplay/lugo-frontend/cmd/tester/server"
 	"fmt"
+	"github.com/lugobots/frontend/cmd/tester/samples"
+	"github.com/lugobots/frontend/cmd/tester/server"
 	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"

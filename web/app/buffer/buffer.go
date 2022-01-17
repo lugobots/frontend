@@ -1,9 +1,9 @@
 package buffer
 
 import (
-	"bitbucket.org/makeitplay/lugo-frontend/web/app"
-	"bitbucket.org/makeitplay/lugo-frontend/web/app/broker"
 	"errors"
+	"github.com/lugobots/frontend/web/app"
+	"github.com/lugobots/frontend/web/app/broker"
 	"go.uber.org/zap"
 	"math"
 	"time"
