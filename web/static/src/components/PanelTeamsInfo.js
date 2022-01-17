@@ -1,23 +1,23 @@
 import React from 'react';
+import {renderLogger} from "../helpers";
+import PropTypes from "prop-types";
+import {connect} from "react-redux";
 
 class PanelTeamsInfo extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      setup: null,
-    };
   }
 
   render() {
+    renderLogger(this.constructor.name)
     return <div id="teams-info">
         <span id="home-team" className="team">
           <span id="profile-home-team" className="profile-team">
             <span id="picture-home-team" className="picture-team">
-              <img src={this.props.setup.home_team.avatar} alt="Team Home logo"/>
+              <img src={this.props.home_team_avatar} alt="Team Home logo"/>
             </span>
             <span id="home-team-name" className="name-team">
-              <h3>{this.props.setup.home_team.name}</h3>
+              <h3>{this.props.home_team_name}</h3>
             </span>
           </span>
           <span id="flag-home-team" className="flag-team">
@@ -29,10 +29,10 @@ class PanelTeamsInfo extends React.Component {
       <span id="away-team" className="team">
             <span id="profile-away-team" className="profile-team">
               <span id="picture-away-team" className="picture-team">
-                <img src={this.props.setup.away_team.avatar} alt="Team Home logo"/>
+                <img src={this.props.away_team_avatar} alt="Team Home logo"/>
               </span>
               <span id="name-away-team" className="name-team">
-                <h3>{this.props.setup.away_team.name}</h3>
+                <h3>{this.props.away_team_name}</h3>
               </span>
             </span>
             <span id="flag-away-team" className="flag-team">
@@ -45,5 +45,21 @@ class PanelTeamsInfo extends React.Component {
   }
 }
 
-export default PanelTeamsInfo;
+PanelTeamsInfo.propTypes = {
+  home_team_avatar: PropTypes.string,
+  home_team_name: PropTypes.string,
+  away_team_avatar: PropTypes.string,
+  away_team_name: PropTypes.string,
+}
+
+const mapStateToProps = state => {
+  return {
+    home_team_avatar: state.app.setup.home_team.avatar,
+    home_team_name: state.app.setup.home_team.name,
+    away_team_avatar: state.app.setup.away_team.avatar,
+    away_team_name: state.app.setup.away_team.name,
+  }
+}
+
+export default connect(mapStateToProps)(PanelTeamsInfo)
 

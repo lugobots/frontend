@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bitbucket.org/makeitplay/lugo-frontend/cmd/tester/samples"
-	"bitbucket.org/makeitplay/lugo-frontend/cmd/tester/server"
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/frontend/cmd/tester/samples"
+	"github.com/lugobots/frontend/cmd/tester/server"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -40,7 +40,8 @@ func initTheServer(srv *server.Broadcaster) chan bool {
 
 	grpcServer := grpc.NewServer()
 
-	lugo.RegisterBroadcastServer(grpcServer, srv)
+	proto.RegisterBroadcastServer(grpcServer, srv)
+	proto.RegisterRemoteServer(grpcServer, srv)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9090))
 	if err != nil {
@@ -72,18 +73,23 @@ func main() {
 		{command: "move_player", sample: samples.SampleMovePlayers()},
 		{command: "rotate_player", sample: samples.SampleRotatePlayers()},
 		{command: "score_time", sample: samples.SampleScoreTime()},
+		{command: "game_over", sample: samples.SampleGameOver()},
+		{command: "buffer", sample: samples.SampleBuffering()},
 	}
 
 	for _, opt := range cms {
 		ddd := opt
-		rootCmd.AddCommand(&cobra.Command{
+		cmd := &cobra.Command{
 			Use: ddd.command,
 			Run: func(cmd *cobra.Command, args []string) {
 				srv.EventQueue = ddd.sample.Events
 				srv.Setup = ddd.sample.Setup
+				srv.Setup.DevMode = false
 				<-initTheServer(srv)
 			},
-		})
+		}
+		cmd.Flags().BoolP("dev-mode", "d", false, "Start on dev mode")
+		rootCmd.AddCommand(cmd)
 	}
 
 	if err := rootCmd.Execute(); err != nil {

@@ -1,120 +1,18 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"path"
+	"strconv"
 	"time"
 )
-
-//type Service struct {
-//	Clients []string
-//}
-//
-//func (s *Service) StreamEventsTo(uuid string) chan FrontEndUpdate {
-//
-//	clientChan := make(chan FrontEndUpdate)
-//
-//	sn := &lugo.GameSnapshot{
-//		State: lugo.GameSnapshot_WAITING,
-//		Turn:  12,
-//		HomeTeam: &lugo.Team{
-//			Players: []*lugo.Player{{
-//				Number: 1,
-//				Position: &lugo.Point{
-//					X: 100,
-//					Y: 100,
-//				},
-//				Velocity:     nil,
-//				TeamSide:     0,
-//				InitPosition: nil,
-//			},
-//			},
-//			Name:  "Eu",
-//			Score: 0,
-//			Side:  lugo.Team_HOME,
-//		},
-//		AwayTeam: &lugo.Team{
-//			Players: []*lugo.Player{{
-//				Number: 1,
-//				Position: &lugo.Point{
-//					X: 100,
-//					Y: 100,
-//				},
-//				Velocity:     nil,
-//				TeamSide:     0,
-//				InitPosition: nil,
-//			},
-//			},
-//			Name:  "Eu",
-//			Score: 0,
-//			Side:  lugo.Team_AWAY,
-//		},
-//		Ball:      &lugo.Ball{},
-//		ShotClock: nil,
-//	}
-//
-//	go func() {
-//		for {
-//			time.Sleep(1 * time.Second)
-//			sn.Turn = uint32(time.Now().Second())
-//			clientChan <- FrontEndUpdate{
-//				Type: EventStateChange,
-//				Update: UpdateData{
-//					GameEvent: &lugo.GameEvent{
-//						GameSnapshot: sn,
-//						Event: &lugo.GameEvent_StateChange{StateChange: &lugo.EventStateChange{
-//							PreviousState: lugo.GameSnapshot_LISTENING,
-//							NewState:      lugo.GameSnapshot_PLAYING,
-//						}},
-//					},
-//					TimeRemaining: time.Now().Format("i:s"),
-//				},
-//			}
-//		}
-//	}()
-//	return clientChan
-//}
-//
-//func (s *Service) GetGameConfig() Config {
-//	return Config{
-//		DevMode:   false,
-//		StartMode: "",
-//		HomeTeam: TeamConfiguration{
-//			Name:   "My team",
-//			Avatar: "external/profile-team-home.jpg",
-//			Colors: TeamColors{
-//				PrimaryColor: Color{
-//					R: 255,
-//					G: 255,
-//				},
-//				SecondaryColor: Color{
-//					R: 100,
-//					G: 100,
-//				},
-//			},
-//		},
-//		AwayTeam: TeamConfiguration{
-//			Name:   "Other team",
-//			Avatar: "external/profile-team-away.jpg",
-//			Colors: TeamColors{
-//				PrimaryColor: Color{
-//					R: 100,
-//					G: 255,
-//				},
-//				SecondaryColor: Color{
-//					R: 100,
-//					G: 200,
-//					B: 50,
-//				},
-//			},
-//		},
-//	}
-//}
 
 func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 	r := gin.Default()
@@ -136,10 +34,11 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 	})
 
 	r.Static("/images", path.Join(whereAmI, "/static/dist/images"))
+	r.Static("/sounds", path.Join(whereAmI, "/static/dist/sounds"))
 	r.Static("/external", path.Join(whereAmI, "/static/external"))
 
 	//temp
-	r.Static("/velho", path.Join(whereAmI, "/static/"))
+	//r.Static("/velho", path.Join(whereAmI, "/static/"))
 
 	uniquer := Uniquer{}
 
@@ -159,14 +58,90 @@ func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 		})
 	})
 
-	r.GET("/setup/:gameID/:uuid/", makeSetupHandler(srv))
-	r.GET("/game-state/:gameID/:uuid/", makeGameStateHandler(srv))
+	r.GET("/setup/:gameID/:uuid", makeSetupHandler(srv))
+	r.GET("/game-state/:gameID/:uuid", makeGameStateHandler(srv))
+
+	remote := r.Group("/remote")
+	{
+		remote.POST("/pause-resume", func(context *gin.Context) {
+			resp, err := srv.GetRemote().PauseOrResume(context, &proto.PauseResumeRequest{})
+			if err != nil {
+				context.JSON(http.StatusInternalServerError, err)
+				return
+			}
+			context.JSON(http.StatusOK, resp)
+		})
+		remote.POST("/next-turn", func(context *gin.Context) {
+			resp, err := srv.GetRemote().NextTurn(context, &proto.NextTurnRequest{})
+			if err != nil {
+				context.JSON(http.StatusInternalServerError, err)
+				return
+			}
+			context.JSON(http.StatusOK, resp)
+		})
+		remote.POST("/next-order", func(context *gin.Context) {
+			resp, err := srv.GetRemote().NextTurn(context, &proto.NextTurnRequest{})
+			if err != nil {
+				context.JSON(http.StatusInternalServerError, err)
+				return
+			}
+			context.JSON(http.StatusOK, resp)
+		})
+		remote.PATCH("/players/:team/:number", func(context *gin.Context) {
+			side := proto.Team_HOME
+			if context.Param("team") == "away" {
+				side = proto.Team_AWAY
+			}
+			n, err := strconv.Atoi(context.Param("number"))
+			if err != nil {
+				e := fmt.Errorf("invalid player number %s: %w", context.Param("number"), err)
+				log.Println(e)
+				context.JSON(http.StatusInternalServerError, e)
+				return
+			}
+
+			props, err := context.GetRawData()
+			if err != nil {
+				e := fmt.Errorf("error reading playload: %w", err)
+				log.Println(e)
+				context.JSON(http.StatusInternalServerError, e)
+				return
+			}
+			playerProperties := &proto.PlayerProperties{
+				Side:     side,
+				Number:   uint32(n),
+				Position: &proto.Point{},
+				Velocity: nil,
+			}
+
+			if err := json.Unmarshal(props, playerProperties.Position); err != nil {
+				e := fmt.Errorf("not a valid JSON: %w", err)
+				log.Println(e)
+				context.JSON(http.StatusInternalServerError, e)
+				return
+			}
+
+			resp, err := srv.GetRemote().SetPlayerProperties(context, playerProperties)
+			if err != nil {
+				e := fmt.Errorf("error from game server: %w", err)
+				log.Println(e)
+				context.JSON(http.StatusInternalServerError, e)
+				return
+			}
+			context.JSON(http.StatusOK, resp)
+		})
+	}
+
 	return r
 }
 
 func makeSetupHandler(srv EventsBroker) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, srv.GetGameConfig())
+		if config, err := srv.GetGameConfig(c.Param("uuid")); err == nil {
+			c.JSON(http.StatusOK, config)
+		} else {
+			c.JSON(http.StatusBadGateway, map[string]interface{}{"error": err.Error()})
+		}
 	}
 }
 
@@ -175,6 +150,19 @@ func makeGameStateHandler(srv EventsBroker) gin.HandlerFunc {
 		clientGone := c.Writer.CloseNotify()
 		uuid := c.Param("uuid")
 		streamChan := srv.StreamEventsTo(uuid)
+
+		//
+		//Problema para resolver:
+		//	O backend e o frontend estao perdendo sincronia quando a conectao eh aberta e o backend esta no mobo debug
+		//
+		//
+		//isso acontece pq o frontend processa o SETUP depois que a conecao com o stream ja enviou o ultimo quadro
+		//que diz que o modo debug is on.
+		//	I o frontend manda pra o "listening" depois de fazer o setup>
+		//
+		//	opcao 1: mandar um novo frame assim que o cara pede o setup
+		//opcao 2: fazer endpint pra solicitar ultimo evento
+		//opcao 3:  no frontend mudar a logic pra o setup nao definir proximo estado do frontend
 
 		log.Printf("streaming to %s", uuid)
 		c.Stream(func(w io.Writer) bool {
@@ -185,8 +173,8 @@ func makeGameStateHandler(srv EventsBroker) gin.HandlerFunc {
 				if !ok {
 					return false
 				}
-				log.Printf("Sending type %s: %s", m.Type, m.Update)
-				c.SSEvent(m.Type, m.Update)
+				log.Printf("Sending type %s", m.Type)
+				c.SSEvent(string(m.Type), m.Update)
 			case <-time.After(500 * time.Millisecond):
 				c.SSEvent("ping", "ping")
 			}

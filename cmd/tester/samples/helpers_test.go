@@ -1,7 +1,7 @@
 package samples
 
 import (
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -10,11 +10,11 @@ func TestCopySnap(t *testing.T) {
 	initial := getInitSnap()
 
 	initial.Ball.Position.Y = 400
-	initial.AwayTeam.Players = []*lugo.Player{
+	initial.AwayTeam.Players = []*proto.Player{
 		{
 			Number: 1,
-			Velocity: &lugo.Velocity{
-				Direction: &lugo.Vector{
+			Velocity: &proto.Velocity{
+				Direction: &proto.Vector{
 					X: 12,
 					Y: 120,
 				},
@@ -23,14 +23,14 @@ func TestCopySnap(t *testing.T) {
 		},
 	}
 
-	newValue := copySnap(initial)
+	newValue := CopySnap(initial)
 
 	newValue.Turn = 200
 	newValue.HomeTeam.Score = 200
 	newValue.AwayTeam.Players[0].Number = 5
 	newValue.AwayTeam.Players[0].Velocity.Direction.X = 400
 	newValue.AwayTeam.Players[0].Velocity.Direction.Y = 100
-	newValue.Ball.Position = &lugo.Point{}
+	newValue.Ball.Position = &proto.Point{}
 
 	assert.Equal(t, uint32(0), initial.Turn)
 	assert.Equal(t, uint32(0), initial.HomeTeam.Score)

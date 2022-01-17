@@ -1,9 +1,11 @@
 package main
 
 import (
-	"bitbucket.org/makeitplay/lugo-frontend/web/app"
-	"bitbucket.org/makeitplay/lugo-frontend/web/app/broker"
 	"context"
+	"github.com/lugobots/frontend/web/app"
+	"github.com/lugobots/frontend/web/app/broker"
+	"github.com/lugobots/frontend/web/app/buffer"
+	"github.com/paulbellamy/ratecounter"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
@@ -82,11 +84,16 @@ func main() {
 	//	},
 	//}
 
+	counter := ratecounter.NewAvgRateCounter(broker.MessagesRateMeasureTimeWindow * time.Second)
+
+	bufferizer := buffer.NewBufferizer(zapLog.Named("broker"), counter)
 	eventBroker := broker.NewBinder(app.Config{
-		GRPCAddress:  "localhost:9090",
-		GRPCInsecure: true,
-	}, zapLog)
-	server := app.NewHandler("/home/rubens/go/src/bitbucket.org/makeitplay/lugo-frontend/web", "local", eventBroker)
+		GRPCAddress:         "localhost:9090",
+		GRPCInsecure:        true,
+		StaysIfDisconnected: true,
+	}, zapLog.Named("broker"), bufferizer)
+
+	server := app.NewHandler("/home/rubens/projects/lugo/lugo-frontend/web", "local", eventBroker)
 	httpServer := &http.Server{
 		Addr:    ":8080",
 		Handler: server,

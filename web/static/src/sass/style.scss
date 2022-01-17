@@ -1,5 +1,6 @@
 // Importing sass library codes
 @import 'src/arq_theme';
+@import 'src/animations';
 
 /* Importando Fonte do google */
 @import url('#{$font-google}');
@@ -75,7 +76,7 @@ $team-away-color-2 : var(--team-away-color-secondary);
   // max-height: 100vh;
 }
 
-#lugobot-page {
+#stadium {
   @include model-display($display:block, $position:relative);
   width: 100%;
   min-height: 100vh;
@@ -554,7 +555,6 @@ $team-away-color-2 : var(--team-away-color-secondary);
     }
 
     #remaining {
-      display: none;
       @include model-square(100%);
       @include font-size(28, 48);
       padding-top: 21px;
@@ -585,7 +585,7 @@ $team-away-color-2 : var(--team-away-color-secondary);
     @include model-square(100%);
     position: relative;
     margin: 20px 25px !important;
-    height: 605px;
+    aspect-ratio: 2/1;
     background: url("../img/bg/field/Field_2.svg") no-repeat;
     background-size: contain;
 
@@ -686,6 +686,7 @@ $team-away-color-2 : var(--team-away-color-secondary);
     border-radius: 50%;
     clip-path: polygon(74% 0%, calc(100% - 15px) 75%, 16px 74%, 26% 0%);
     box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0 0 3px rgba($team-home-color-1, 0.54);
+
   }
 
   .player-number {
@@ -811,6 +812,17 @@ $team-away-color-2 : var(--team-away-color-secondary);
     }
   }
 }
+.rearranging  {
+  .player {
+    cursor: move;
+    animation: shaking linear 1s;
+    animation-iteration-count: infinite;
+    transition: none;
+  }
+}
+
+
+
 
 /* Soccer Ball */
 #ball {
@@ -850,7 +862,10 @@ $team-away-color-2 : var(--team-away-color-secondary);
     background-size: contain;
   }
 
-
+  &.within_goal_zone {
+    animation: glowing linear 0.3s;
+    animation-iteration-count: infinite;
+  }
 
   @include breakpoint(m) {
     &::before {
@@ -1390,16 +1405,15 @@ $team-away-color-2 : var(--team-away-color-secondary);
 #lugobot-admin-panel {
   @include model-flex(column, nowrap, flex-start, false);
   display: none;
-  bottom: 0px;
   width: 100%;
-  position: fixed;
   padding: 0 40px;
+  margin-top: 20px;
   background-image: url('../img/bg/footer/bg-footer-complete.png');
   background-repeat: no-repeat;
   background-position: top center;
   background-size: cover;
-  transform:translateY(100%);
-  transition: transform 1s ease-in 1s;
+  //transform:translateY(100%);
+  transition: transform 0.5s ease-in 0.5s;
 
   &.debug-mode {  display: flex; }
   * {
@@ -1631,7 +1645,7 @@ $team-away-color-2 : var(--team-away-color-secondary);
     }
   }
 
-  #coordenates {
+  #coordinates {
     @include model-flex(row, nowrap, center, false);
 
     #axis {
@@ -1799,6 +1813,10 @@ $team-away-color-2 : var(--team-away-color-secondary);
       }
     }
 
+    &:disabled {
+      color: #4e6365 !important;
+      border-color: rgba(93, 67, 67, 0);
+    }
     &#btn-next-order::before { content: '\f051'; }
     &#btn-next-cycle::before { content: '\f050'; }
     &#btn-rearrange::before { content: '\f0b2'; }
@@ -1815,4 +1833,34 @@ $team-away-color-2 : var(--team-away-color-secondary);
 
   }
 /* #endregion -- Section END General classes */
+
+
+
+#grid {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  width: 100%;
+
+  .grid_lines {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    justify-content: space-evenly;
+  }
+
+  .grid_cell {
+    padding-top: 5px;
+    padding-left: 5px;
+    border-top: 1px solid #efefef;
+    border-right: 1px solid #efefef;
+    width: 100%;
+    font-size: .8em;
+    color: #efefef;
+    opacity: 0.4;
+  }
+}
+
+
 

@@ -3,47 +3,47 @@ package samples
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 type Sample struct {
-	Events []*lugo.GameEvent
-	Setup  *lugo.GameSetup
+	Events []*proto.GameEvent
+	Setup  *proto.GameSetup
 }
 
-func getLastSampleSnap(sample Sample) *lugo.GameSnapshot {
+func getLastSampleSnap(sample Sample) *proto.GameSnapshot {
 	return sample.Events[len(sample.Events)-1].GameSnapshot
 }
-func getInitSnap() *lugo.GameSnapshot {
-	return &lugo.GameSnapshot{
-		State: lugo.GameSnapshot_WAITING,
+func getInitSnap() *proto.GameSnapshot {
+	return &proto.GameSnapshot{
+		State: proto.GameSnapshot_WAITING,
 		Turn:  0,
-		HomeTeam: &lugo.Team{
-			Players: []*lugo.Player{},
+		HomeTeam: &proto.Team{
+			Players: []*proto.Player{},
 			Name:    "Team C (snapshot)",
 			Score:   0,
-			Side:    lugo.Team_HOME,
+			Side:    proto.Team_HOME,
 		},
-		AwayTeam: &lugo.Team{
-			Players: []*lugo.Player{},
+		AwayTeam: &proto.Team{
+			Players: []*proto.Player{},
 			Name:    "Team D (snapshot)",
 			Score:   0,
-			Side:    lugo.Team_AWAY,
+			Side:    proto.Team_AWAY,
 		},
-		Ball: &lugo.Ball{
-			Position: &lugo.Point{},
+		Ball: &proto.Ball{
+			Position: &proto.Point{},
 		},
 	}
 }
 
-func copySnap(snap *lugo.GameSnapshot) *lugo.GameSnapshot {
+func CopySnap(snap *proto.GameSnapshot) *proto.GameSnapshot {
 	j, err := proto.Marshal(snap)
 	if err != nil {
 		panic(fmt.Sprintf("error marshalling snapshot: %s", err))
 	}
 
-	m := &lugo.GameSnapshot{}
+	m := &proto.GameSnapshot{}
 	err = proto.UnmarshalMerge(j, m)
 	if err != nil {
 		panic(fmt.Sprintf("error marshalling snapshot: %s", err))
@@ -51,25 +51,36 @@ func copySnap(snap *lugo.GameSnapshot) *lugo.GameSnapshot {
 	return m
 }
 
-func makeInitialPosition(playerNumber uint32, side lugo.Team_Side) *lugo.Point {
-	p := lugo.Point{
+func makeInitialPosition(playerNumber uint32, side proto.Team_Side) *proto.Point {
+	p := proto.Point{
 		X: field.FieldWidth / 4,
 		Y: int32(playerNumber) * field.PlayerSize * 2,
 	}
 
-	if side == lugo.Team_AWAY {
+	if side == proto.Team_AWAY {
 		p.X = field.FieldWidth - p.X
 	}
 	return &p
 }
 
-func newStateChangeEvent(snap *lugo.GameSnapshot, previous lugo.GameSnapshot_State) *lugo.GameEvent {
-	return &lugo.GameEvent{
+func newStateChangeEvent(snap *proto.GameSnapshot, previous proto.GameSnapshot_State) *proto.GameEvent {
+	return &proto.GameEvent{
 		GameSnapshot: snap,
-		Event: &lugo.GameEvent_StateChange{
-			StateChange: &lugo.EventStateChange{
+		Event: &proto.GameEvent_StateChange{
+			StateChange: &proto.EventStateChange{
 				PreviousState: previous,
 				NewState:      snap.State,
+			},
+		},
+	}
+}
+
+func newGoal(snap *proto.GameSnapshot, side proto.Team_Side) *proto.GameEvent {
+	return &proto.GameEvent{
+		GameSnapshot: snap,
+		Event: &proto.GameEvent_Goal{
+			Goal: &proto.EventGoal{
+				Side: side,
 			},
 		},
 	}

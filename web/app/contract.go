@@ -1,23 +1,32 @@
 package app
 
-import "github.com/lugobots/lugo4go/v2/lugo"
+import (
+	"encoding/json"
+	"github.com/lugobots/lugo4go/v2/proto"
+)
 
 type EventsBroker interface {
 	StreamEventsTo(uuid string) chan FrontEndUpdate
-	GetGameConfig() FrontEndSet
+	GetGameConfig(uuid string) (FrontEndSet, error)
+	GetRemote() proto.RemoteClient
 }
 
+type EventType string
+
 const (
-	EventNewPlayer     = "new_player"
-	EventBreakpoint    = "breakpoint"
-	EventStateChange   = "state_change"
-	EventDebugReleased = "debug_released"
-	EventGameOver      = "game_over"
-	EventLostPlayer    = "lost_player"
+	EventNewPlayer     EventType = "new_player"
+	EventBreakpoint    EventType = "breakpoint"
+	EventStateChange   EventType = "state_change"
+	EventDebugReleased EventType = "debug_released"
+	EventGameOver      EventType = "game_over"
+	EventLostPlayer    EventType = "lost_player"
+	EventGoal          EventType = "goal"
 
 	//events between frontend server and frontend
-	EventConnectionLost          = "connection_lots"
-	EventConnectionReestablished = "connection_Reestablished"
+	EventConnectionLost          EventType = "connection_lots"
+	EventConnectionReestablished EventType = "connection_reestablished"
+	EventBuffering               EventType = "buffering"
+	EventBufferReady             EventType = "buffer_ready"
 )
 
 const (
@@ -26,17 +35,22 @@ const (
 )
 
 type UpdateData struct {
-	GameEvent     *lugo.GameEvent `json:"game_event"`
+	GameEvent     json.RawMessage `json:"game_event"`
 	TimeRemaining string          `json:"time_remaining"`
+	ShotTime      string          `json:"shot_time"`
+	DebugMode     bool            `json:"debug_mode"`
+	Buffer        int             `json:"buffer_percentile"`
 }
 
 type FrontEndUpdate struct {
-	Type            string     `json:"type"`
-	Update          UpdateData `json:"data"`
-	ConnectionState string     `json:"connection_state"`
+	// speed up the rate calc
+	Snapshot        *proto.GameSnapshot `json:"-"`
+	Type            EventType           `json:"type"`
+	Update          UpdateData          `json:"data"`
+	ConnectionState string              `json:"connection_state"`
 }
 type FrontEndSet struct {
-	GameSetup       *lugo.GameSetup `json:"game_setup"`
+	GameSetup       json.RawMessage `json:"game_setup"`
 	ConnectionState string          `json:"connection_state"`
 }
 
