@@ -252,15 +252,17 @@ $team-away-color-2 : var(--team-away-color-secondary);
 
       }
 
+
+
       .picture-team {
         @include model-square(65px);
         @include model-display($display:block, $position:relative);
         box-shadow: 0px 0px 20px 10px rgba(5, 6, 6, 0.44);
-        background-image: url('../img/bg/header/bg-picture.png');
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-color: rgba(0, 0, 0, .2);
+        //background-image: url('../img/bg/header/bg-picture.png');
+        //background-size: contain;
+        //background-repeat: no-repeat;
+        //background-position: center center;
+        //background-color: rgba(0, 0, 0, .2);
         border-radius: 50%;
         overflow: hidden;
         padding: 4px;
@@ -269,6 +271,15 @@ $team-away-color-2 : var(--team-away-color-secondary);
           @include model-img($model:contain);
           border-radius: 50%;
         }
+      }
+
+      #picture-home-team {
+        //background-color: $team-away-color-1;
+        background: linear-gradient(45deg, rgba($team-home-color-1, 1) 30%, rgba($team-home-color-2, 1) 70%)
+      }
+      #picture-away-team {
+        //background-color: $team-away-color-1;
+        background: linear-gradient(45deg, rgba($team-away-color-1, 1) 30%, rgba($team-away-color-2, 1) 70%)
       }
 
       .name-team {

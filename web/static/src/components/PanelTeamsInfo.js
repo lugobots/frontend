@@ -14,7 +14,7 @@ class PanelTeamsInfo extends React.Component {
         <span id="home-team" className="team">
           <span id="profile-home-team" className="profile-team">
             <span id="picture-home-team" className="picture-team">
-              <img src={this.props.home_team_avatar} alt="Team Home logo"/>
+              <img src={this.props.home_team_avatar}/>
             </span>
             <span id="home-team-name" className="name-team">
               <h3>{this.props.home_team_name}</h3>
@@ -29,7 +29,7 @@ class PanelTeamsInfo extends React.Component {
       <span id="away-team" className="team">
             <span id="profile-away-team" className="profile-team">
               <span id="picture-away-team" className="picture-team">
-                <img src={this.props.away_team_avatar} alt="Team Home logo"/>
+                <img src={this.props.away_team_avatar}/>
               </span>
               <span id="name-away-team" className="name-team">
                 <h3>{this.props.away_team_name}</h3>
