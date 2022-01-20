@@ -3,8 +3,6 @@ import Panel from "./Panel";
 import Field from "./Field";
 import Events from "./Events";
 import ToolBar from "./ToolBar";
-import {Howl} from 'howler';
-import tickAudio from '../sounds/kick.mp3';
 
 import {StadiumStatus} from '../constants';
 import {renderLogger, updateRatio} from "../helpers";

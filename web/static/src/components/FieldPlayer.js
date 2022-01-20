@@ -23,14 +23,21 @@ class FieldPlayer extends React.Component {
   componentDidMount() {
     const meInJquery = $(this.myDOM.current)
     this.props.setOnNewFrameListener(player => {
-      this.position.x = player.position.x ?? 0
-      this.position.y = player.position.y ?? 0
+
+      if(!player) {
+        this.myDOM.current.style.opacity = 0.2
+      } else {
+        this.myDOM.current.style.opacity = 1
+      }
+
+      this.position.x = player.position?.x ?? this.props.defaultPosition.x
+      this.position.y = player.position?.y ?? this.props.defaultPosition.y
       const left = 100 * this.position.x / GameDefinitions.Field.Width
       const top = 100 * (GameDefinitions.Field.Height - this.position.y) / GameDefinitions.Field.Height
 
       this.myDOM.current.style.left = `${left}%`;
       this.myDOM.current.style.top = `${top}%`;
-      this.myDirectionDOM.current.style.transform = `rotate(${-player.velocity.direction.ang + 90}deg)`;
+      this.myDirectionDOM.current.style.transform = `rotate(${-player?.velocity?.direction?.ang + 90}deg)`;
     })
     meInJquery.draggable({
       containment: "parent",

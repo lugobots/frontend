@@ -10,7 +10,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"io"
-	"math"
 	"sync"
 	"time"
 )
@@ -31,7 +30,7 @@ var defaultTeamColors = &proto.TeamSettings{
 
 const MessagesRateMeasureTimeWindow = 5
 
-func NewBinder(config app.Config, logger *zap.SugaredLogger, buffer BufferHandler) *Binder {
+func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 	return &Binder{
 		consumers:    map[string]chan app.FrontEndUpdate{},
 		consumersMux: sync.RWMutex{},
@@ -41,11 +40,10 @@ func NewBinder(config app.Config, logger *zap.SugaredLogger, buffer BufferHandle
 			HomeTeam: defaultTeamColors,
 			AwayTeam: defaultTeamColors,
 		},
-		buffer: buffer,
 	}
 }
 
-const MaxUpdateBuffer = 1200 // n / 20 = time in sec
+//const MaxUpdateBuffer = 1200 // n / 20 = time in sec
 
 type Binder struct {
 	consumers    map[string]chan app.FrontEndUpdate
@@ -58,7 +56,6 @@ type Binder struct {
 	stopRequest  bool
 	Logger       *zap.SugaredLogger
 	lastUpdate   app.FrontEndUpdate
-	buffer       BufferHandler
 }
 
 func (b *Binder) GetRemote() proto.RemoteClient {
@@ -80,6 +77,7 @@ func (b *Binder) GetGameConfig(uuid string) (app.FrontEndSet, error) {
 		state = app.ConnStateDown
 	}
 
+	// not sure why we need this
 	go func() {
 		time.Sleep(1 * time.Second)
 		b.consumersMux.RLock()
@@ -121,18 +119,18 @@ func (b *Binder) connect() error {
 	if err != nil {
 		return err
 	}
-	if !b.gameSetup.DevMode {
-		bufferLoad := b.buffer.Start(func(data BufferedEvent) {
-			b.lastUpdate = data.Update
-			b.sendToAll(data.Update)
-			if data.Update.Type == app.EventGoal {
-				time.Sleep(5 * time.Second)
-			} else if data.Update.Snapshot.State == proto.GameSnapshot_LISTENING {
-				time.Sleep(50 * time.Millisecond)
-			}
-		}, b.gameSetup.GameDuration)
-		go b.watchBufferNotifications(bufferLoad)
-	}
+	//if !b.gameSetup.DevMode {
+	//	bufferLoad := b.buffer.Start(func(data BufferedEvent) {
+	//		b.lastUpdate = data.Update
+	//		b.sendToAll(data.Update)
+	//		if data.Update.Type == app.EventGoal {
+	//			time.Sleep(5 * time.Second)
+	//		} else if data.Update.Snapshot.State == proto.GameSnapshot_LISTENING {
+	//			time.Sleep(50 * time.Millisecond)
+	//		}
+	//	}, b.gameSetup.GameDuration)
+	//	go b.watchBufferNotifications(bufferLoad)
+	//}
 
 	b.remoteConn = proto.NewRemoteClient(b.producerConn)
 
@@ -156,7 +154,6 @@ func (b *Binder) ListenAndBroadcast() error {
 				finalErr = err
 				break
 			}
-			b.buffer.Stop()
 			b.broadcastConnectionLost()
 			b.Logger.Warnf("broadcast interrupted: %s", err)
 		}
@@ -212,24 +209,12 @@ func (b *Binder) broadcast() error {
 			b.Logger.Errorf("ignoring game event: %s", err)
 			continue
 		}
-		if b.gameSetup.DevMode {
-			b.lastUpdate = update
-			b.sendToAll(update)
-		} else {
-			if err := b.buffer.QueueUp(update); err != nil {
-				b.Logger.Errorf("ignoring game event: %s", err)
-			}
-			//if the game is ended, the grpx will be dropped soon, we must wait the buffer be consumed.
-			if update.Type == app.EventGameOver {
-				for range time.Tick(1 * time.Second) {
-					b.Logger.Info("game ended, waiting buffer be consumed")
-					// very ugly solution!
-					if b.lastUpdate.Type == app.EventGameOver {
-						return app.ErrGameOver
-					}
-				}
-			}
-		}
+		b.lastUpdate = update
+		b.sendToAll(update)
+		//if event.GetGoal() != nil {
+		//	time.Sleep(10 * time.Second)
+		//}
+		// VAI TER QUE CACHEAR
 	}
 }
 
@@ -261,7 +246,7 @@ func (b *Binder) sendToAll(update app.FrontEndUpdate) {
 		}
 	}
 	b.consumersMux.RUnlock()
-	b.Logger.Infof("event sent: %s", update.Type)
+	//b.Logger.Infof("event sent: %s", update.Type)
 }
 
 func (b *Binder) broadcastConnectionLost() {
@@ -325,29 +310,29 @@ func (b *Binder) createFrame(event *proto.GameEvent, debugging bool) (app.FrontE
 	return update, debugging, nil
 }
 
-func (b *Binder) watchBufferNotifications(bufferLoad <-chan float32) {
-	for {
-		select {
-		case percentile, ok := <-bufferLoad:
-			if !ok {
-				return
-			}
-			b.lastUpdate.Update.Buffer = int(math.Round(float64(percentile) * 100))
-			update := app.FrontEndUpdate{
-				Update:          b.lastUpdate.Update,
-				ConnectionState: app.ConnStateUp,
-			}
-			update.Type = app.EventBufferReady
-			if percentile < 1 {
-				update.Type = app.EventBuffering
-			}
-			b.lastUpdate = update
-			b.sendToAll(update)
-			b.Logger.Infof("Buffer load %f", percentile)
-			time.Sleep(5 * time.Second)
-		}
-	}
-}
+//func (b *Binder) watchBufferNotifications(bufferLoad <-chan float32) {
+//	for {
+//		select {
+//		case percentile, ok := <-bufferLoad:
+//			if !ok {
+//				return
+//			}
+//			b.lastUpdate.Update.Buffer = int(math.Round(float64(percentile) * 100))
+//			update := app.FrontEndUpdate{
+//				Update:          b.lastUpdate.Update,
+//				ConnectionState: app.ConnStateUp,
+//			}
+//			update.Type = app.EventBufferReady
+//			if percentile < 1 {
+//				update.Type = app.EventBuffering
+//			}
+//			b.lastUpdate = update
+//			b.sendToAll(update)
+//			b.Logger.Infof("Buffer load %f", percentile)
+//			time.Sleep(5 * time.Second)
+//		}
+//	}
+//}
 
 func eventTypeTranslator(event interface{}) (app.EventType, error) {
 	switch event.(type) {

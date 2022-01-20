@@ -7,33 +7,25 @@ import {AppStatus, BackendConfig, EventTypes, GameStates, StadiumStatus} from ".
 import store from "./store";
 import Stadium from "./components/Stadium";
 import channel from "./channel";
-import {Howl} from "howler";
-import audioKick from "./sounds/kick.mp3";
-import audioNewPlayer from "./sounds/new-player.wav";
-import audioRefereeStart from "./sounds/referee-whistle.mp3";
-import audioBackground from "./sounds/backgound.mp3";
+import audio from "./audio_manager";
+// import {Howl} from "howler";
+// import audioKick from "./sounds/kick.mp3";
+// import audioNewPlayer from "./sounds/new-player.wav";
+// import audioRefereeStart from "./sounds/referee-whistle.mp3";
+// import audioBackground from "./sounds/gb.wav";
+// import audioPublic from "./sounds/public.mp3";
+// import goal from "./sounds/goal1.wav";
+// import audioConnectionLost from "./sounds/connection-lost.mp3";
+// import audioReconnected from "./sounds/reconnected.mp3";
 
 class App extends React.Component {
   constructor(props) {
     super(props);
 
-    this.audio = {
-      background: new Howl({
-        src: [audioBackground]
-      }),
-      kick: new Howl({
-        src: [audioKick]
-      }),
-      newPlayer: new Howl({
-        src: [audioNewPlayer]
-      }),
-      refereeStart: new Howl({
-        src: [audioRefereeStart]
-      }),
-    }
+    this.audioManager = audio
 
     this.ballOnHold = false;
-    this.previousState = GameStates.WAITING;
+    this.previousGameState = GameStates.WAITING;
   }
 
 
@@ -72,19 +64,28 @@ class App extends React.Component {
       this.props.dispatch(stadiumAction.resume())
     }
 
-    if(data.game_event.game_snapshot?.state !== GameStates.PLAYING && data.game_event.game_snapshot?.state !== "LISTENING") {
-      console.log(data.game_event.game_snapshot?.state)
-    }
+    // if (data.game_event.game_snapshot?.state !== GameStates.PLAYING && data.game_event.game_snapshot?.state !== "LISTENING") {
+    //   console.log(data.game_event.game_snapshot?.state)
+    // }
 
     // detecting game start or restart
-    if(data.game_event.game_snapshot?.state === GameStates.LISTENING && this.previousState === GameStates.GET_READY) {
-      this.audio.refereeStart.play()
+    if (data.game_event.game_snapshot?.state === GameStates.LISTENING && this.previousGameState === GameStates.GET_READY) {
+      this.audioManager.onGameRestart()
+    // } else if (data.game_event.game_snapshot?.state !== GameStates.WAITING && this.previousGameState === GameStates.WAITING) {
+    //   this.audioManager.onGameStarts()
+    } if (data.game_event.game_snapshot?.state === GameStates.LISTENING && !this.audioManager.isAmbienceOn()) {
+      this.audioManager.onGameResume()
+    }
+
+
+    if (data.game_event.game_snapshot?.ball?.holder?.number === 1) {
+      // this.audio.audioPublic.play("claps_good_try")
     }
 
     // detecting ball kick
-    if(!data.game_event.game_snapshot?.ball?.holder) {
-      if(this.ballOnHold) {
-        this.audio.kick.play()
+    if (!data.game_event.game_snapshot?.ball?.holder) {
+      if (this.ballOnHold) {
+        this.audioManager.onKick()
 
         this.ballOnHold = false
       }
@@ -93,7 +94,7 @@ class App extends React.Component {
     }
 
 
-    this.previousState = data.game_event.game_snapshot?.state
+    this.previousGameState = data.game_event.game_snapshot?.state
     this.updateTimer(data)
     channel.newGameFrame(data.game_event.game_snapshot)
   }
@@ -107,12 +108,18 @@ class App extends React.Component {
     let backConnTries = 0;
     this.evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
     this.evtSource.onerror = () => {
+      if (backConnTries === 0) {
+        this.audioManager.onBackendConnectionLost()
+      }
       backConnTries++
       this.props.dispatch(appAction.backendDisconnected())
       this.props.dispatch(stadiumAction.displayAlert("Connecting to backend",
         <span>Wait the connection be established<br/><br/>Retrying {backConnTries}</span>))
     };
     this.evtSource.addEventListener('open', () => {
+      if(backConnTries > 0) {
+        this.audioManager.onBackendReconnected()
+      }
       upstreamConnTries = 0;
       backConnTries = 0;
       this.props.dispatch(appAction.backConnect())
@@ -125,6 +132,10 @@ class App extends React.Component {
         return
       }
       console.error("%cupstream connection lost", "color: #AA0000")
+      if (upstreamConnTries === 0) {
+        this.audioManager.onUpstreamConnectionLost()
+      }
+
       upstreamConnTries++
       this.props.dispatch(appAction.upstreamDisconnect())
       this.props.dispatch(stadiumAction.displayAlert("Upstream connection lost",
@@ -133,11 +144,13 @@ class App extends React.Component {
     });
     this.evtSource.addEventListener(EventTypes.ConnectionReestablished, () => {
       upstreamConnTries = 0;
+      this.audioManager.onUpstreamReconnected()
       console.log("%cupstream connection reestablished", "color: green")
       this.props.dispatch(appAction.upstreamConnected())
     });
     this.evtSource.addEventListener(EventTypes.StateChange, (e) => this.onStateChange(this.parse(e)));
     this.evtSource.addEventListener(EventTypes.Goal, (e) => {
+      this.audioManager.onGoal()
       const g = this.parse(e);
       this.updatePanel(g)
       //ignore celebrations on dev mode.
@@ -166,7 +179,11 @@ class App extends React.Component {
 
     this.evtSource.addEventListener(EventTypes.NewPlayer, (e) => {
       this.onStateChange(this.parse(e))
-      this.audio.newPlayer.play()
+      this.audioManager.onNewPlayer()
+    });
+    this.evtSource.addEventListener(EventTypes.LostPlayer, (e) => {
+      this.onStateChange(this.parse(e))
+      this.audioManager.onLostPlayer()
     });
   }
 
