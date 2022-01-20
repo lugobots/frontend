@@ -8,13 +8,14 @@ import (
 	"github.com/lugobots/frontend/web/app"
 	"github.com/lugobots/lugo4go/v2/proto"
 	"go.uber.org/zap"
+	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"io"
 	"sync"
 	"time"
 )
 
-var maxIgnoredMessaged = 20
+var maxIgnoredMessaged = 20 * 5 // 20 msg = 1 second
 var maxGRPCReconnect = 10
 var grpcReconnectInterval = time.Second
 
@@ -137,6 +138,33 @@ func (b *Binder) connect() error {
 	return err
 }
 
+func (b *Binder) drainBuffer(ctx context.Context, caching chan app.FrontEndUpdate) {
+	limiter := rate.NewLimiter(40, 1)
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case update, ok := <-caching:
+			if !ok {
+				b.Logger.Error("Cache closed")
+				return
+			}
+			b.lastUpdate = update
+			b.sendToAll(update)
+			if !b.gameSetup.DevMode {
+				switch update.Type {
+				case app.EventGoal:
+					time.Sleep(8 * time.Second)
+				case app.EventStateChange:
+					if err := limiter.Wait(context.Background()); err != nil {
+						b.Logger.With("error", err).Error("could not wait more to keep the rate")
+					}
+				}
+			}
+		}
+	}
+}
+
 func (b *Binder) ListenAndBroadcast() error {
 	tries := 0
 	var finalErr error
@@ -149,7 +177,12 @@ func (b *Binder) ListenAndBroadcast() error {
 		} else {
 			b.broadcastConnectionRees()
 			tries = 0
-			err := b.broadcast()
+			caching := make(chan app.FrontEndUpdate, 5000)
+			ctx, stop := context.WithCancel(context.Background())
+			go b.drainBuffer(ctx, caching)
+			err := b.broadcast(caching)
+			stop()
+			close(caching)
 			if err == app.ErrGameOver {
 				finalErr = err
 				break
@@ -182,7 +215,7 @@ func (b *Binder) Stop() error {
 	return nil
 }
 
-func (b *Binder) broadcast() error {
+func (b *Binder) broadcast(caching chan app.FrontEndUpdate) error {
 	ctx := context.Background()
 	receiver, err := b.producer.OnEvent(ctx, &proto.WatcherRequest{
 		Uuid: "frontend",
@@ -209,12 +242,7 @@ func (b *Binder) broadcast() error {
 			b.Logger.Errorf("ignoring game event: %s", err)
 			continue
 		}
-		b.lastUpdate = update
-		b.sendToAll(update)
-		//if event.GetGoal() != nil {
-		//	time.Sleep(10 * time.Second)
-		//}
-		// VAI TER QUE CACHEAR
+		caching <- update
 	}
 }
 
