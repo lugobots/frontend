@@ -72,5 +72,5 @@ const (
 
 	ErrGameOver = Error("the game is over")
 
-	ErrStopRequested = Error("it was requested to stop")
+	//ErrStopRequested = Error("it was requested to stop")
 )

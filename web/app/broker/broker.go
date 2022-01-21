@@ -7,9 +7,13 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/lugobots/frontend/web/app"
 	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/pkg/errors"
+	"github.com/rubens21/srvmgr"
 	"go.uber.org/zap"
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"io"
 	"sync"
 	"time"
@@ -41,6 +45,7 @@ func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 			HomeTeam: defaultTeamColors,
 			AwayTeam: defaultTeamColors,
 		},
+		process: srvmgr.NewProcess(),
 	}
 }
 
@@ -57,6 +62,11 @@ type Binder struct {
 	stopRequest  bool
 	Logger       *zap.SugaredLogger
 	lastUpdate   app.FrontEndUpdate
+	process      srvmgr.Process
+}
+
+func (b *Binder) Name() string {
+	return "http-binder"
 }
 
 func (b *Binder) GetRemote() proto.RemoteClient {
@@ -144,6 +154,8 @@ func (b *Binder) drainBuffer(ctx context.Context, caching chan app.FrontEndUpdat
 		select {
 		case <-ctx.Done():
 			return
+		case <-b.process.Died():
+			return
 		case update, ok := <-caching:
 			if !ok {
 				b.Logger.Error("Cache closed")
@@ -168,10 +180,11 @@ func (b *Binder) drainBuffer(ctx context.Context, caching chan app.FrontEndUpdat
 	}
 }
 
-func (b *Binder) ListenAndBroadcast() error {
+func (b *Binder) Start() error {
+	defer b.process.Deceased()
 	tries := 0
 	var finalErr error
-	for !b.stopRequest && (b.config.StaysIfDisconnected || tries < maxGRPCReconnect) {
+	for b.config.StaysIfDisconnected || tries < maxGRPCReconnect {
 		if err := b.connect(); err != nil {
 			b.broadcastConnectionLost()
 			b.Logger.Warnf("failure on connecting to the game server: %s", err)
@@ -185,36 +198,46 @@ func (b *Binder) ListenAndBroadcast() error {
 
 			var err error
 			go func() {
+
 				err = b.broadcast(caching)
+
 				if err == app.ErrGameOver {
 					finalErr = err
 					b.Logger.Info("game over")
 					return
 				}
+
+				if grpcErr, ok := status.FromError(err); ok && grpcErr.Code() != codes.Canceled {
+					b.Logger.Warnf("broadcast interrupted: %s", err)
+				}
 				b.broadcastConnectionLost()
-				b.Logger.Warnf("broadcast interrupted: %s", err)
 				stop()
 			}()
 			b.drainBuffer(ctx, caching)
 			stop()
 			close(caching)
 		}
+		if !b.process.IsAlive() {
+			break
+		}
 	}
-	if b.stopRequest {
-		finalErr = app.ErrStopRequested
-	}
+
 	if !b.config.StaysIfDisconnected && tries >= maxGRPCReconnect {
 		finalErr = ErrMaxConnectionAttemptsReached
-	}
-	if err := b.Stop(); err != nil {
-		return fmt.Errorf("error stopping: %w (initial error: %s)", err, finalErr)
 	}
 
 	return finalErr
 }
 
-func (b *Binder) Stop() error {
-	b.stopRequest = true
+func (b *Binder) Stop(ctx context.Context) error {
+	b.process.Die()
+	select {
+	case <-ctx.Done():
+		return errors.Wrap(ctx.Err(), "http binder was not able to close all connections safely")
+	case <-b.process.Dying():
+
+	}
+
 	if b.producerConn != nil {
 		if err := b.producerConn.Close(); err != nil {
 			return err
@@ -243,7 +266,7 @@ func (b *Binder) broadcast(caching chan app.FrontEndUpdate) error {
 			if err != io.EOF {
 				return fmt.Errorf("%w: %s", app.ErrGRPCConnectionLost, err)
 			}
-			return app.ErrGRPCConnectionClosed
+			return errors.Wrap(err, "grpc connection closed")
 		}
 		var update app.FrontEndUpdate
 		update, debugging, err = b.createFrame(event, debugging)

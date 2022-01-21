@@ -4,13 +4,12 @@ import (
 	"context"
 	"github.com/lugobots/frontend/web/app"
 	"github.com/lugobots/frontend/web/app/broker"
+	"github.com/pkg/errors"
+	"github.com/rubens21/srvmgr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"sync"
 	"time"
 )
 
@@ -39,52 +38,6 @@ func init() {
 
 func main() {
 
-	//gameConfig := app.Config{
-	//	Broadcast: app.BroadcastConfig{
-	//		Address:  "localhost:9090",
-	//		Insecure: true,
-	//	},
-	//	DevMode:           false,
-	//	StartMode:         "",
-	//	GameDuration:      0,
-	//	ListeningDuration: 0,
-	//	HomeTeam: app.TeamConfiguration{
-	//		Name:   "Canada",
-	//		Avatar: "external/profile-team-home.jpg",
-	//		Colors: app.TeamColors{
-	//			PrimaryColor: app.Color{
-	//				R: 230,
-	//				G: 0,
-	//				B: 0,
-	//			},
-	//			SecondaryColor: app.Color{
-	//				R: 255,
-	//				G: 255,
-	//				B: 255,
-	//			},
-	//		},
-	//	},
-	//	AwayTeam: app.TeamConfiguration{
-	//		Name:   "UK",
-	//		Avatar: "external/profile-team-away.jpg",
-	//		Colors: app.TeamColors{
-	//			PrimaryColor: app.Color{
-	//				R: 240,
-	//				G: 0,
-	//				B: 0,
-	//			},
-	//			SecondaryColor: app.Color{
-	//				R: 0,
-	//				G: 0,
-	//				B: 250,
-	//			},
-	//		},
-	//	},
-	//}
-
-	//counter := ratecounter.NewAvgRateCounter(broker.MessagesRateMeasureTimeWindow * time.Second)
-
-	//bufferizer := buffer.NewBufferizer(zapLog.Named("broker"), counter)
 	eventBroker := broker.NewBinder(app.Config{
 		GRPCAddress:         "localhost:9090",
 		GRPCInsecure:        true,
@@ -96,77 +49,24 @@ func main() {
 		Addr:    ":8080",
 		Handler: server,
 	}
-	var evenBrokerStopped sync.Once
-	var httpStopped sync.Once
-	var somethingStopped sync.Once
 
-	serviceGroup := sync.WaitGroup{}
-	running := make(chan error)
+	serviceManager := srvmgr.NewManager(zapLog, 10*time.Second)
 
-	stoppingEventBroker := func() {
-		evenBrokerStopped.Do(func() {
-			zapLog.Info("stopping event broker")
-			if err := eventBroker.Stop(); err != nil {
-				zapLog.Errorf("error stopping event broker: %s", err)
-			}
-			zapLog.Info("event broker stopped")
-		})
-	}
-	startingEventBroker := func() {
-		serviceGroup.Add(1)
-		defer serviceGroup.Done()
-		zapLog.Infof("starting http server at %s", httpServer.Addr)
-		err := eventBroker.ListenAndBroadcast()
-		if err != app.ErrGameOver {
-			zapLog.Errorf("event broker has stopped: %s", err)
-		}
-
-		somethingStopped.Do(func() {
-			evenBrokerStopped.Do(func() {})
-			close(running)
-		})
-	}
-
-	stoppingHttpServer := func() {
-		httpStopped.Do(func() {
-			zapLog.Info("stopping http server")
-			ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
+	serviceManager.AddTask(eventBroker)
+	serviceManager.AddTask(srvmgr.MakeTask(
+		"http-server",
+		func() error {
+			return httpServer.ListenAndServe()
+		},
+		func(ctx context.Context) error {
 			if err := httpServer.Shutdown(ctx); err != nil {
-				zapLog.Errorf("error stopping event broker: %s", err)
+				return errors.Wrap(err, "error stopping http server")
 			}
-			zapLog.Info("http server stopped")
-		})
+			return nil
+		},
+	))
+
+	if err := serviceManager.Run(); err != nil {
+		zapLog.Errorf(err.Error())
 	}
-
-	startingHttpServer := func() {
-		serviceGroup.Add(1)
-		defer serviceGroup.Done()
-		err := httpServer.ListenAndServe()
-		zapLog.Errorf("https has stopped: %s", err)
-
-		somethingStopped.Do(func() {
-			httpStopped.Do(func() {})
-			close(running)
-		})
-	}
-
-	monitorInterruptionSignal := func() {
-		signalChan := make(chan os.Signal, 1)
-		signal.Notify(signalChan, os.Interrupt)
-		<-signalChan
-		somethingStopped.Do(func() {
-			zapLog.Info("interruption signal sent")
-			close(running)
-		})
-	}
-
-	go startingEventBroker()
-	go startingHttpServer()
-	go monitorInterruptionSignal()
-
-	<-running
-
-	stoppingHttpServer()
-	stoppingEventBroker()
-	serviceGroup.Wait()
 }
