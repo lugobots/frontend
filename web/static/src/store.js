@@ -6,9 +6,9 @@ const loggingMiddleware = (store) => (next) => (action) => {
   const previousAppState = store.getState().app.status
   const previousStadiumState = store.getState().stadium.status
   next(action)
-  console.log(`App (${previousAppState} -> ${store.getState().app.status }) `+
-          `Stadium (${previousStadiumState} -> ${store.getState().stadium.status }) `+
-          `dispatching %c${action.type}`, "color: blue" )
+  // console.log(`App (${previousAppState} -> ${store.getState().app.status }) `+
+  //         `Stadium (${previousStadiumState} -> ${store.getState().stadium.status }) `+
+  //         `dispatching %c${action.type}`, "color: blue" )
 }
 
 const rootReducer = combineReducers({

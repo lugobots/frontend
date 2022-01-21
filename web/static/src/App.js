@@ -161,6 +161,7 @@ class App extends React.Component {
     this.evtSource.addEventListener(EventTypes.GameOver, (e) => {
       const g = this.parse(e);
       this.updatePanel(g)
+      this.audioManager.onGameOver()
       this.props.dispatch(stadiumAction.over())
     });
     this.evtSource.addEventListener(EventTypes.Breakpoint, (e) => {

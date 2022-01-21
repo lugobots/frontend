@@ -117,7 +117,9 @@ func main() {
 		defer serviceGroup.Done()
 		zapLog.Infof("starting http server at %s", httpServer.Addr)
 		err := eventBroker.ListenAndBroadcast()
-		zapLog.Errorf("event broker has stopped: %s", err)
+		if err != app.ErrGameOver {
+			zapLog.Errorf("event broker has stopped: %s", err)
+		}
 
 		somethingStopped.Do(func() {
 			evenBrokerStopped.Do(func() {})

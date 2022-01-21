@@ -38,7 +38,6 @@ class Field extends React.Component {
       })
 
       homeMissed.forEach(playerNumber => {
-        console.log(`MISSDEd `, playerNumber)
         this.onNewFrameListeners["home"][`home_${playerNumber}`](false)
       })
 
@@ -101,7 +100,7 @@ class Field extends React.Component {
     if(side === "away") {
       p.x = GameDefinitions.Field.Width - p.x
     }
-    console.log(`${side}: `, p)
+    // console.log(`${side}: `, p)
     return p
   }
 }

@@ -28,7 +28,7 @@ class ToolBarTabDebug extends React.Component {
     sendDebug("pause-resume")
       .then(
         ({status, body}) => {
-          console.log(`DEBG: `, status, body)
+          // console.log(`DEBG: `, status, body)
         },
         (error) => {
           console.error(`Debug tool: `, error)
@@ -40,7 +40,7 @@ class ToolBarTabDebug extends React.Component {
     sendDebug("next-turn")
       .then(
         ({status, body}) => {
-          console.log(`DEBG: `, status, body)
+          // console.log(`DEBG: `, status, body)
         },
         (error) => {
           console.error(`Debug tool: `, error)
@@ -52,7 +52,7 @@ class ToolBarTabDebug extends React.Component {
     sendDebug("next-order")
       .then(
         ({status, body}) => {
-          console.log(`DEBG: `, status, body)
+          // console.log(`DEBG: `, status, body)
         },
         (error) => {
           console.error(`Debug tool: `, error)
@@ -170,7 +170,7 @@ function SetPlayerProperties(side, number, position) {
   sendDebug(`players/${side}/${number}`, {position}, 'PATCH')
     .then(
       ({status, body}) => {
-        console.log(`Rearrange`, status)
+        // console.log(`Rearrange`, status)
       },
       (error) => {
         console.error(`Debug tool: `, error)

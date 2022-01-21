@@ -62,13 +62,13 @@ class AudioManager {
 
   _startAmbienceSound() {
     this.ambient_audio_num = this.audio.background.play()
-    this.audio.background.fade(0, 0.08, 5000);
+    this.audio.background.fade(0, 0.06, 5000);
     this.ambience_on = true
   }
 
   _stopAmbienceSound() {
     if(this.ambience_on) {
-      this.audio.background.fade(0.08, 0, 1000);
+      this.audio.background.fade(0.06, 0, 1000);
       this.ambience_on = false
     }
   }
@@ -82,11 +82,6 @@ class AudioManager {
     this.audio.refereeStart.play()
     this.onGameResume()
   }
-
-  // onGameStarts() {
-  //   console.log(`onGameStartss`)
-  //
-  // }
 
   onGameResume() {
     // console.log(`onGameResume`)
@@ -113,6 +108,9 @@ class AudioManager {
     }, 3000)
   }
 
+  onGameOver() {
+    this._stopAmbienceSound()
+  }
 
   onBackendConnectionLost() {
     this.onUpstreamConnectionLost()

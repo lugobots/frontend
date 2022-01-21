@@ -161,6 +161,9 @@ func (b *Binder) drainBuffer(ctx context.Context, caching chan app.FrontEndUpdat
 					}
 				}
 			}
+			if update.Type == app.EventGameOver {
+				return
+			}
 		}
 	}
 }
@@ -179,16 +182,22 @@ func (b *Binder) ListenAndBroadcast() error {
 			tries = 0
 			caching := make(chan app.FrontEndUpdate, 5000)
 			ctx, stop := context.WithCancel(context.Background())
-			go b.drainBuffer(ctx, caching)
-			err := b.broadcast(caching)
+
+			var err error
+			go func() {
+				err = b.broadcast(caching)
+				if err == app.ErrGameOver {
+					finalErr = err
+					b.Logger.Info("game over")
+					return
+				}
+				b.broadcastConnectionLost()
+				b.Logger.Warnf("broadcast interrupted: %s", err)
+				stop()
+			}()
+			b.drainBuffer(ctx, caching)
 			stop()
 			close(caching)
-			if err == app.ErrGameOver {
-				finalErr = err
-				break
-			}
-			b.broadcastConnectionLost()
-			b.Logger.Warnf("broadcast interrupted: %s", err)
 		}
 	}
 	if b.stopRequest {
@@ -243,6 +252,9 @@ func (b *Binder) broadcast(caching chan app.FrontEndUpdate) error {
 			continue
 		}
 		caching <- update
+		if update.Type == app.EventGameOver {
+			return app.ErrGameOver
+		}
 	}
 }
 
