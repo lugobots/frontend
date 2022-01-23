@@ -49,7 +49,7 @@ module.exports = {
                 test: /\.(png|svg|jpg|gif)$/,
                 loader: 'file-loader',
                 options: {
-                    outputPath: 'images',
+                    name: 'images/[name].[ext]',
                 },
             },
             {
@@ -63,7 +63,10 @@ module.exports = {
     },
     // add a custom index.html as the template
     plugins: [
-      new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'src', 'index.html') }),
+        new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, 'src', 'index.html') ,
+            favicon: path.resolve(__dirname,'src', 'img', 'favicon.png'),
+        }),
         new PreloadWebpackPlugin({
             rel: 'preload',
             include: 'allAssets',
@@ -71,6 +74,7 @@ module.exports = {
                 if (/\.css$/.test(entry)) return 'style';
                 if (/\.woff$/.test(entry)) return 'font';
                 if (/\.png$/.test(entry)) return 'image';
+                if (/\.jpg$/.test(entry)) return 'image';
                 return 'script';
             }
         })

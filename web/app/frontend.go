@@ -1,6 +1,7 @@
 package app
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -14,28 +15,30 @@ import (
 	"time"
 )
 
+//go:embed static/dist/*
+var jsDist embed.FS
+
 func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
 	r := gin.Default()
 
-	f := path.Join(whereAmI, "/static/dist/index.html")
-	t, err := template.New("a").ParseFiles(f)
+	t, err := template.New("a").ParseFS(jsDist, "static/dist/index.html")
 	if err != nil {
 		panic(err)
 	}
 
 	r.SetHTMLTemplate(t)
 
-	//r.Static("/js", path.Join(whereAmI, "/static/dist/js"))
-	r.StaticFile("/loader.gif", path.Join(whereAmI, "/static/loader.gif"))
-	r.StaticFile("/favicon.png", path.Join(whereAmI, "/static/favicon.png"))
-	r.GET("/js/bundle.js", func(context *gin.Context) {
-		//time.Sleep(5 * time.Second)
-		context.File(path.Join(whereAmI, "/static/dist/js/bundle.js"))
-	})
+	processDistFiles := func(c *gin.Context) {
+		c.FileFromFS(path.Join("/static/dist", c.Request.URL.Path), http.FS(jsDist))
+	}
 
-	r.Static("/images", path.Join(whereAmI, "/static/dist/images"))
-	r.Static("/sounds", path.Join(whereAmI, "/static/dist/sounds"))
-	r.Static("/external", path.Join(whereAmI, "/static/external"))
+	r.StaticFile("/loader.gif", path.Join(whereAmI, "/static/loader.gif"))
+
+	r.GET("/favicon.png", processDistFiles)
+	r.GET("/js/*filepath", processDistFiles)
+	r.GET("/images/*filepath", processDistFiles)
+	r.GET("/sounds/*filepath", processDistFiles)
+	r.GET("/external/*filepath", processDistFiles)
 
 	//temp
 	//r.Static("/velho", path.Join(whereAmI, "/static/"))

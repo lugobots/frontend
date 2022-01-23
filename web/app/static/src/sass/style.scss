@@ -6,7 +6,15 @@
 @import url('#{$font-google}');
 
 /* ###################### DEFINITIONS ###################### */
-
+// forcing the webpack to load this shit
+.nothing {
+  a {
+    background: url("../img/profile-team-away.jpg");
+  }
+  b {
+    background: url("../img/profile-team-home.jpg");
+  }
+}
 /* #region -- Section  Root */
 
 

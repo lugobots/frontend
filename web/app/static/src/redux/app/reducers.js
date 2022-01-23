@@ -9,7 +9,7 @@ const defaultSetup = {
   game_duration: 6000,
   home_team: {
     name: "Home",
-    avatar: "external/profile-team-home.jpg",
+    avatar: "images/profile-team-home.jpg",
     colors: {
       primary: {
         red: 240
@@ -24,7 +24,7 @@ const defaultSetup = {
   away_team: {
     name: "Away",
     side: 1,
-    avatar: "external/profile-team-away.jpg",
+    avatar: "images/profile-team-away.jpg",
     colors: {
       primary: {
         green: 200

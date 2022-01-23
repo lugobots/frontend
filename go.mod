@@ -1,6 +1,6 @@
 module github.com/lugobots/frontend
 
-go 1.14
+go 1.16
 
 replace github.com/lugobots/lugo4go/v2 => /home/rubens/projects/lugo/lugo4go
 
