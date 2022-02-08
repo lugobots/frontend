@@ -110,6 +110,16 @@ func (b *Binder) GetGameConfig(uuid string) (app.FrontEndSet, error) {
 	}, nil
 }
 
+// this method is not used yet! I made it because the frontend would start as soon as a client connects, but it won't be implmentned now
+func (b *Binder) StartGame(uuid string) error {
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
+	_, err := b.producer.StartGame(ctx, &proto.StartRequest{
+		WatcherUuid: uuid,
+	})
+
+	return errors.Wrap(err, "failed to request the start of the game")
+}
+
 func (b *Binder) connect() error {
 	opts := []grpc.DialOption{grpc.WithBlock()}
 	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
@@ -338,11 +348,15 @@ func (b *Binder) createFrame(event *proto.GameEvent, debugging bool) (app.FrontE
 		return app.FrontEndUpdate{}, false, err
 	}
 
-	marshal := jsonpb.Marshaler{
-		OrigName:     true,
-		EmitDefaults: true,
-	}
-	raw, err := marshal.MarshalToString(event)
+	//marshal := jsonpb.Marshaler{
+	//	OrigName:     true,
+	//	EmitDefaults: true,
+	//}
+	//raw, err := marshal.MarshalToString(event)
+	raw, err := json.Marshal(event)
+
+	// vale a penas?????
+
 	if err != nil {
 		return app.FrontEndUpdate{}, false, fmt.Errorf("error marshalling event message: %w", err)
 	}

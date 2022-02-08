@@ -9,6 +9,7 @@ type EventsBroker interface {
 	StreamEventsTo(uuid string) chan FrontEndUpdate
 	GetGameConfig(uuid string) (FrontEndSet, error)
 	GetRemote() proto.RemoteClient
+	StartGame(uuid string) error
 }
 
 type EventType string

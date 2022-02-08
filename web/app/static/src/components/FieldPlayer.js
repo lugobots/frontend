@@ -26,12 +26,14 @@ class FieldPlayer extends React.Component {
 
       if(!player) {
         this.myDOM.current.style.opacity = 0.2
+        this.position.x = this.props.defaultPosition.x
+        this.position.y = this.props.defaultPosition.y
       } else {
         this.myDOM.current.style.opacity = 1
+        this.position.x = player.position.x
+        this.position.y = player.position.y
       }
 
-      this.position.x = player.position?.x ?? this.props.defaultPosition.x
-      this.position.y = player.position?.y ?? this.props.defaultPosition.y
       const left = 100 * this.position.x / GameDefinitions.Field.Width
       const top = 100 * (GameDefinitions.Field.Height - this.position.y) / GameDefinitions.Field.Height
 

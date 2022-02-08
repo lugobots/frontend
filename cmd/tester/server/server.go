@@ -100,7 +100,7 @@ func (b *Broadcaster) SetPlayerProperties(ctx context.Context, properties *proto
 	}
 	p.Position = properties.Position
 
-	b.logger.Infof("player %s-%d moved to %v", properties.Side, properties.Number, p.Position)
+	//b.logger.Infof("player %s-%d moved to %v", properties.Side, properties.Number, p.Position)
 	return &proto.CommandResponse{
 		Code:         proto.CommandResponse_SUCCESS,
 		GameSnapshot: b.lastSnap,

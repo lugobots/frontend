@@ -105,7 +105,7 @@ func (h *Bufferizer) streamBuffer(callback func(data broker.BufferedEvent), puls
 					return
 				}
 				h.lastSentTurn = update.Snapshot.Turn
-				h.Logger.Infof("buffer size: %d", len(h.bufferStage))
+				//h.Logger.Infof("buffer size: %d", len(h.bufferStage))
 				callback(broker.BufferedEvent{Update: update})
 			}
 		}

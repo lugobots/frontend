@@ -44,9 +44,9 @@ func main() {
 		StaysIfDisconnected: true,
 	}, zapLog.Named("broker"))
 
-	server := app.NewHandler("/home/rubens/projects/lugo/lugo-frontend/web", "local", eventBroker)
+	server := app.NewHandler("", "local", eventBroker)
 	httpServer := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":8081",
 		Handler: server,
 	}
 
