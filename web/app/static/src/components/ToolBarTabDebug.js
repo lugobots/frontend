@@ -3,7 +3,7 @@ import $ from 'jquery';
 import 'jquery-ui/ui/widgets/draggable';
 
 import {getSizeRatio, renderLogger} from "../helpers";
-import {GameDefinitions, BackendConfig, StadiumStatus} from '../constants'
+import {GameDefinitions, StadiumStatus} from '../constants'
 import stadiumActions from '../redux/stadium/actions'
 import PropTypes from "prop-types";
 import {connect} from "react-redux";
@@ -180,7 +180,7 @@ function SetPlayerProperties(side, number, position) {
 
 function sendDebug(path, payload = {}, method = "POST") {
   let status = 0;
-  return fetch(`${BackendConfig.BackEndPoint}/remote/${path}`, {
+  return fetch(`remote/${path}`, {
     method: method,
     body: JSON.stringify(payload),
     headers: {

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
 import appAction from "./redux/app/actions";
 import stadiumAction from "./redux/stadium/actions";
-import {AppStatus, BackendConfig, EventTypes, GameStates, StadiumStatus} from "./constants";
+import {AppStatus, EventTypes, GameStates, StadiumStatus} from "./constants";
 import store from "./store";
 import Stadium from "./components/Stadium";
 import channel from "./channel";
@@ -31,7 +31,7 @@ class App extends React.Component {
 
   setup() {
     let status = false
-    fetch(`${BackendConfig.BackEndPoint}/setup/${gameID}/${uuid}`)
+    fetch(`setup/${gameID}/${uuid}`)
       .then(response => {
         status = response.status
         return response.json()
@@ -106,7 +106,7 @@ class App extends React.Component {
   componentDidMount() {
     let upstreamConnTries = 0;
     let backConnTries = 0;
-    this.evtSource = new EventSource(`${BackendConfig.BackEndPoint}/game-state/${gameID}/${uuid}/`);
+    this.evtSource = new EventSource(`game-state/${gameID}/${uuid}/`);
     this.evtSource.onerror = () => {
       if (backConnTries === 0) {
         this.audioManager.onBackendConnectionLost()

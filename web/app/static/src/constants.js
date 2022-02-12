@@ -72,9 +72,6 @@ const BreakpointType = {
 }
 
 
-const BackendConfig = {
-  BackEndPoint: "http://localhost:8080",
-}
 export {
   GameDefinitions,
   GameSettings,
@@ -82,7 +79,6 @@ export {
   // StadiumStates,
   EventTypes,
   BreakpointType,
-  BackendConfig,
   AppStatus,
   // ModalModes,
   StadiumStatus,

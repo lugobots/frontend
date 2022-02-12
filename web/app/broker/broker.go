@@ -98,7 +98,7 @@ func (b *Binder) GetGameConfig(uuid string) (app.FrontEndSet, error) {
 	}()
 	marshal := jsonpb.Marshaler{
 		OrigName:     true,
-		EmitDefaults: true,
+		EmitDefaults: false,
 	}
 	raw, err := marshal.MarshalToString(b.gameSetup)
 	if err != nil {
@@ -212,7 +212,7 @@ func (b *Binder) Start() error {
 				err = b.broadcast(caching)
 
 				if err == app.ErrGameOver {
-					finalErr = err
+					finalErr = nil
 					b.Logger.Info("game over")
 					return
 				}
@@ -348,14 +348,12 @@ func (b *Binder) createFrame(event *proto.GameEvent, debugging bool) (app.FrontE
 		return app.FrontEndUpdate{}, false, err
 	}
 
-	//marshal := jsonpb.Marshaler{
-	//	OrigName:     true,
-	//	EmitDefaults: true,
-	//}
-	//raw, err := marshal.MarshalToString(event)
-	raw, err := json.Marshal(event)
-
-	// vale a penas?????
+	marshal := jsonpb.Marshaler{
+		OrigName:     true,
+		EmitDefaults: true,
+	}
+	raw, err := marshal.MarshalToString(event)
+	//raw, err := json.Marshal(event)
 
 	if err != nil {
 		return app.FrontEndUpdate{}, false, fmt.Errorf("error marshalling event message: %w", err)
