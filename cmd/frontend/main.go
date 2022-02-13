@@ -2,13 +2,19 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/lugobots/frontend/web/app"
 	"github.com/lugobots/frontend/web/app/broker"
+	"github.com/lugobots/frontend/web/app/propagator"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/pkg/errors"
 	"github.com/rubens21/srvmgr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"log"
+	"net"
 	"net/http"
 	"time"
 )
@@ -44,6 +50,18 @@ func main() {
 		StaysIfDisconnected: true,
 	}, zapLog.Named("broker"))
 
+	broadcasterSyncer := propagator.NewPropagator(eventBroker)
+
+	grpcServer := grpc.NewServer()
+	proto.RegisterBroadcastServer(grpcServer, broadcasterSyncer)
+	reflection.Register(grpcServer)
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 5001))
+	if err != nil {
+		zapLog.Errorf("failed on listen grpc port: %s", err)
+		return
+	}
+
 	server := app.NewHandler("", "local", eventBroker)
 	httpServer := &http.Server{
 		Addr:    ":8081",
@@ -53,6 +71,7 @@ func main() {
 	serviceManager := srvmgr.NewManager(zapLog, 10*time.Second)
 
 	serviceManager.AddTask(eventBroker)
+	serviceManager.AddTask(srvmgr.GrpcServerAsTask("grpc-server", grpcServer, lis))
 	serviceManager.AddTask(srvmgr.MakeTask(
 		"http-server",
 		func() error {

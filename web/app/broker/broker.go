@@ -183,9 +183,9 @@ func (b *Binder) drainBuffer(ctx context.Context, caching chan app.FrontEndUpdat
 					}
 				}
 			}
-			if update.Type == app.EventGameOver {
-				return
-			}
+			//if update.Type == app.EventGameOver {
+			//	b.Logger.Info("CABOOOO!!!!")
+			//}
 		}
 	}
 }
@@ -208,24 +208,18 @@ func (b *Binder) Start() error {
 
 			var err error
 			go func() {
-
 				err = b.broadcast(caching)
-
-				if err == app.ErrGameOver {
-					finalErr = nil
-					b.Logger.Info("game over")
-					return
-				}
-
 				if grpcErr, ok := status.FromError(err); ok && grpcErr.Code() != codes.Canceled {
 					b.Logger.Warnf("broadcast interrupted: %s", err)
 				}
 				b.broadcastConnectionLost()
 				stop()
+				b.Logger.Info("WHAT??")
 			}()
 			b.drainBuffer(ctx, caching)
 			stop()
 			close(caching)
+			b.Logger.Info("WHAT     222222??")
 		}
 		if !b.process.IsAlive() {
 			break
@@ -286,7 +280,7 @@ func (b *Binder) broadcast(caching chan app.FrontEndUpdate) error {
 		}
 		caching <- update
 		if update.Type == app.EventGameOver {
-			return app.ErrGameOver
+			b.Logger.Info("game over")
 		}
 	}
 }
@@ -372,8 +366,8 @@ func (b *Binder) createFrame(event *proto.GameEvent, debugging bool) (app.FrontE
 		debugging = false
 	}
 	update := app.FrontEndUpdate{
-		Type:     eventType,
-		Snapshot: event.GameSnapshot,
+		Type:      eventType,
+		GameEvent: event,
 		Update: app.UpdateData{
 			GameEvent:     json.RawMessage(raw),
 			TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),

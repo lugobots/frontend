@@ -71,9 +71,10 @@ class App extends React.Component {
     // detecting game start or restart
     if (data.game_event.game_snapshot?.state === GameStates.LISTENING && this.previousGameState === GameStates.GET_READY) {
       this.audioManager.onGameRestart()
-    // } else if (data.game_event.game_snapshot?.state !== GameStates.WAITING && this.previousGameState === GameStates.WAITING) {
-    //   this.audioManager.onGameStarts()
-    } if (data.game_event.game_snapshot?.state === GameStates.LISTENING && !this.audioManager.isAmbienceOn()) {
+      // } else if (data.game_event.game_snapshot?.state !== GameStates.WAITING && this.previousGameState === GameStates.WAITING) {
+      //   this.audioManager.onGameStarts()
+    }
+    if (data.game_event.game_snapshot?.state === GameStates.LISTENING && !this.audioManager.isAmbienceOn()) {
       this.audioManager.onGameResume()
     }
 
@@ -106,6 +107,7 @@ class App extends React.Component {
   componentDidMount() {
     let upstreamConnTries = 0;
     let backConnTries = 0;
+    let gameIsOver = false;
     this.evtSource = new EventSource(`game-state/${gameID}/${uuid}/`);
     this.evtSource.onerror = () => {
       if (backConnTries === 0) {
@@ -117,11 +119,12 @@ class App extends React.Component {
         <span>Wait the connection be established<br/><br/>Retrying {backConnTries}</span>))
     };
     this.evtSource.addEventListener('open', () => {
-      if(backConnTries > 0) {
+      if (backConnTries > 0) {
         this.audioManager.onBackendReconnected()
       }
       upstreamConnTries = 0;
       backConnTries = 0;
+      gameIsOver = false
       this.props.dispatch(appAction.backConnect())
     });
     this.evtSource.addEventListener("ping", () => {
@@ -159,6 +162,7 @@ class App extends React.Component {
       }
     });
     this.evtSource.addEventListener(EventTypes.GameOver, (e) => {
+      gameIsOver = true
       const g = this.parse(e);
       this.updatePanel(g)
       this.audioManager.onGameOver()
@@ -183,8 +187,11 @@ class App extends React.Component {
       this.audioManager.onNewPlayer()
     });
     this.evtSource.addEventListener(EventTypes.LostPlayer, (e) => {
-      this.onStateChange(this.parse(e))
-      this.audioManager.onLostPlayer()
+      if(!gameIsOver) {
+        this.onStateChange(this.parse(e))
+        this.audioManager.onLostPlayer()
+      }
+
     });
   }
 

@@ -45,10 +45,10 @@ type UpdateData struct {
 
 type FrontEndUpdate struct {
 	// speed up the rate calc
-	Snapshot        *proto.GameSnapshot `json:"-"`
-	Type            EventType           `json:"type"`
-	Update          UpdateData          `json:"data"`
-	ConnectionState string              `json:"connection_state"`
+	GameEvent       *proto.GameEvent `json:"-"`
+	Type            EventType        `json:"type"`
+	Update          UpdateData       `json:"data"`
+	ConnectionState string           `json:"connection_state"`
 }
 type FrontEndSet struct {
 	GameSetup       json.RawMessage `json:"game_setup"`
