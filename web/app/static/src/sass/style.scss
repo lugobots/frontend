@@ -1,0 +1,1885 @@
+// Importing sass library codes
+@import 'src/arq_theme';
+@import 'src/animations';
+
+/* Importando Fonte do google */
+@import url('#{$font-google}');
+
+/* ###################### DEFINITIONS ###################### */
+// forcing the webpack to load this shit
+.nothing {
+  a {
+    background: url("../img/profile-team-away.jpg");
+  }
+  b {
+    background: url("../img/profile-team-home.jpg");
+  }
+}
+/* #region -- Section  Root */
+
+
+// Variables Sass
+
+// Team 1
+$team-home-color-1 : var(--team-home-color-primary);
+$team-home-color-2 : var(--team-home-color-secondary);
+
+// Team 2
+$team-away-color-1 : var(--team-away-color-primary);
+$team-away-color-2 : var(--team-away-color-secondary);
+
+/* #endregion -- Section End Root definitions  */
+
+/* ###################### START ###################### */
+
+#loading{
+  @include model-flex(column, nowrap, center, center);
+  @include model-square(100%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  overflow: hidden;
+  background: #171715;
+
+  #load-content{
+    @include model-flex(column, nowrap, center, center);
+    width: 70%;
+    max-width: 300px;
+    min-width: 200px;
+    padding: 20px;
+    position: relative;
+  }
+
+  #lugo-logo{
+    @include model-img(contain);
+    margin-bottom: 50px;
+  }
+
+  #progress{
+    @include model-display(block,relative);
+    width: 100%;
+    padding: 5px;
+    border-radius: 5px;
+    background: $white;
+    &::after{
+      @include model-display(block,relative);
+      content: '';
+      width: 100%;
+      max-width: 0%;
+      height: 8px;
+      background-image: linear-gradient(to top, #ffaf16 0%, #ffbd3e 100%);
+      animation: loadProgress 3s infinite;
+    }
+  }
+
+}
+
+/* #region -- Section  Body */
+
+#lugobot-view {
+  @include model-display($display:block, $position:relative);
+  background: url("../img/bg/bg-page.jpg") no-repeat center center;
+  background-size: cover;
+  // max-height: 100vh;
+}
+
+#stadium {
+  @include model-display($display:block, $position:relative);
+  width: 100%;
+  min-height: 100vh;
+  padding: 0px 25px;
+  z-index: 15;
+
+  &.active-modal{
+    #lugobot-header, #lugobot-stadium, #lugobot-admin-panel{
+      filter: url('#blur');
+    }
+  }
+
+  @include breakpoint(xg) {
+    padding: 0px 100px;
+  }
+
+  @include breakpoint(m) {
+    padding: 0px 25px;
+  }
+}
+
+/* #endregion -- Section  */
+
+
+/* #region -- Section   Header */
+#lugobot-header {
+//   transform:translateY(-100%);
+  transition: max-width 2s ease-in-out, transform 1s ease-in 1s;
+  transform-origin: center top;
+  z-index: 500;
+
+  * {
+    color: $white;
+    z-index: 10;
+  }
+  &::before,
+  &::after {
+    @include model-display($display:block, $position:absolute);
+    content: '';
+    order: -1;
+    top: 0;
+    left: 0px;
+    width: 100%;
+    z-index: 5;
+    min-height: calc(100% - 20px);
+  }
+
+
+  &.active-modal {
+    z-index: 20000;
+
+    #timer {
+      width: 100%;
+      max-width: 0px;
+    }
+
+    #teams-info { max-width: 80%;}
+
+    @include breakpoint(xg){
+      #teams-info { max-width: 85%; }
+    }
+
+    @include breakpoint(xl){
+      #teams-info { max-width: 90%; }
+    }
+
+    @include breakpoint(l){
+      #game-info{
+        transform: scale(.85);
+        transform-origin: center top;
+        background-clip: border-box;
+      }
+      #score-info{ background-clip: border-box; }
+
+      .flag-color{  max-width: 44.5%!important;}
+    }
+
+
+  }
+
+
+    // @include breakpoint(l){ transform: translateY(0%) scale(.95); }
+    @include breakpoint(m){
+      // transform: translateY(0%) scale(.8);
+      width: 120%;
+      left: -10%;
+    }
+
+    @include breakpoint(s){
+      // transform: translateY(0%) scale(.70);
+      width: 130%;
+      left: -15%;
+      .name-team{ display: none;}
+    }
+    @include breakpoint(xs){
+      width: 150%;
+      left: -25%;
+      #game-info{ transform: translateY(0%) scale(.90); transform-origin: center top;}
+    }
+    @include breakpoint(470){
+      // transform: translateY(0%) scale(.65);
+      width: 166%;
+      left: -33%;
+      #game-info{ transform: scale(.85); transform-origin: center top;}
+    }
+  }
+
+
+#game-panel {
+  @extend %col-12, %no-gutter;
+  @include model-flex(row, wrap, center, center);
+  position: relative;
+
+  * {
+    color: $white;
+    z-index: 10;
+  }
+
+  &::before,
+  &::after {
+    @include model-display($display:block, $position:absolute);
+    content: '';
+    order: -1;
+    top: 0;
+    left: 0px;
+    width: 100%;
+    z-index: 5;
+    min-height: calc(100% - 20px);
+  }
+
+
+
+}
+
+#teams-info {
+  @include model-flex(row, wrap, false, space-between);
+  width: 100%;
+  max-width: 100%;
+  transition: max-width 2s ease-in-out;
+
+  .team {
+    @include model-flex(column, nowrap,false, false);
+    position: relative;
+    width: 49.98%;
+
+
+    /* #region -- Section   Colors for teams */
+
+
+
+    /* #endregion -- Section  */
+
+    .profile-team {
+      @include model-flex(row, wrap, center, false);
+      width: 100%;
+      padding: 10px 50px;
+      z-index: 10;
+      position: relative;
+
+      &::before, &::after {
+        @include model-display($display:table, $position:absolute);
+        content: '';
+        order: -1;
+        z-index: 5;
+      }
+      &::before{
+        top: 0px;
+        height: 100%;
+        min-height: 85px;
+        width: 40%;
+        filter: saturate(5);
+        opacity: .6;
+
+      }
+
+
+
+      .picture-team {
+        @include model-square(65px);
+        @include model-display($display:block, $position:relative);
+        box-shadow: 0px 0px 20px 10px rgba(5, 6, 6, 0.44);
+        //background-image: url('../img/bg/header/bg-picture.png');
+        //background-size: contain;
+        //background-repeat: no-repeat;
+        //background-position: center center;
+        //background-color: rgba(0, 0, 0, .2);
+        border-radius: 50%;
+        overflow: hidden;
+        padding: 4px;
+
+        img {
+          @include model-img($model:contain);
+          border-radius: 50%;
+        }
+      }
+
+      #picture-home-team {
+        //background-color: $team-away-color-1;
+        background: linear-gradient(45deg, rgba($team-home-color-1, 1) 30%, rgba($team-home-color-2, 1) 70%)
+      }
+      #picture-away-team {
+        //background-color: $team-away-color-1;
+        background: linear-gradient(45deg, rgba($team-away-color-1, 1) 30%, rgba($team-away-color-2, 1) 70%)
+      }
+
+      .name-team {
+        margin: 0px 20px;
+
+        h3 {
+          @include font-size(16,20);
+          margin-bottom: 0px;
+          font-weight: 200;
+        }
+      }
+
+    }
+
+    .flag-team {
+      @include model-flex(row, nowrap, center, false);
+      position: relative;
+      width: 80%;
+      height: 20px;
+      top: 2px;
+      padding: 7px 0px;
+      // overflow: hidden;
+      filter: saturate(2) brightness(120%);
+
+      * { z-index: 10;}
+
+      &::before,
+      &::after {
+        content: '';
+        @include model-display(block, absolute);
+        z-index: 15;
+      }
+
+      &::after{
+        width: 100%;
+        top: 0px;
+        height: 1px;
+        box-shadow: 0 2px 4px 2px rgba(0, 0, 0, 0.5);
+      }
+
+      @include breakpoint(xs) { width: 70%; }
+      .flag-color {
+        max-width: 28.5%;
+        width: 100%;
+        height: 100%;
+        transition: max-width 2s ease-in-out;
+
+        &:first-of-type {
+          margin-right: 2px;
+        }
+
+        &::before {
+          content: '';
+          @include model-display(block, absolute);
+          @include model-square(100%);
+          z-index: 10;
+        }
+        @include breakpoint(m){  max-width: 24%; }
+        @include breakpoint(s){  max-width: 18%; }
+
+        @include breakpoint(xs) { max-width: 44.5%; }
+      }
+
+    }
+
+    &#home-team{
+      background: url('../img/bg/header/bg-header.png') no-repeat top left;
+      align-items: flex-end;
+
+      &::after{
+        right: 0px;
+      }
+
+      .profile-team {
+        overflow: hidden;
+
+        &::before {
+          left: 28px;
+          border-radius: 0 0 0 16px;
+          transform: skew(22deg);
+          background: radial-gradient(circle at left center, rgba($team-home-color-1, 1) 0%, rgba($team-home-color-1, 0) 80%);
+        }
+      }
+
+      #flag-home-team {
+        left: 0px;
+        background: url('../img/bg/header/bg-flag-bar.png') no-repeat top left;
+
+        .flag-color { transform: skew(45deg); }
+
+        #flag-color-1 {
+          background: rgba($team-home-color-1, 1);
+          box-shadow:  0 0 0px 0px #fff, 0px -6px 20px 5px rgba($team-home-color-1, .5);
+
+
+          margin-left: 25px;
+        }
+
+        #flag-color-2 {
+          background: rgba($team-home-color-2, 1);
+          box-shadow: 0 0 0px 0px #fff, 0px -6px 20px 5px rgba($team-home-color-2, .4);
+        }
+      }
+    }
+
+    &#away-team{
+      background: url('../img/bg/header/bg-header.png') no-repeat top right;
+      .profile-team {
+        justify-content: flex-end;
+
+        &::before {
+          right: 28px;
+          transform: skew(-22deg);
+          border-radius: 0 0 16px 0;
+          background: radial-gradient(circle at right center, rgba($team-away-color-1, 1) 0%, rgba($team-away-color-1, 0) 80%);
+        }
+        .name-team {  order: -1;  }
+      }
+      #flag-away-team {
+        left: 0px;
+        justify-content: flex-end;
+        background: url('../img/bg/header/bg-flag-bar.png') no-repeat top right;
+
+        .flag-color { transform: skew(-45deg); }
+
+        #flag-color-1 {
+          order: 2;
+          margin-right: 25px;
+          background: rgba($team-away-color-1, 1);
+          box-shadow: 0 0 0px 0px #fff, 0px -6px 20px 5px rgba($team-away-color-1, .5);
+        }
+
+        #flag-color-2 {
+          background: rgba($team-away-color-2, 1);
+          box-shadow: 0 0 0px 0px #fff, 0px -6px 20px 5px rgba($team-away-color-2, .5);
+        }
+
+      }
+    }
+
+  }
+
+}
+
+#game-info {
+  @include model-flex(row, wrap, false, center);
+  position: absolute;
+  width: 100%;
+  max-width: 450px;
+  height: 100%;
+  top: 0px;
+  padding: 10px 70px;
+  left: calc(50% - 225px);
+  transition: all 2s ease-in-out;
+  text-align: center;
+  background: url('../img/bg/header/bg-scoreboard.png') no-repeat top center;
+  background-size: contain;
+
+
+  &::before {
+    @include model-display($display:block, $position:absolute);
+    content: '';
+    order: -1;
+    width: 100%;
+    min-height: 100%;
+    z-index: 5;
+    left: 0px;
+    top: 0px;
+
+  }
+
+
+}
+
+#score-info {
+  @include model-flex(row, wrap, center, center);
+  width: 100%;
+  max-width: 300px;
+  padding: 4px 5px 5px 5px ;
+  height: 100%;
+  max-height: 78px;
+  border-radius: 10px;
+  background: url('../img/bg/header/bg-score-info.png') no-repeat center center;
+
+
+
+  >span {
+    @include model-flex(column, nowrap, center, center);
+    height: 100%;
+  }
+
+  .score-team {
+    @include font-size(32, 42);
+    font-family: $font-primary;
+    line-height: 72px;
+    font-weight: 300;
+    width: 94px;
+    height: 74px;
+    padding-top: 1px;
+    display: block;
+    transition: all 2s ease-in-out;
+
+
+    &#score-home-team {
+      background: url('../img/bg/header/score-team-home.png') no-repeat 4px center;
+      background-size: cover;
+      text-indent: 4px;
+      margin-left: -15px;
+      &.score-winner,
+      &.goal {
+        text-shadow:
+          0 0 6px rgba(202, 228, 225, 0.98),
+          0 0 30px rgba(202, 228, 225, 0.42),
+          0 0 12px rgba($team-home-color-1, 0.58),
+          0 0 22px rgba($team-home-color-1, 0.84),
+          0 0 38px rgba($team-home-color-1, 0.88),
+          0 0 60px rgba($team-home-color-1, 1);
+      }
+    }
+
+    &#score-away-team {
+      background: url('../img/bg/header/score-team-away.png') no-repeat -4px center;
+      background-size: cover;
+      text-indent: -4px;
+      margin-right: -15px;
+
+      &.score-winner,
+      &.goal {
+        text-shadow:
+          0 0 6px rgba(233, 184, 156, 0.98),
+          0 0 30px rgba(233, 184, 156, 0.42),
+          0 0 12px rgba($team-away-color-1, 0.58),
+          0 0 22px rgba($team-away-color-1, 0.84),
+          0 0 38px rgba($team-away-color-1, 0.88),
+          0 0 60px rgba($team-away-color-1, 1);
+      }
+    }
+  }
+
+  #timer {
+    width: 100%;
+    max-width: 120px;
+    height: 66px;
+    margin-top:-1px;
+    background-color: #0c1018;
+    font-family: $font-primary;
+    transition: max-width 2s ease-in-out;
+    overflow: hidden;
+
+    #buffering {
+      @include model-flex(column, nowrap, center, false);
+      @include model-square(100%);
+      position: relative;
+      padding-top: 14px;
+      text-transform: uppercase;
+
+      span{ z-index: 10;}
+      .label{
+        @include font-size(12, 14);
+        line-height: 8px;
+        font-family: $font-secondary;
+        transform: scale(.9);
+        @include breakpoint(s){ transform: scale(1.2); }
+      }
+
+      .percent {
+        @include font-size(18, 38);
+        line-height: 40px;
+        font-family: $font-secondary;
+        transform: scale(.9);
+        text-shadow: 2px 2px 2px rgba(5, 6, 6,.4);
+        @include breakpoint(s){ transform: scale(1.2); }
+      }
+      .progress{
+        @include model-display(block,absolute);
+        @include model-square(100%);
+        max-height: 50%;
+        box-shadow: inset 0 -1px 4px 2px rgba(0, 0, 0, 0.5);
+        background-image: linear-gradient(to top, rgba(275, 175, 22, 1) 0%, rgba(255, 189, 62, 1) 100%);
+        bottom: 0px;
+        left: 0px;
+        z-index: 5;
+      }
+    }
+
+    #remaining {
+      @include model-square(100%);
+      @include font-size(28, 48);
+      padding-top: 21px;
+      font-family: $font-primary;
+      line-height: 24px;
+    }
+
+  }
+}
+
+/* #endregion -- Section  */
+
+
+/* #region -- Section Soccer Field and Players    */
+#lugobot-stadium {
+  @extend %col-12, %no-gutter;
+  @include model-flex(row, wrap, false, false);
+  position: relative;
+  background: #11a0b1;
+  border-radius: 15px;
+
+  &.admin-mode{
+    transition: margin .8s ease 3.5s;
+  }
+
+  #field {
+    @include model-flex(row, wrap, false, false);
+    @include model-square(100%);
+    position: relative;
+    margin: 20px 25px !important;
+    aspect-ratio: 2/1;
+    background: url("../img/bg/field/Field_2.svg") no-repeat;
+    background-size: contain;
+
+    &::before,&::after{
+      @include model-display(block,absolute);
+      content:'';
+      width: 10px;
+      height: 32%;
+      background: blue;
+      top:calc(50% - 16%);
+    }
+
+    &::before{
+      left: -10px;
+      background: rgba($team-home-color-1, 1);
+      clip-path: polygon(100% 0%, 100% 100%, 0% calc(100% - 10px), 0% 10px);
+    }
+    &::after{
+      right: -10px;
+      background: rgba($team-away-color-1, 1);
+      clip-path: polygon(100% 10px, 100% calc(100% - 10px), 0% 100%, 0% 0%);
+    }
+
+    @include breakpoint(m) {
+      margin: 15px 20px!important;
+      &::before,&::after{ width: 8px;}
+      &::before{ left: -8px; }
+      &::after{ right: -8px; }
+    }
+    @include breakpoint(s) {
+      &::before,&::after{ width: 6px;}
+      &::before{ left: -6px; }
+      &::after{ right: -6px; }
+    }
+
+    @include breakpoint(xs) {
+      margin: 10px 15px !important;
+
+    }
+
+
+  }
+
+  // #field_svg{
+  //   position: absolute;
+  //   display: block;
+  //   left: -1.2%;
+  //   height: 100%;
+  // }
+
+  @include breakpoint(xg) {
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+
+}
+
+.player {
+  @include model-flex(column, nowrap, center, center);
+  @include model-display(inline-flex, absolute);
+  @include model-square(0px);
+  transition: all .1s ease;
+  border-radius: 50%;
+  z-index: 60;
+
+  * { z-index: 10;}
+
+  &::before,
+  &::after {
+    @include model-display(block, absolute);
+    content: '';
+    order: -1;
+    border-radius: 50%;
+    z-index: 5;
+  }
+
+  &::before {
+    content: '';
+    @include model-square(calc(28px + 12px));
+    @include model-display(block, absolute);
+    border-radius: 50%;
+    top: -20px;
+    bottom: -20px;
+    opacity: 0;
+    transition: opacity .1s ease-in-out;
+  }
+  &::after {
+    @include model-square(28px);
+    top: -14px;
+    bottom: -14px;
+  }
+
+  .player-direction {
+    @include model-display(block, absolute);
+    @include model-square(calc(28px + 4px));
+    top: -16px;
+    bottom: -16px;
+    border-radius: 50%;
+    clip-path: polygon(74% 0%, calc(100% - 15px) 75%, 16px 74%, 26% 0%);
+    box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0 0 3px rgba($team-home-color-1, 0.54);
+
+  }
+
+  .player-number {
+    @include model-square(18px);
+    @include font-size(14, 15);
+    // padding-top: 1px;
+    padding-bottom: 2px;
+    text-align: center;
+    line-height: 14px;
+    text-indent: -.05rem;
+    border-radius: 50%;
+    font-family: $font-primary;
+    z-index: 10;
+  }
+
+  &.active-player {
+    &::before { opacity: 1;}
+  }
+
+  &.player-home-team {
+
+    &::before {
+      border: 1px solid rgba($team-home-color-1, .8);
+      background: radial-gradient(circle, rgba($team-home-color-1, 0) 8%, rgba($team-home-color-1, .4) 100%);
+    }
+    &::after{
+      box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0 0 3px rgba($team-home-color-1, 0.54);
+      background: rgba($team-home-color-1, 1);
+    }
+
+    .player-number {
+      background: rgba($team-home-color-2, 1);
+      color: rgba($team-home-color-1, 1);
+      box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0 0 3px rgba($team-home-color-1, 0.54);
+    }
+
+    .player-direction {
+      background: rgba($team-home-color-2, 1);
+      transform: rotate(90deg);
+    }
+  }
+
+  &.player-away-team {
+
+      &::before {
+        border: 1px solid rgba($team-away-color-1, .8);
+        background: radial-gradient(circle, rgba($team-away-color-1, 0) 8%, rgba($team-away-color-1, .4) 100%);
+      }
+
+      &::after{
+        box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0px 0px 6px rgba($team-away-color-1, 0.9);
+        background: rgba($team-away-color-2, 1);
+      }
+
+
+    .player-direction {
+      background: rgba($team-away-color-1, 1);
+      transform: rotate(-90deg);
+    }
+
+    .player-number {
+      box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0 0 3px rgba($team-home-color-1, 0.54);
+      background: rgba($team-away-color-1, 1);
+      color: rgba($team-away-color-2, 1);
+    }
+
+  }
+
+  @include breakpoint(m) {
+    &::before {
+      @include model-square(calc(20px + 12px));
+      top: -16px;
+      bottom: -16px;
+    }
+
+    &::after {
+      @include model-square(20px);
+      top: -10px;
+      bottom: -10px;
+    }
+
+    .player-number {
+      @include model-square(14px);
+      @include font-size(10, 12);
+      padding-top: 1px;
+      line-height: 12px;
+      text-indent: 0rem;
+    }
+    .player-direction {
+      @include model-square(calc(20px + 4px));
+      top: -12px;
+      bottom: -12px;
+    }
+
+
+  }
+
+  @include breakpoint(xs) {
+    &::before {
+      @include model-square(calc(16px + 12px));
+      top: -14px;
+      bottom: -14px;
+    }
+
+    &::after {
+      @include model-square(16px);
+      top: -8px;
+      bottom: -8px;
+    }
+
+
+    .player-number {
+      @include model-square(10px);
+      @include font-size(8, 8);
+      line-height: 8px;
+    }
+
+    .player-direction {
+      @include model-square(calc(16px + 4px));
+      top: -10px;
+      bottom: -10px;
+      clip-path: polygon(74% 0%, calc(100% - 11px) 75%, 11px 74%, 26% 0%);
+    }
+  }
+}
+.rearranging  {
+  .player {
+    cursor: move;
+    animation: shaking linear 1s;
+    animation-iteration-count: infinite;
+    transition: none;
+  }
+}
+
+
+
+
+/* Soccer Ball */
+#ball {
+  @include model-flex(column, nowrap, center, center);
+  @include model-display(inline-flex, absolute);
+  @include model-square(0px);
+  transition: all 50ms linear;
+  border-radius: 50%;
+  z-index: 60;
+  bottom: calc(50%);
+  left: 50%;
+  z-index: 61;
+  // background-color: #0c1011;
+  // background-image: linear-gradient(-156deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.44) 27%, rgba(255, 255, 255, 0.1) 84%, rgba(0, 0, 0, 0) 100%);
+  * { z-index: 10;}
+
+  &::before,
+  &::after {
+    @include model-display(block, absolute);
+    content: '';
+    order: -1;
+    border-radius: 50%;
+    z-index: 5;
+  }
+
+  &::before {
+    content: '';
+    @include model-square(30px);
+    @include model-display(block, absolute);
+    border-radius: 50%;
+    top: -15px;
+    bottom: -15px;
+    // background-color: #0c1011;
+    // box-shadow: 0 1px 7px 2px rgba(5, 6, 6, 0.88), 0 0 3px rgba(0, 220, 255, 0.99);
+    // border: 1px solid rgba(10, 10, 10, 0.42);
+    background: url('../img/ball.png') no-repeat center center;
+    background-size: contain;
+  }
+
+  &.within_goal_zone {
+    animation: glowing linear 0.3s;
+    animation-iteration-count: infinite;
+  }
+
+  @include breakpoint(m) {
+    &::before {
+      @include model-square(10px);
+      top: -5px;
+      bottom: -5px;
+    }
+  }
+
+  @include breakpoint(xs) {
+    &::before {
+      @include model-square(6px);
+      top: -3px;
+      bottom: -3px;
+    }
+  }
+}
+
+/* Default position 4-3-3 */
+
+/* #region -- Section  Home Team  */
+/* Goleiro */
+#player-home-team-1 {  left: 6.5%;    bottom: calc(50%);}
+#player-home-team-2 {  left: 14.5%;  bottom: calc(20%);}
+#player-home-team-3 {  left: 14.5%;  bottom: calc(40%);}
+#player-home-team-4 {  left: 14.5%;  bottom: calc(60%);}
+#player-home-team-5 {  left: 14.5%;  bottom: calc(80%);}
+#player-home-team-6 {  left: 27%;    bottom: calc(25%);}
+#player-home-team-7 {  left: 27%;    bottom: calc(50%);}
+#player-home-team-8 {  left: 27%;    bottom: calc(75%);}
+#player-home-team-9 {  left: 39.5%;  bottom: calc(25%);}
+#player-home-team-10 { left: 39.5%;  bottom: calc(50%);}
+#player-home-team-11 { left: 39.5%;  bottom: calc(75%);}
+/* #endregion -- Section End Home Team  */
+
+/* #region -- Section  Away Team */
+/* Goleiro */
+#player-away-team-1 {  right: 6.5%;    bottom: calc(50%);}
+#player-away-team-2 {  right: 14.5%;  bottom: calc(20%);}
+#player-away-team-3 {  right: 14.5%;  bottom: calc(40%);}
+#player-away-team-4 {  right: 14.5%;  bottom: calc(60%);}
+#player-away-team-5 {  right: 14.5%;  bottom: calc(80%);}
+#player-away-team-6 {  right: 27%;    bottom: calc(25%);}
+#player-away-team-7 {  right: 27%;    bottom: calc(50%);}
+#player-away-team-8 {  right: 27%;    bottom: calc(75%);}
+#player-away-team-9 {  right: 39.5%;  bottom: calc(25%);}
+#player-away-team-10 { right: 39.5%;  bottom: calc(50%);}
+#player-away-team-11 { right: 39.5%;  bottom: calc(75%);}
+/* #endregion -- Section End Away Team */
+
+/* #endregion -- Section End Field and Players  */
+
+
+/* #region -- Section   Modals */
+  #event-view {
+    @include model-flex(column, nowrap, center, center);
+    @include model-square(100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    overflow: hidden;
+    transition: scale .5s ease-in-out;
+    transform: scale(1);
+    opacity: 0;
+
+    * {
+      z-index: 10;
+    }
+
+    &.active-modal {
+      transition: all 2s;
+      display: flex !important;
+      opacity: 1;
+      &.goal{
+        transform: scale(0);
+        opacity: 0;
+      }
+    }
+
+    &.zoom-In.goal {
+      transition: all 2s;
+      transform: scale(1);
+      opacity: 1;
+
+    }
+
+    &.zoom-Out.goal {
+      transform: scale(0.5);
+      opacity: 0;
+    }
+
+    &::before,
+    &::after {
+      content: '';
+      @include model-display($display:block, $position:absolute);
+      width: 100%;
+      min-height: 100%;
+      order: -1;
+      top: 0px;
+      left: 0px;
+    }
+
+    &::before {
+      z-index: 5;
+      background-color: rgba(255, 255, 255, 0.05);
+      background-image: url('../img/bg/modals/bg-modal-shadow-extern.png');
+    }
+
+
+    &::after {
+      z-index: 6;
+      // background: url("../img/bg/pattern-module.png") repeat left top;
+
+    }
+
+    &.debug-mode {
+      .close-modal {
+        display: flex !important;
+      }
+    }
+
+    .close-modal {
+      @include model-flex(column, nowrap, center, center);
+      @include model-display(none, absolute);
+      @include model_square(40px);
+      cursor: pointer;
+      right: -20px;
+      top: -20px;
+      border-radius: 50%;
+      background: $danger;
+      z-index: 3000;
+
+      i {
+        color: $white;
+        @include icon-size(16, 24);
+      }
+    }
+
+    .modal {
+      @include model-flex(column, nowrap, center, center);
+      @include model-display(none,relative);
+      width: 80%;
+      max-width: 700px;
+      min-height: 370px;
+      padding: 40px 10px;
+      color: white;
+      border-radius: 10px;
+      box-shadow: 0 14px 21px 6px rgba(5, 6, 6, 0.49);
+      transition: scale .8s ease-in-out;
+      transform: scale(0);
+      opacity: 0;
+      background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+
+      &::before,
+      &::after {
+        content: '';
+        @include model-display($display:block, $position:absolute);
+        width: calc(100% - 4px);
+        min-height: calc(100% - 4px);
+        order: -1;
+        top: 0px;
+        left: 0px;
+        border-radius: 10px;
+        margin: 2px;
+      }
+
+      &::before {
+        z-index: 5;
+        background: url('../img/bg/modals/bg-modal-full.png') no-repeat center center;
+        background-size: cover;
+      }
+
+      * {
+        z-index: 10;
+      }
+
+
+
+      &.active-modal {
+        display: flex;
+      }
+      &.zoom-In {
+        transition: all 2s;
+        transform: scale(1);
+        opacity: 1;
+
+      }
+
+      &.zoom-Out {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+
+      .modal-content {
+        text-align: center;
+        width: 100%;
+
+        .icon-modal {
+          margin: -60px auto 5px auto;
+        }
+
+        .modal-title {
+          margin-bottom: 20px;
+          @include font-size(25, 35);
+          font-weight: 400;
+        }
+      }
+
+      .modal-action {
+        @include model-flex(row, wrap, center, false);
+
+        .btn {
+          margin: 10px 20px;
+          min-width: 140px;
+          text-align: center;
+          justify-content: center;
+        }
+
+        @include breakpoint(xs) {
+          @include model-flex(column, nowrap, center, center);
+        }
+      }
+    }
+
+    #modal-winner {
+      padding: 10px;
+
+      .modal-title{
+        @include font-size(20,35);
+        line-height: 20px;
+        margin: 15px 0px 0px 0px;
+      }
+
+      .game-panel {
+        @include model-flex(row,nowrap,center,false);
+        position: relative;
+        width: 100%;
+        height: 190px;
+        background: url('../img/bg/modals/bg-tape-team.png') no-repeat center center;
+        background-size: contain;
+
+        @include breakpoint(xs){  margin-top: -20px; }
+
+        .team{background: none;}
+
+        #teams-info .team .profile-team {
+          padding: 20px 40px;
+
+          @include breakpoint(s) {
+            padding: 20px 25px;
+          }
+
+          &::before {
+            display: none;
+          }
+
+          .picture-team {
+            @include model-square(90px);
+
+            @include breakpoint(s) {
+              @include model-square(70px);
+            }
+
+            @include breakpoint(xs) {
+              @include model-square(40px);
+            }
+          }
+        }
+
+        #score-info {
+          border: none;
+          padding: 6px 4px 4px 6px;
+          max-width: unset;
+          width: 310px;
+          height: 120px;
+          max-height: unset;
+          background: url("../img/bg/modals/bg-score-info.png") no-repeat center center;
+
+          .score-team {
+            @include model-flex(row,nowrap,center,false);
+            width: 150px;
+            height: 100px;
+            left: unset;
+            right: unset;
+            text-indent: 0px;
+            @include font-size(50,80);
+            &#score-home-team{
+              background: url("../img/bg/modals/bg-score-home.png") no-repeat center center;
+            }
+            &#score-away-team{
+              background: url("../img/bg/modals/bg-score-away.png") no-repeat center center;
+            }
+
+            @include breakpoint(s) {
+              min-width: 60px;
+            }
+
+            @include breakpoint(xs) {
+              min-width: 30px;
+            }
+          }
+        }
+
+
+
+      }
+
+      #modal-game-info {
+        @include model-flex(column,nowrap,center,center);
+        position: absolute;
+        top: 10px;
+        left: 25%;
+        width: 50%;
+        height: calc(100% - 20px);
+        min-height: calc(100% - 20px);
+
+        @include breakpoint(s) {
+          left: 30%;
+          width: 40%;
+        }
+
+      }
+
+      @include breakpoint(m){ #modal-game-info{ transform:scale(.8); } }
+      @include breakpoint(s){ #modal-game-info{ transform:scale(.6); } }
+      @include breakpoint(xs){
+        #modal-game-info{ transform:scale(.6); }
+        .modal-action{ margin-top: -40px; }
+      }
+      @include breakpoint(480){ #modal-game-info{ transform:scale(.5); } }
+    }
+
+    /* Event Goal */
+    &.goal {
+      &::before {
+        background-image: url("../img/bg/modals/bg-goal.png");
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        opacity: .9;
+        background-blend-mode: multiply;
+        filter: contrast(104%) brightness(190%);
+
+      }
+
+      &::after {
+        background: url('../img/bg/modals/bg-lights.png') no-repeat center center;
+        opacity: .4;
+        filter: blur(2px);
+
+      }
+
+    }
+
+    &.goal-home {
+      background-color: rgba($team-home-color-1, 1);
+
+      &::before {
+        background-color: rgba($team-home-color-1, 1);
+      }
+
+      .legend-goal span {
+        text-shadow:
+          0 0 6px rgba(202, 228, 225, 0.98),
+          0 0 30px rgba(202, 228, 225, 0.42),
+          0 0 12px rgba($team-home-color-1, 0.58),
+          0 0 22px rgba($team-home-color-1, 0.84),
+          0 0 38px rgba($team-home-color-1, 0.88),
+          0 0 60px rgba($team-home-color-1, 1);
+      }
+
+      #balls .snow {
+        background-color: rgba($team-home-color-1, 1);
+        box-shadow: 0 0 0px 0px #fff, 0px -2px 20px 5px rgba($team-home-color-1, 0.4);
+      }
+
+    }
+
+    &.goal-away {
+      background-color: rgba($team-away-color-1, 1);
+
+      &::before {
+        background-color: rgba($team-away-color-1, 1);
+      }
+
+      .legend-goal span {
+        text-shadow:
+          0 0 6px rgba(233, 184, 156, 0.98),
+          0 0 30px rgba(233, 184, 156, 0.42),
+          0 0 12px rgba($team-away-color-1, 0.58),
+          0 0 22px rgba($team-away-color-1, 0.84),
+          0 0 38px rgba($team-away-color-1, 0.88),
+          0 0 60px rgba($team-away-color-1, 1);
+      }
+
+      #balls .snow {
+        background-color: rgba($team-away-color-1, 1);
+        box-shadow: 0 0 0px 0px #fff, 0px -2px 20px 5px rgba($team-away-color-1, 0.4);
+      }
+
+    }
+
+
+    #event-goal {
+      @include model-square(100%);
+      @include model-display(none, relative);
+      max-width: 100%;
+
+      &.active-modal {
+        display: flex;
+      }
+
+      .close-modal {
+        right: calc(50% - 20px);
+        bottom: 20px;
+        top: unset;
+      }
+
+      /* #region -- Section Balls Fallen    */
+      #balls {
+        @include model-display($display:block, $position:absolute);
+        width: 100%;
+        min-height: 100%;
+        top: 0px;
+        left: 0px;
+
+        @function random_range($min, $max) {
+          $rand: random();
+          $random_range: $min + floor($rand * (($max - $min) + 1));
+          @return $random_range;
+        }
+
+        .snow {
+          $total: 200;
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          filter: brightness(190%) contrast(3);
+
+          @for $i from 1 through $total {
+            $random-x: random(1000000) * 0.0001vw;
+            $random-offset: random_range(-100000, 100000) * 0.0001vw;
+            $random-x-end: $random-x + $random-offset;
+            $random-x-end-yoyo: $random-x + ($random-offset / 2);
+            $random-yoyo-time: random_range(30000, 80000) / 100000;
+            $random-yoyo-y: $random-yoyo-time * 100vh;
+            $random-scale: random(10000) * 0.0001;
+            $fall-duration: random_range(10, 30) * 1s;
+            $fall-delay: random(30) * -1s;
+
+            &:nth-child(#{$i}) {
+              opacity: random(10000) * 0.0001;
+              transform: translate($random-x, -10px) scale($random-scale);
+              animation: fall-#{$i} $fall-duration $fall-delay linear infinite;
+            }
+
+            @keyframes fall-#{$i} {
+              #{percentage($random-yoyo-time)} {
+                transform: translate($random-x-end, $random-yoyo-y) scale($random-scale);
+              }
+
+              to {
+                transform: translate($random-x-end-yoyo, 100vh) scale($random-scale);
+              }
+            }
+          }
+        }
+
+      }
+
+      /* #endregion -- Section Balls Fallen */
+
+      .soccer-crowd {
+        position: absolute;
+        @include model-square(100%);
+        display: block;
+        background: url("../img/bg/modals/bg-silhouettes.png") no-repeat bottom center;
+        background-size: contain;
+        transform: translateY(120px);
+        animation: positionPeople 2s .3s, movePeople 2s infinite 2s;
+
+        @include breakpoint(xl) {
+          background-size: 200% 60%;
+        }
+      }
+
+      .legend-goal {
+        @include font-size(60, 190);
+        position: absolute;
+        margin: 0px;
+        color: $white;
+        top: calc(50%);
+        left: calc(50%);
+        transform: translate(calc(-50%), calc(-50%));
+
+        span {
+          display: table-cell;
+          animation: animate 1s infinite;
+
+          &:nth-child(1) {
+            animation-delay: .4s;
+          }
+
+          &:nth-child(2) {
+            animation-delay: .8s;
+          }
+
+          &:nth-child(3) {
+            animation-delay: .12s;
+          }
+
+          &:nth-child(4) {
+            animation-delay: .16s;
+          }
+
+          &:nth-child(5) {
+            animation-delay: .20s;
+          }
+
+          &:nth-child(6) {
+            animation-delay: .24s;
+          }
+        }
+      }
+
+    }
+
+  }
+
+/* #endregion -- Section END Modals */
+
+
+/* #region -- Section Footer Admin panel   */
+
+#lugobot-admin-panel {
+  @include model-flex(column, nowrap, flex-start, false);
+  display: none;
+  width: 100%;
+  padding: 0 40px;
+  margin-top: 20px;
+  background-image: url('../img/bg/footer/bg-footer-complete.png');
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: cover;
+  //transform:translateY(100%);
+  transition: transform 0.5s ease-in 0.5s;
+
+  &.debug-mode {  display: flex; }
+  * {
+    color: $white;
+    z-index: 10;
+  }
+
+  &::before,
+  &::after {
+    @include model-display($display:block, $position:absolute);
+    content: '';
+    top: 0px;
+    order: -1;
+    width: 100%;
+    min-height: 100%;
+    z-index: 5;
+  }
+
+
+  @include breakpoint(l) {
+    background-size: 100% 101%;
+    transform-origin: center bottom;
+    .tab-content *:not(label) { margin: 5px; }
+    #tabs-panel-content { padding: 10px 15px; }
+  }
+  @include breakpoint(m) {
+    background-color: #0d1528;
+    background: url('../img/bg/footer/bg-footer-complete-mobile.png') no-repeat center center;
+    background-size: cover;
+
+  }
+
+  @include breakpoint(s) {
+    .btn{
+      width: 45%;
+      justify-content: center;
+    }
+  }
+
+
+  // @include breakpoint(xl){ transform: scale(.90); transform-origin: center bottom; }
+  // @include breakpoint(au){ transform: scale(.80); transform-origin: center bottom; }
+
+  #tabs-panel-link {
+    @include model-flex(row, nowrap, center, false);
+    padding: 2px 40px;
+    width: 100%;
+    overflow: hidden;
+    @include breakpoint(m){ overflow: visible;  }
+
+    li {
+      transform: skew(-20deg);
+      box-shadow: inset 4px -1px 4px rgba(0, 0, 0, 0.58);
+      background-color: #0c1018;
+      transition: background .3s ease, opacity .3s ease;
+      opacity: .8;
+
+      &.active-tab-link {
+        background: none;
+        box-shadow: none;
+      }
+      &:first-of-type{
+        position: relative;
+        border-radius: 30px 0px 0px 0px;
+
+        &.active-tab-link::after { opacity: 0; display: 	none;}
+
+        &::after{
+          border-radius: 20px 0px 0px 0px;
+          box-shadow: inset 2px 1px 2px rgba(0, 0, 0, 0.58);
+          @include model-display(block,absolute);
+          background-color: #0c1018;
+          content: '';
+          position: absolute;
+          display: block;
+          left: -10px;
+          top: 0px;
+          height: 100%;
+          width: 40px;
+          transform: skew(-5deg);
+
+          @include breakpoint(1100){ left: -21px; }
+        }
+        @include breakpoint(m){
+          border-radius:0px;
+          &::after{
+            transform: skew(0deg);
+            width: 200px;
+            margin-left: -178px;
+            border-radius:0px;
+          }
+        }
+
+      }
+
+      &.bg-tab {
+        flex-grow: 1;
+        color: transparent;
+        position: relative;
+        border-radius: 0px 100px 0px 0px;
+        &::after{
+          border-radius: 0px 15px 0px 0px;
+          box-shadow: inset -2px 1px 2px rgba(0, 0, 0, 0.58);
+          @include model-display(block,absolute);
+          background-color: #0c1018;
+          content: '';
+          position: absolute;
+          display: block;
+          right: -10px;
+          top: 0px;
+          height: 100%;
+          width: 40px;
+          transform: skew(40deg);
+          @include breakpoint(1100){ right: -18px;  }
+        }
+
+
+        @include breakpoint(m){
+          margin-right: -100px;
+          border-radius:0px;
+          &::after{ display: none; }
+        }
+      }
+
+    }
+
+    a {
+      display: block;
+      position: relative;
+      padding: 10px 20px;
+      color: $white;
+      transform: skew(20deg);
+    }
+  }
+
+  #tabs-panel-content {
+    padding: 10px 40px;
+    width: 100%;
+
+    .tab-content {
+      display: none;
+      width: 100%;
+      min-height: 42px;
+
+      &.active-tab-content {
+        @include model-flex(row, wrap, center, space-between);
+      }
+      @include breakpoint(l){ min-height: 120px; }
+    }
+  }
+
+  #status-conection {
+    @include model-square(25px);
+    display: block;
+    border-radius: 50%;
+    filter: saturate(10);
+
+    @include breakpoint(m) {
+      order: 2;
+    }
+
+    &.conected {
+      background: $success;
+      box-shadow: 0 0 0px 0px #fff, 0px -2px 20px 5px rgba($success, 0.5);
+    }
+
+    &.reconection {
+      background: $atention;
+      box-shadow: 0 0 0px 0px #fff, 0px -2px 20px 5px rgba($atention, 0.5);
+    }
+
+    &.notconected {
+      background: $danger;
+      box-shadow: 0 0 0px 0px #fff, 0px -2px 20px 5px rgba($danger, 0.5);
+    }
+
+  }
+
+  #choose-preset {
+    @include model-flex(row, nowrap, center, false);
+    width: 20%;
+    position: relative;
+    border-radius: 6px;
+    background-color: #0a1520;
+    box-shadow: 0 1px 6px 2px rgba(5, 6, 6, 0.13);
+
+    @include breakpoint(l) {
+      width: 100%;
+      order: 2;
+    }
+
+    label {
+      @include model-display(block, absolute);
+      @include model-square(15px);
+      position: absolute;
+      text-indent: -99999px;
+      overflow: hidden;
+      right: 10px;
+      z-index: 5;
+
+      &:before {
+        @include model-square(100%);
+        @include model-flex(column, nowrap, center, center);
+        @include font-awesome(solid, 20);
+        content: '\f0dd';
+        position: absolute;
+        top: -3px;
+        left: 0px;
+        color: $white;
+        text-indent: 0px;
+
+      }
+    }
+
+    select {
+      z-index: 10;
+      width: 100%;
+      padding: 10px;
+      color: $white;
+      background: none;
+      border: none;
+      appearance: none;
+      cursor: pointer;
+
+      option {
+        background-color: #0a1520;
+        border: none;
+      }
+    }
+  }
+
+  #coordinates {
+    @include model-flex(row, nowrap, center, false);
+
+    #axis {
+      @include model-flex(column, nowrap, flex-start, false);
+      @include font-size(12, 12);
+      color: $white;
+      opacity: .6;
+
+      span {
+        margin-left: 5px;
+      }
+    }
+
+    #icon {
+      @include model-square(30px);
+      display: block;
+      margin-left: 10px;
+      background: url("../img/bg/footer/axis_coordenate.png") no-repeat center center;
+    }
+  }
+
+}
+
+#login-area{
+  @include model-flex(row, nowrap, false, center);
+  width: 100%;
+  display: none;
+  padding:10px 0px;
+  position: fixed;
+  bottom: 20px;
+  transition: transform 1s ease-in 1s;
+  transform: translateY(120%);
+  &.user-mode{ display: flex; }
+}
+
+#filter_blur{ position: absolute;}
+
+/* #endregion -- Section END Footer Admin panel   */
+
+
+/* #region -- Section   Key frames and animations */
+@keyframes scaleView {
+  0% {
+    transform: scale(0.0);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes animate {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-40px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes positionPeople {
+  0% {
+    transform: translateY(500px);
+  }
+
+  100% {
+    transform: translateY(120px);
+  }
+}
+@keyframes loadProgress {
+  0% {
+    max-width: 0%;
+  }
+
+  100% {
+    max-width: 100%;
+  }
+}
+
+@keyframes movePeople {
+  0% {
+    transform: translateY(120px);
+  }
+
+  50% {
+    transform: translateY(150px);
+  }
+
+  100% {
+    transform: translateY(120px);
+  }
+}
+
+/* #endregion -- Section  */
+
+
+/* #region -- Section  General classes  */
+  .btn {
+    @include model-flex(row, nowrap, center, flex-start);
+    position: relative;
+    padding: 10px 20px;
+    border-radius: 6px;
+    color: $white;
+    letter-spacing: .14;
+    min-width: 100px;
+    text-transform: capitalize;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .3s ease;
+    box-shadow: inset 0 4px 6px -4px rgba(255, 255, 255, 0.44);
+    border: 1px solid rgba(255, 255, 255, 0.44);
+
+
+    border-radius: 6px;
+
+    background-image: linear-gradient(to top, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0) 51%, rgba(255, 255, 255, 0.1) 100%);
+
+    &::before {
+      content: '';
+      display: block;
+      @include font-awesome(solid, 12);
+      margin-right: 10px;
+    }
+
+    &:hover {
+      background: #000;
+    }
+
+    @include breakpoint(l) {
+      padding: 5px 10px;
+      min-width: 70px;
+    }
+
+    &.btn-main {
+      background-color: #2275f2;
+      background-image:
+        linear-gradient(46deg,
+          rgba(88, 40, 192, 0.76) 0%,
+          rgba(46, 110, 247, 0.76) 100%),
+
+        linear-gradient(-2deg,
+          rgba(0, 0, 0, 0.51) 0%,
+          rgba(15, 15, 15, 0.28) 30%,
+          rgba(32, 32, 32, 0.24) 35%,
+          rgba(255, 255, 255, 0) 100%),
+
+        linear-gradient(to top,
+          rgba(255, 255, 255, 0) 50%,
+          rgba(255, 255, 255, 0) 51%,
+          rgba(255, 255, 255, 0.18) 100%);
+      box-shadow: none;
+      // border: none;
+
+      &::before {
+        content: '\f04b';
+      }
+
+      &:hover {
+        filter: brightness(120%);
+      }
+    }
+
+    &:disabled {
+      color: #4e6365 !important;
+      border-color: rgba(93, 67, 67, 0);
+    }
+    &#btn-next-order::before { content: '\f051'; }
+    &#btn-next-cycle::before { content: '\f050'; }
+    &#btn-rearrange::before { content: '\f0b2'; }
+    &#btn-save-positions::before { content: '\f0c7'; }
+    &#btn-login::before{ content: '\f023'; }
+    &#btn-logoff::before{ content: '\f011'; }
+    &#btn-loading::before{ content: '\f110'; }
+    &#btn-game-over::before{ content: '\f017'; }
+    &#btn-winner::before{ content: '\f091'; }
+    &#btn-home-goal::before,
+    &#btn-away-goal::before{ content: '\f1e3'; font-weight: 400; }
+
+
+
+  }
+/* #endregion -- Section END General classes */
+
+
+
+#grid {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  width: 100%;
+
+  .grid_lines {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    justify-content: space-evenly;
+  }
+
+  .grid_cell {
+    padding-top: 5px;
+    padding-left: 5px;
+    border-top: 1px solid #efefef;
+    border-right: 1px solid #efefef;
+    width: 100%;
+    font-size: .8em;
+    color: #efefef;
+    opacity: 0.4;
+  }
+}
+
+
+

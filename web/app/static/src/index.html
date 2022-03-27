@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en-US" id="lugobot-view" class="">
+<head id="lugobot-head">
+    <meta name="theme-color" content="#59585D">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#59585D">
+    <meta name="msapplication-navbutton-color" content="#59585D">
+    <link rel="shortcut icon" href="favicon.png">
+    <meta name="description" content="Lugo is game played by bots. Your goal is developing a bot able to play Lugo.">
+    <title>Lugo</title>
+    <style>
+        html#lugobot-view.loading {
+            background-color: black;
+            background-image: url("loader.gif");
+            background-position: top;
+            background-repeat: no-repeat;
+            background-size: auto;
+        }
+    </style>
+    <script>
+      const uuid = {{ .uuid}};
+      const gameID = {{ .gameID}};
+    </script>
+</head>
+<body id="lugobot-page">
+<div id="app"></div>
+</body>
+</html>

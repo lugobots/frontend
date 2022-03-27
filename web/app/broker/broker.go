@@ -7,15 +7,19 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/lugobots/frontend/web/app"
 	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/pkg/errors"
+	"github.com/rubens21/srvmgr"
 	"go.uber.org/zap"
+	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"io"
-	"math"
 	"sync"
 	"time"
 )
 
-var maxIgnoredMessaged = 20
+var maxIgnoredMessaged = 20 * 5 // 20 msg = 1 second
 var maxGRPCReconnect = 10
 var grpcReconnectInterval = time.Second
 
@@ -31,7 +35,7 @@ var defaultTeamColors = &proto.TeamSettings{
 
 const MessagesRateMeasureTimeWindow = 5
 
-func NewBinder(config app.Config, logger *zap.SugaredLogger, buffer BufferHandler) *Binder {
+func NewBinder(config app.Config, logger *zap.SugaredLogger) *Binder {
 	return &Binder{
 		consumers:    map[string]chan app.FrontEndUpdate{},
 		consumersMux: sync.RWMutex{},
@@ -41,11 +45,11 @@ func NewBinder(config app.Config, logger *zap.SugaredLogger, buffer BufferHandle
 			HomeTeam: defaultTeamColors,
 			AwayTeam: defaultTeamColors,
 		},
-		buffer: buffer,
+		process: srvmgr.NewProcess(),
 	}
 }
 
-const MaxUpdateBuffer = 1200 // n / 20 = time in sec
+//const MaxUpdateBuffer = 1200 // n / 20 = time in sec
 
 type Binder struct {
 	consumers    map[string]chan app.FrontEndUpdate
@@ -58,7 +62,11 @@ type Binder struct {
 	stopRequest  bool
 	Logger       *zap.SugaredLogger
 	lastUpdate   app.FrontEndUpdate
-	buffer       BufferHandler
+	process      srvmgr.Process
+}
+
+func (b *Binder) Name() string {
+	return "http-binder"
 }
 
 func (b *Binder) GetRemote() proto.RemoteClient {
@@ -80,6 +88,7 @@ func (b *Binder) GetGameConfig(uuid string) (app.FrontEndSet, error) {
 		state = app.ConnStateDown
 	}
 
+	// not sure why we need this
 	go func() {
 		time.Sleep(1 * time.Second)
 		b.consumersMux.RLock()
@@ -89,7 +98,7 @@ func (b *Binder) GetGameConfig(uuid string) (app.FrontEndSet, error) {
 	}()
 	marshal := jsonpb.Marshaler{
 		OrigName:     true,
-		EmitDefaults: true,
+		EmitDefaults: false,
 	}
 	raw, err := marshal.MarshalToString(b.gameSetup)
 	if err != nil {
@@ -99,6 +108,16 @@ func (b *Binder) GetGameConfig(uuid string) (app.FrontEndSet, error) {
 		GameSetup:       json.RawMessage(raw),
 		ConnectionState: state,
 	}, nil
+}
+
+// this method is not used yet! I made it because the frontend would start as soon as a client connects, but it won't be implmentned now
+func (b *Binder) StartGame(uuid string) error {
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
+	_, err := b.producer.StartGame(ctx, &proto.StartRequest{
+		WatcherUuid: uuid,
+	})
+
+	return errors.Wrap(err, "failed to request the start of the game")
 }
 
 func (b *Binder) connect() error {
@@ -111,7 +130,7 @@ func (b *Binder) connect() error {
 	var err error
 	b.producerConn, err = grpc.DialContext(ctx, b.config.GRPCAddress, opts...)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to connect to %s", b.config.GRPCAddress)
 	}
 
 	b.producer = proto.NewBroadcastClient(b.producerConn)
@@ -121,28 +140,61 @@ func (b *Binder) connect() error {
 	if err != nil {
 		return err
 	}
-	if !b.gameSetup.DevMode {
-		bufferLoad := b.buffer.Start(func(data BufferedEvent) {
-			b.lastUpdate = data.Update
-			b.sendToAll(data.Update)
-			if data.Update.Type == app.EventGoal {
-				time.Sleep(5 * time.Second)
-			} else if data.Update.Snapshot.State == proto.GameSnapshot_LISTENING {
-				time.Sleep(50 * time.Millisecond)
-			}
-		}, b.gameSetup.GameDuration)
-		go b.watchBufferNotifications(bufferLoad)
-	}
+	//if !b.gameSetup.DevMode {
+	//	bufferLoad := b.buffer.Start(func(data BufferedEvent) {
+	//		b.lastUpdate = data.Update
+	//		b.sendToAll(data.Update)
+	//		if data.Update.Type == app.EventGoal {
+	//			time.Sleep(5 * time.Second)
+	//		} else if data.Update.Snapshot.State == proto.GameSnapshot_LISTENING {
+	//			time.Sleep(50 * time.Millisecond)
+	//		}
+	//	}, b.gameSetup.GameDuration)
+	//	go b.watchBufferNotifications(bufferLoad)
+	//}
 
 	b.remoteConn = proto.NewRemoteClient(b.producerConn)
 
 	return err
 }
 
-func (b *Binder) ListenAndBroadcast() error {
+func (b *Binder) drainBuffer(ctx context.Context, caching chan app.FrontEndUpdate) {
+	limiter := rate.NewLimiter(40, 1)
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-b.process.Died():
+			return
+		case update, ok := <-caching:
+			if !ok {
+				b.Logger.Error("Cache closed")
+				return
+			}
+			b.lastUpdate = update
+			b.sendToAll(update)
+			if !b.gameSetup.DevMode {
+				switch update.Type {
+				case app.EventGoal:
+					time.Sleep(8 * time.Second)
+				case app.EventStateChange:
+					if err := limiter.Wait(context.Background()); err != nil {
+						b.Logger.With("error", err).Error("could not wait more to keep the rate")
+					}
+				}
+			}
+			//if update.Type == app.EventGameOver {
+			//	b.Logger.Info("CABOOOO!!!!")
+			//}
+		}
+	}
+}
+
+func (b *Binder) Start() error {
+	defer b.process.Deceased()
 	tries := 0
 	var finalErr error
-	for !b.stopRequest && (b.config.StaysIfDisconnected || tries < maxGRPCReconnect) {
+	for b.config.StaysIfDisconnected || tries < maxGRPCReconnect {
 		if err := b.connect(); err != nil {
 			b.broadcastConnectionLost()
 			b.Logger.Warnf("failure on connecting to the game server: %s", err)
@@ -151,31 +203,43 @@ func (b *Binder) ListenAndBroadcast() error {
 		} else {
 			b.broadcastConnectionRees()
 			tries = 0
-			err := b.broadcast()
-			if err == app.ErrGameOver {
-				finalErr = err
-				break
-			}
-			b.buffer.Stop()
-			b.broadcastConnectionLost()
-			b.Logger.Warnf("broadcast interrupted: %s", err)
+			caching := make(chan app.FrontEndUpdate, 5000)
+			ctx, stop := context.WithCancel(context.Background())
+
+			var err error
+			go func() {
+				err = b.broadcast(caching)
+				if grpcErr, ok := status.FromError(err); ok && grpcErr.Code() != codes.Canceled {
+					b.Logger.Warnf("broadcast interrupted: %s", err)
+				}
+				b.broadcastConnectionLost()
+				stop()
+			}()
+			b.drainBuffer(ctx, caching)
+			stop()
+			close(caching)
+		}
+		if !b.process.IsAlive() {
+			break
 		}
 	}
-	if b.stopRequest {
-		finalErr = app.ErrStopRequested
-	}
+
 	if !b.config.StaysIfDisconnected && tries >= maxGRPCReconnect {
 		finalErr = ErrMaxConnectionAttemptsReached
-	}
-	if err := b.Stop(); err != nil {
-		return fmt.Errorf("error stopping: %w (initial error: %s)", err, finalErr)
 	}
 
 	return finalErr
 }
 
-func (b *Binder) Stop() error {
-	b.stopRequest = true
+func (b *Binder) Stop(ctx context.Context) error {
+	b.process.Die()
+	select {
+	case <-ctx.Done():
+		return errors.Wrap(ctx.Err(), "http binder was not able to close all connections safely")
+	case <-b.process.Dying():
+
+	}
+
 	if b.producerConn != nil {
 		if err := b.producerConn.Close(); err != nil {
 			return err
@@ -185,7 +249,7 @@ func (b *Binder) Stop() error {
 	return nil
 }
 
-func (b *Binder) broadcast() error {
+func (b *Binder) broadcast(caching chan app.FrontEndUpdate) error {
 	ctx := context.Background()
 	receiver, err := b.producer.OnEvent(ctx, &proto.WatcherRequest{
 		Uuid: "frontend",
@@ -204,7 +268,7 @@ func (b *Binder) broadcast() error {
 			if err != io.EOF {
 				return fmt.Errorf("%w: %s", app.ErrGRPCConnectionLost, err)
 			}
-			return app.ErrGRPCConnectionClosed
+			return errors.Wrap(err, "grpc connection closed")
 		}
 		var update app.FrontEndUpdate
 		update, debugging, err = b.createFrame(event, debugging)
@@ -212,23 +276,9 @@ func (b *Binder) broadcast() error {
 			b.Logger.Errorf("ignoring game event: %s", err)
 			continue
 		}
-		if b.gameSetup.DevMode {
-			b.lastUpdate = update
-			b.sendToAll(update)
-		} else {
-			if err := b.buffer.QueueUp(update); err != nil {
-				b.Logger.Errorf("ignoring game event: %s", err)
-			}
-			//if the game is ended, the grpx will be dropped soon, we must wait the buffer be consumed.
-			if update.Type == app.EventGameOver {
-				for range time.Tick(1 * time.Second) {
-					b.Logger.Info("game ended, waiting buffer be consumed")
-					// very ugly solution!
-					if b.lastUpdate.Type == app.EventGameOver {
-						return app.ErrGameOver
-					}
-				}
-			}
+		caching <- update
+		if update.Type == app.EventGameOver {
+			b.Logger.Info("game over")
 		}
 	}
 }
@@ -261,7 +311,7 @@ func (b *Binder) sendToAll(update app.FrontEndUpdate) {
 		}
 	}
 	b.consumersMux.RUnlock()
-	b.Logger.Infof("event sent: %s", update.Type)
+	//b.Logger.Infof("event sent: %s", update.Type)
 }
 
 func (b *Binder) broadcastConnectionLost() {
@@ -295,6 +345,8 @@ func (b *Binder) createFrame(event *proto.GameEvent, debugging bool) (app.FrontE
 		EmitDefaults: true,
 	}
 	raw, err := marshal.MarshalToString(event)
+	//raw, err := json.Marshal(event)
+
 	if err != nil {
 		return app.FrontEndUpdate{}, false, fmt.Errorf("error marshalling event message: %w", err)
 	}
@@ -312,8 +364,8 @@ func (b *Binder) createFrame(event *proto.GameEvent, debugging bool) (app.FrontE
 		debugging = false
 	}
 	update := app.FrontEndUpdate{
-		Type:     eventType,
-		Snapshot: event.GameSnapshot,
+		Type:      eventType,
+		GameEvent: event,
 		Update: app.UpdateData{
 			GameEvent:     json.RawMessage(raw),
 			TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),
@@ -325,29 +377,29 @@ func (b *Binder) createFrame(event *proto.GameEvent, debugging bool) (app.FrontE
 	return update, debugging, nil
 }
 
-func (b *Binder) watchBufferNotifications(bufferLoad <-chan float32) {
-	for {
-		select {
-		case percentile, ok := <-bufferLoad:
-			if !ok {
-				return
-			}
-			b.lastUpdate.Update.Buffer = int(math.Round(float64(percentile) * 100))
-			update := app.FrontEndUpdate{
-				Update:          b.lastUpdate.Update,
-				ConnectionState: app.ConnStateUp,
-			}
-			update.Type = app.EventBufferReady
-			if percentile < 1 {
-				update.Type = app.EventBuffering
-			}
-			b.lastUpdate = update
-			b.sendToAll(update)
-			b.Logger.Infof("Buffer load %f", percentile)
-			time.Sleep(5 * time.Second)
-		}
-	}
-}
+//func (b *Binder) watchBufferNotifications(bufferLoad <-chan float32) {
+//	for {
+//		select {
+//		case percentile, ok := <-bufferLoad:
+//			if !ok {
+//				return
+//			}
+//			b.lastUpdate.Update.Buffer = int(math.Round(float64(percentile) * 100))
+//			update := app.FrontEndUpdate{
+//				Update:          b.lastUpdate.Update,
+//				ConnectionState: app.ConnStateUp,
+//			}
+//			update.Type = app.EventBufferReady
+//			if percentile < 1 {
+//				update.Type = app.EventBuffering
+//			}
+//			b.lastUpdate = update
+//			b.sendToAll(update)
+//			b.Logger.Infof("Buffer load %f", percentile)
+//			time.Sleep(5 * time.Second)
+//		}
+//	}
+//}
 
 func eventTypeTranslator(event interface{}) (app.EventType, error) {
 	switch event.(type) {
