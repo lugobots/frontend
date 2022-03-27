@@ -130,7 +130,7 @@ func (b *Binder) connect() error {
 	var err error
 	b.producerConn, err = grpc.DialContext(ctx, b.config.GRPCAddress, opts...)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to connect to %s", b.config.GRPCAddress)
 	}
 
 	b.producer = proto.NewBroadcastClient(b.producerConn)
@@ -214,12 +214,10 @@ func (b *Binder) Start() error {
 				}
 				b.broadcastConnectionLost()
 				stop()
-				b.Logger.Info("WHAT??")
 			}()
 			b.drainBuffer(ctx, caching)
 			stop()
 			close(caching)
-			b.Logger.Info("WHAT     222222??")
 		}
 		if !b.process.IsAlive() {
 			break

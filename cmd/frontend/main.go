@@ -45,9 +45,9 @@ func init() {
 func main() {
 
 	eventBroker := broker.NewBinder(app.Config{
-		GRPCAddress:         "localhost:9090",
+		GRPCAddress:         "localhost:5000",
 		GRPCInsecure:        true,
-		StaysIfDisconnected: true,
+		StaysIfDisconnected: true, // here we define if the server should die if the frontend application is not able to connect to the upstream
 	}, zapLog.Named("broker"))
 
 	broadcasterSyncer := propagator.NewPropagator(eventBroker)
