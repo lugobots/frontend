@@ -1,4 +1,3 @@
 .idea
-web/app/static/dist
 web/app/static/node_modules
 cmd/frontend/Run
