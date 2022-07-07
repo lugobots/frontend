@@ -4,8 +4,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/lugobots/lugo4go/v2/proto"
 	"html/template"
 	"io"
 	"log"
@@ -13,13 +11,18 @@ import (
 	"path"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 //go:embed static/dist/*
 var jsDist embed.FS
 
 func NewHandler(whereAmI, gameID string, srv EventsBroker) *gin.Engine {
-	r := gin.Default()
+	r := gin.New()
+	//r.Use(gin.Logger())
+	r.Use(gin.Recovery())
 
 	t, err := template.New("a").ParseFS(jsDist, "static/dist/index.html")
 	if err != nil {
