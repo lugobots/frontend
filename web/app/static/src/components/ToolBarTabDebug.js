@@ -132,10 +132,10 @@ class ToolBarTabDebug extends React.Component {
               onClick={this.pauseResume}>Resume
       </button>
       <button id="btn-next-order" disabled={!enabledBreakPoint} className="btn"
-              onClick={this.nextTurn}>Next Order
+              onClick={this.nextOrder}>Next Order
       </button>
       <button id="btn-next-cycle" disabled={!enabledBreakPoint} className="btn"
-              onClick={this.nextOrder}>Next Cycle
+              onClick={this.nextTurn}>Next Cycle
       </button>
       <button id="btn-rearrange" disabled={!enabledRearrange} className="btn"
               onClick={this.startRearrange}>Rearrange
@@ -143,15 +143,15 @@ class ToolBarTabDebug extends React.Component {
       <button id="btn-save-positions" disabled={!enabledSavePos} className="btn"
               onClick={this.confirmRearranging}>Save Positions
       </button>
-      <span id="choose-preset">
-            <label htmlFor="preset">Choose a pre-set Arrangement</label>
-            <select name="preset">
-              <option value="default">Choose a pre-set Arrangement</option>
-              <option value="preset-1">Pre-set 1</option>
-              <option value="preset-2">Pre-set 2</option>
-              <option value="preset-3">Pre-set 3</option>
-            </select>
-          </span>
+      {/*<span id="choose-preset">*/}
+      {/*      <label htmlFor="preset">Choose a pre-set Arrangement</label>*/}
+      {/*      <select name="preset">*/}
+      {/*        <option value="default">Choose a pre-set Arrangement</option>*/}
+      {/*        <option value="preset-1">Pre-set 1</option>*/}
+      {/*        <option value="preset-2">Pre-set 2</option>*/}
+      {/*        <option value="preset-3">Pre-set 3</option>*/}
+      {/*      </select>*/}
+      {/*  </span>*/}
       <span id="coordinates">
             <span id="axis">
               <span id="axis-x" className="axis">X:
