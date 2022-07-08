@@ -170,7 +170,6 @@ func makeGameStateHandler(srv EventsBroker) gin.HandlerFunc {
 		//opcao 2: fazer endpint pra solicitar ultimo evento
 		//opcao 3:  no frontend mudar a logic pra o setup nao definir proximo estado do frontend
 
-		log.Printf("streaming to %s", uuid)
 		c.Stream(func(w io.Writer) bool {
 			select {
 			case <-clientGone:
@@ -185,6 +184,5 @@ func makeGameStateHandler(srv EventsBroker) gin.HandlerFunc {
 			}
 			return true
 		})
-		log.Printf("finished streaming to %s", uuid)
 	}
 }
