@@ -22,7 +22,7 @@ class FieldPlayer extends React.Component {
 
   componentDidMount() {
     const meInJquery = $(this.myDOM.current)
-    this.props.setOnNewFrameListener(player => {
+    this.props.setOnNewFrameListener((player, isBallHolder) => {
 
       if(!player) {
         this.myDOM.current.style.opacity = 0.2
@@ -36,6 +36,15 @@ class FieldPlayer extends React.Component {
 
       const left = 100 * this.position.x / GameDefinitions.Field.Width
       const top = 100 * (GameDefinitions.Field.Height - this.position.y) / GameDefinitions.Field.Height
+
+      const hasClass = this.myDOM.current.classList.contains("ball-holder")
+      if(!hasClass && isBallHolder) {
+        console.log(`add it`, )
+        this.myDOM.current.classList.add("ball-holder")
+      } else if(this.myDOM.current.classList.contains("ball-holder")) {
+        console.log(`Remove it`, )
+        this.myDOM.current.classList.remove("ball-holder")
+      }
 
       this.myDOM.current.style.left = `${left}%`;
       this.myDOM.current.style.top = `${top}%`;

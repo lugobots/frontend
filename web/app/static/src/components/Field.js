@@ -16,12 +16,16 @@ class Field extends React.Component {
     const params = new URLSearchParams(window.location.search);
     this.grid_cols = parseInt(params.get("c")) ?? 1
     this.grid_rows = parseInt(params.get("r")) ?? 1
+    this.ballHolder = {number: 0, team_side: ""}
   }
 
   componentDidMount() {
     channel.subscribe((snapshot) => {
       const left = 100 * (snapshot.ball.position.x ?? 0) / GameDefinitions.Field.Width
       const bottom = 100 * (snapshot.ball.position.y ?? 0) / GameDefinitions.Field.Height
+
+      this.ballHolder.number = snapshot.ball?.holder?.number
+      this.ballHolder.team_side = snapshot.ball?.holder?.team_side
 
       this.ballDOM.current.style.left = `${left}%`;
       this.ballDOM.current.style.bottom = `calc(${bottom}%)`;
@@ -34,7 +38,7 @@ class Field extends React.Component {
       let homeMissed = presentPlayers.slice()
       snapshot.home_team?.players?.forEach((player) => {
         homeMissed.splice(homeMissed.indexOf(player.number), 1)
-        this.onNewFrameListeners["home"][`home_${player.number}`](player)
+        this.onNewFrameListeners["home"][`home_${player.number}`](player, (this.ballHolder.number === player.number && this.ballHolder.team_side === "HOME"))
       })
 
       homeMissed.forEach(playerNumber => {
@@ -44,7 +48,7 @@ class Field extends React.Component {
       let awayMissed = presentPlayers.slice()
       snapshot.away_team?.players?.forEach((player) => {
         awayMissed.splice(awayMissed.indexOf(player.number), 1)
-        this.onNewFrameListeners["away"][`away_${player.number}`](player)
+        this.onNewFrameListeners["away"][`away_${player.number}`](player, (this.ballHolder.number === player.number && this.ballHolder.team_side === "AWAY"))
       })
 
       awayMissed.forEach(playerNumber => {

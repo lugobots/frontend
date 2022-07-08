@@ -721,6 +721,12 @@ $team-away-color-2 : var(--team-away-color-secondary);
     z-index: 10;
   }
 
+  &.ball-holder {
+    -webkit-box-shadow:0px 0px 9px 16px #36d75f;
+    -moz-box-shadow: 0px 0px 9px 16px #36d75f;
+    box-shadow: 0px 0px 9px 16px #36d75f;
+  }
+
   &.active-player {
     &::before { opacity: 1;}
   }
