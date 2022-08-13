@@ -95,6 +95,15 @@ class ToolBarTabDebug extends React.Component {
     });
   }
 
+  setGrid() {
+    const rows = document.getElementById("grid_rows").value
+    const cols = document.getElementById("grid_cols").value
+
+    console.log(`Setting grid to ${rows}x${cols}`)
+    window.location = `?c=${cols}&r=${rows}`
+  }
+
+
   componentDidMount() {
     let me = this;
     document.getElementById('field').onmousemove = function (e) {
@@ -151,7 +160,12 @@ class ToolBarTabDebug extends React.Component {
       {/*        <option value="preset-2">Pre-set 2</option>*/}
       {/*        <option value="preset-3">Pre-set 3</option>*/}
       {/*      </select>*/}
-      {/*  </span>*/}
+      {/*</span>*/}
+      <span id="grid-config">
+        <input type="number" min={0} max={15} id="grid_cols" name="grid_cols" />
+        <input type="number" min={0} max={15} id="grid_rows" name="grid_rows" />
+          <button id="btn-grid" className="btn"  onClick={this.setGrid}/>
+      </span>
       <span id="coordinates">
             <span id="axis">
               <span id="axis-x" className="axis">X:

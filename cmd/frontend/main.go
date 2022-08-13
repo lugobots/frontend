@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/lugobots/frontend/web/app"
-	"github.com/lugobots/frontend/web/app/broker"
-	"github.com/lugobots/frontend/web/app/propagator"
+	"log"
+	"net"
+	"net/http"
+	"time"
+
 	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/pkg/errors"
 	"github.com/rubens21/srvmgr"
@@ -13,10 +15,10 @@ import (
 	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"log"
-	"net"
-	"net/http"
-	"time"
+
+	"github.com/lugobots/frontend/web/app"
+	"github.com/lugobots/frontend/web/app/broker"
+	"github.com/lugobots/frontend/web/app/propagator"
 )
 
 var zapLog *zap.SugaredLogger
@@ -43,7 +45,7 @@ func init() {
 }
 
 func main() {
-
+	defaultPort := ":8081"
 	eventBroker := broker.NewBinder(app.Config{
 		GRPCAddress:         "localhost:5000",
 		GRPCInsecure:        true,
@@ -64,7 +66,7 @@ func main() {
 
 	server := app.NewHandler("", "local", eventBroker)
 	httpServer := &http.Server{
-		Addr:    ":8081",
+		Addr:    defaultPort,
 		Handler: server,
 	}
 
@@ -84,6 +86,7 @@ func main() {
 			return nil
 		},
 	))
+	zapLog.With("port", defaultPort).Info("starting HTTP service")
 
 	if err := serviceManager.Run(); err != nil {
 		zapLog.Errorf(err.Error())
