@@ -38,9 +38,8 @@ class PanelGameInfo extends React.Component {
           <span id="timer">
             <span id="remaining" style={remainingStyle} className="active">{this.props.time_remaining}</span>
             <span id="shot-clock" style={remainingStyle}>
-              <span id="shot-clock-home" />
+              <span id="shot-clock-label" >Shot clock: </span>
               <span id="shot-clock-timer">{this.props.shot_time}</span>
-              <span id="shot-clock-away" />
             </span>
             <span id="buffering" style={bufferStyle} >
               <span className="label">Buffering</span>

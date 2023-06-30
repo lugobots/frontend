@@ -575,10 +575,16 @@ $team-away-color-2 : var(--team-away-color-secondary);
 
     #remaining {
       @include model-square(100%);
-      @include font-size(28, 48);
-      padding-top: 21px;
+      font-size: 2.55em;
+      padding-top: 11px;
       font-family: $font-primary;
       line-height: 24px;
+
+    }
+
+    #shot-clock-label {
+        font-size: 0.7em;
+        color: #b9b9b9;
     }
 
   }
