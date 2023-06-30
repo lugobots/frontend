@@ -39,16 +39,18 @@ class FieldPlayer extends React.Component {
 
       const hasClass = this.myDOM.current.classList.contains("ball-holder")
       if(!hasClass && isBallHolder) {
-        console.log(`add it`, )
         this.myDOM.current.classList.add("ball-holder")
       } else if(this.myDOM.current.classList.contains("ball-holder")) {
-        console.log(`Remove it`, )
         this.myDOM.current.classList.remove("ball-holder")
       }
 
       this.myDOM.current.style.left = `${left}%`;
       this.myDOM.current.style.top = `${top}%`;
-      this.myDirectionDOM.current.style.transform = `rotate(${-player?.velocity?.direction?.ang + 90}deg)`;
+      let ang = 90
+      if(player?.velocity?.direction) {
+        ang = ((Math.atan2(player?.velocity?.direction.y, player?.velocity?.direction.x)*180)/Math.PI) + 360 - 90
+      }
+      this.myDirectionDOM.current.style.transform = `rotate(${-ang%360}deg)`;
     })
     meInJquery.draggable({
       containment: "parent",
