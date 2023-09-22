@@ -703,6 +703,8 @@ $team-away-color-2 : var(--team-away-color-secondary);
     bottom: -14px;
   }
 
+
+
   .player-direction {
     @include model-display(block, absolute);
     @include model-square(calc(28px + 4px));
@@ -713,6 +715,8 @@ $team-away-color-2 : var(--team-away-color-secondary);
     box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0 0 3px rgba($team-home-color-1, 0.54);
 
   }
+
+
 
   .player-number {
     @include model-square(18px);
@@ -725,6 +729,28 @@ $team-away-color-2 : var(--team-away-color-secondary);
     border-radius: 50%;
     font-family: $font-primary;
     z-index: 10;
+  }
+
+  &#player-home-team-1 {
+    background: rgba($team-home-color-2, 1);
+    box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0 0 3px rgba($team-home-color-1, 0.54);
+  }
+
+  &#player-away-team-1 {
+      background: rgba($team-away-color-2, 1);
+      box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0 0 3px rgba($team-away-color-1, 0.54);
+  }
+
+  &#player-home-team-1, &#player-away-team-1 {
+    width: 12px;
+    height: 56px;
+    border: 0;
+    border-radius: 20%;
+    transform: translate(calc(-50%), calc(-50%));
+
+    &::after, &::before,  .player-direction, .player-number {
+     display: none
+    }
   }
 
   &.ball-holder {
@@ -843,12 +869,17 @@ $team-away-color-2 : var(--team-away-color-secondary);
     }
   }
 }
+
 .rearranging  {
   .player {
     cursor: move;
     animation: shaking linear 1s;
     animation-iteration-count: infinite;
     transition: none;
+
+     &#player-home-team-1, &#player-away-team-1 {
+        animation: none;
+     }
   }
 }
 
