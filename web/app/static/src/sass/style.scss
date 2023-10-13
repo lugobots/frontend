@@ -742,8 +742,8 @@ $team-away-color-2 : var(--team-away-color-secondary);
   }
 
   &#player-home-team-1, &#player-away-team-1 {
-    width: 12px;
-    height: 56px;
+    @include model-square(64px);
+    width: 11px;
     border: 0;
     border-radius: 20%;
     transform: translate(calc(-50%), calc(-50%));
