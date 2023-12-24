@@ -1,8 +1,9 @@
 package samples
 
 import (
-	"github.com/lugobots/lugo4go/v2/pkg/field"
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v3/field"
+	"github.com/lugobots/lugo4go/v3/proto"
+	"github.com/lugobots/lugo4go/v3/specs"
 )
 
 func SampleMoveBall() Sample {
@@ -11,22 +12,22 @@ func SampleMoveBall() Sample {
 
 	lastSnap.Ball.Position = &proto.Point{}
 
-	for lastSnap.Ball.Position.X < field.FieldWidth {
+	for lastSnap.Ball.Position.X < specs.FieldWidth {
 		lastSnap = CopySnap(lastSnap)
 
-		lastSnap.Ball.Position.X += field.BallMaxSpeed
-		if lastSnap.Ball.Position.X > field.FieldWidth {
-			lastSnap.Ball.Position.X = field.FieldWidth
+		lastSnap.Ball.Position.X += specs.BallMaxSpeed
+		if lastSnap.Ball.Position.X > specs.FieldWidth {
+			lastSnap.Ball.Position.X = specs.FieldWidth
 		}
 		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, proto.GameSnapshot_WAITING))
 	}
 
-	for lastSnap.Ball.Position.Y < field.FieldHeight {
+	for lastSnap.Ball.Position.Y < specs.FieldHeight {
 		lastSnap = CopySnap(lastSnap)
 
-		lastSnap.Ball.Position.Y += field.BallMaxSpeed
-		if lastSnap.Ball.Position.Y > field.FieldHeight {
-			lastSnap.Ball.Position.Y = field.FieldHeight
+		lastSnap.Ball.Position.Y += specs.BallMaxSpeed
+		if lastSnap.Ball.Position.Y > specs.FieldHeight {
+			lastSnap.Ball.Position.Y = specs.FieldHeight
 		}
 		sample.Events = append(sample.Events, newStateChangeEvent(lastSnap, proto.GameSnapshot_WAITING))
 	}
@@ -34,7 +35,7 @@ func SampleMoveBall() Sample {
 	for lastSnap.Ball.Position.X > 0 {
 		lastSnap = CopySnap(lastSnap)
 
-		lastSnap.Ball.Position.X -= field.BallMaxSpeed
+		lastSnap.Ball.Position.X -= specs.BallMaxSpeed
 		if lastSnap.Ball.Position.X < 0 {
 			lastSnap.Ball.Position.X = 0
 		}
@@ -44,7 +45,7 @@ func SampleMoveBall() Sample {
 	for lastSnap.Ball.Position.Y > 0 {
 		lastSnap = CopySnap(lastSnap)
 
-		lastSnap.Ball.Position.Y -= field.BallMaxSpeed
+		lastSnap.Ball.Position.Y -= specs.BallMaxSpeed
 		if lastSnap.Ball.Position.Y < 0 {
 			lastSnap.Ball.Position.Y = 0
 		}
@@ -52,8 +53,8 @@ func SampleMoveBall() Sample {
 	}
 
 	vec, _ := proto.NewVector(*lastSnap.Ball.Position, field.FieldCenter())
-	vec.SetLength(field.BallMaxSpeed)
-	for lastSnap.Ball.Position.DistanceTo(field.FieldCenter()) >= field.BallSize/2 {
+	vec.SetLength(specs.BallMaxSpeed)
+	for lastSnap.Ball.Position.DistanceTo(field.FieldCenter()) >= specs.BallSize/2 {
 		lastSnap = CopySnap(lastSnap)
 
 		lastSnap.Ball.Position.X += int32(vec.X)

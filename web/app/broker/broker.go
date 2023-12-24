@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/lugobots/frontend/web/app"
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v3/proto"
 	"github.com/pkg/errors"
 	"github.com/rubens21/srvmgr"
 	"go.uber.org/zap"
