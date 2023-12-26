@@ -21,6 +21,9 @@ class ToolBarTabDebug extends React.Component {
     this.nextOrder = this.nextOrder.bind(this);
     this.startRearrange = this.startRearrange.bind(this);
     this.confirmRearranging = this.confirmRearranging.bind(this);
+    this.state = {
+      isDebugging: false,
+    }
   }
 
 
@@ -28,7 +31,9 @@ class ToolBarTabDebug extends React.Component {
     sendDebug("pause-resume")
       .then(
         ({status, body}) => {
-          // console.log(`DEBG: `, status, body)
+          this.setState({
+            isDebugging: !this.state.isDebugging,
+          })
         },
         (error) => {
           console.error(`Debug tool: `, error)
@@ -130,6 +135,7 @@ class ToolBarTabDebug extends React.Component {
       case StadiumStatus.DEBUGGING:
         enabledBreakPoint = true
         enabledRearrange = true
+        this.state.isDebugging = true
         break;
       case StadiumStatus.REARRANGING:
         enabledSavePos = true
@@ -137,20 +143,20 @@ class ToolBarTabDebug extends React.Component {
         break;
     }
     return <div className={`${this.props.className} debug-tab`}>
-      <button id="btn-resume" disabled={!enabledPausePlay} className="btn btn-main"
-              onClick={this.pauseResume}>Resume
+      <button id="btn-resume" disabled={!enabledPausePlay} className={`btn btn-main ${this.state.isDebugging ? "debugging" : ""}`}
+              onClick={this.pauseResume}>{this.state.isDebugging ? "On" : "Off"}
       </button>
       <button id="btn-next-order" disabled={!enabledBreakPoint} className="btn"
               onClick={this.nextOrder}>Next Order
       </button>
       <button id="btn-next-cycle" disabled={!enabledBreakPoint} className="btn"
-              onClick={this.nextTurn}>Next Cycle
+              onClick={this.nextTurn}>Next turn
       </button>
       <button id="btn-rearrange" disabled={!enabledRearrange} className="btn"
               onClick={this.startRearrange}>Rearrange
       </button>
       <button id="btn-save-positions" disabled={!enabledSavePos} className="btn"
-              onClick={this.confirmRearranging}>Save Positions
+              onClick={this.confirmRearranging}>Keep Positions
       </button>
       {/*<span id="choose-preset">*/}
       {/*      <label htmlFor="preset">Choose a pre-set Arrangement</label>*/}
