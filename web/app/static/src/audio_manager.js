@@ -1,10 +1,11 @@
 import {Howl} from "howler";
-import audioKick from "./sounds/kick.mp3";
+import audioKick from "./sounds/kicking.wav";
 import audioNewPlayer from "./sounds/new-player.wav";
 import audioLostPlayer from "./sounds/player-droped.mp3";
 import audioRefereeStart from "./sounds/referee-whistle.mp3";
 import audioBackground from "./sounds/gb.wav";
 import audioPublic from "./sounds/public.mp3";
+import debugPressed from "./sounds/on-debug-pressed.wav";
 import goal from "./sounds/goal1.wav";
 import audioConnectionLost from "./sounds/connection-lost.mp3";
 import audioReconnected from "./sounds/reconnected.mp3";
@@ -12,8 +13,24 @@ import audioReconnected from "./sounds/reconnected.mp3";
 
 class AudioManager {
   constructor() {
+    console.log("ISSOI MESMOA")
+    this.context = new AudioContext();
+    // this.playabble = false;
+    this.audio = {};
     this.ambience_on = false
     this.ambient_audio_num =null
+  }
+
+  __canPlay() {
+    if(this.context.state !== "suspended") {
+      return true;
+    }
+    this.context = new AudioContext();
+    console.log(this.context.state)
+    if(this.context.state === "suspended") {
+       return false;
+    }
+
     this.audio = {
       background: new Howl({
         src: [audioBackground],
@@ -49,6 +66,9 @@ class AudioManager {
       reconnected: new Howl({
         src: [audioReconnected]
       }),
+      debugPressed: new Howl({
+        src: [debugPressed]
+      }),
 
       goal: new Howl({
         src: [goal],
@@ -58,15 +78,20 @@ class AudioManager {
         }
       })
     }
+
+
+
+    return true
   }
 
   _startAmbienceSound() {
-    this.ambient_audio_num = this.audio.background.play()
-    this.audio.background.fade(0, 0.06, 5000);
+    // removing ambient sound temporariay
+    // this.ambient_audio_num = this.audio.background.play()
+    // this.audio.background.fade(0, 0.06, 5000);
     this.ambience_on = true
   }
 
-  _stopAmbienceSound() {
+  stopAmbienceSound() {
     if(this.ambience_on) {
       this.audio.background.fade(0.06, 0, 1000);
       this.ambience_on = false
@@ -78,6 +103,9 @@ class AudioManager {
   }
 
   onGameRestart() {
+    if(!this.__canPlay()) {
+      return
+    }
     // console.log(`onGameRestart`)
     this.audio.refereeStart.play()
     this.onGameResume()
@@ -90,18 +118,37 @@ class AudioManager {
 
 
   onKick() {
+    if(!this.__canPlay()) {
+      return
+    }
     this.audio.kick.play()
   }
 
   onNewPlayer() {
+    if(!this.__canPlay()) {
+      return
+    }
     this.audio.newPlayer.play()
   }
 
   onLostPlayer() {
+    if(!this.__canPlay()) {
+      return
+    }
     this.audio.lostPlayer.play()
   }
 
+  onDebugPressed() {
+    if(!this.__canPlay()) {
+      return
+    }
+    this.audio.debugPressed.play()
+  }
+
   onGoal() {
+    if(!this.__canPlay()) {
+      return
+    }
     const playNum = this.audio.goal.play("goal")
     setTimeout(() => {
       this.audio.goal.fade(0.3, 0, 5000, playNum);
@@ -109,7 +156,7 @@ class AudioManager {
   }
 
   onGameOver() {
-    this._stopAmbienceSound()
+    this.stopAmbienceSound()
   }
 
   onBackendConnectionLost() {
@@ -119,10 +166,21 @@ class AudioManager {
     this.onUpstreamReconnected()
   }
   onUpstreamConnectionLost() {
-    this._stopAmbienceSound()
-    this.audio.connectionLost.play()
+    if(!this.__canPlay()) {
+      return
+    }
+    this.stopAmbienceSound()
+    try {
+      this.audio.connectionLost.play()
+    }catch (e) {
+      console.log("GOT IS")
+    }
+
   }
   onUpstreamReconnected() {
+    if(!this.__canPlay()) {
+      return
+    }
     this.audio.reconnected.play()
   }
 }

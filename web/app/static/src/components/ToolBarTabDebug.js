@@ -8,6 +8,7 @@ import stadiumActions from '../redux/stadium/actions'
 import PropTypes from "prop-types";
 import {connect} from "react-redux";
 import channel from "../channel";
+import audio from "../audio_manager";
 
 class ToolBarTabDebug extends React.Component {
   constructor(props) {
@@ -15,7 +16,7 @@ class ToolBarTabDebug extends React.Component {
 
     this.coordXDOM = React.createRef();
     this.coordYDOM = React.createRef();
-
+    this.audioManager = audio
     this.pauseResume = this.pauseResume.bind(this);
     this.nextTurn = this.nextTurn.bind(this);
     this.nextOrder = this.nextOrder.bind(this);
@@ -28,9 +29,11 @@ class ToolBarTabDebug extends React.Component {
 
 
   pauseResume() {
+    this.audioManager.onDebugPressed()
     sendDebug("pause-resume")
       .then(
         ({status, body}) => {
+
           this.setState({
             isDebugging: !this.state.isDebugging,
           })
