@@ -13,16 +13,18 @@ import audioReconnected from "./sounds/reconnected.mp3";
 
 class AudioManager {
   constructor() {
-    console.log("ISSOI MESMOA")
     this.context = new AudioContext();
     // this.playabble = false;
-    this.audio = {};
+    this.audio = null;
     this.ambience_on = false
     this.ambient_audio_num =null
   }
 
   __canPlay() {
     if(this.context.state !== "suspended") {
+      if(this.audio == null) {
+        this.__initializaAutio()
+      }
       return true;
     }
     this.context = new AudioContext();
@@ -31,6 +33,13 @@ class AudioManager {
        return false;
     }
 
+    if(this.audio == null) {
+      this.__initializaAutio()
+    }
+    return true;
+  }
+
+  __initializaAutio() {
     this.audio = {
       background: new Howl({
         src: [audioBackground],
@@ -79,9 +88,6 @@ class AudioManager {
       })
     }
 
-
-
-    return true
   }
 
   _startAmbienceSound() {
@@ -103,12 +109,12 @@ class AudioManager {
   }
 
   onGameRestart() {
-    if(!this.__canPlay()) {
-      return
+    if(this.__canPlay()) {
+      // console.log(`onGameRestart`)
+      this.audio.refereeStart.play()
+      this.onGameResume()
     }
-    // console.log(`onGameRestart`)
-    this.audio.refereeStart.play()
-    this.onGameResume()
+
   }
 
   onGameResume() {
@@ -118,41 +124,46 @@ class AudioManager {
 
 
   onKick() {
-    if(!this.__canPlay()) {
-      return
+    if(this.__canPlay()) {
+      this.audio.kick.play()
     }
-    this.audio.kick.play()
+
   }
 
   onNewPlayer() {
-    if(!this.__canPlay()) {
-      return
+    if(this.__canPlay()) {
+
+
+      this.audio.newPlayer.play()
     }
-    this.audio.newPlayer.play()
   }
 
   onLostPlayer() {
-    if(!this.__canPlay()) {
-      return
+    if(this.__canPlay()) {
+
+
+      this.audio.lostPlayer.play()
     }
-    this.audio.lostPlayer.play()
   }
 
   onDebugPressed() {
-    if(!this.__canPlay()) {
-      return
+    if(this.__canPlay()) {
+
+
+      this.audio.debugPressed.play()
     }
-    this.audio.debugPressed.play()
   }
 
   onGoal() {
-    if(!this.__canPlay()) {
-      return
-    }
+    if(this.__canPlay()) {
+
+
     const playNum = this.audio.goal.play("goal")
-    setTimeout(() => {
-      this.audio.goal.fade(0.3, 0, 5000, playNum);
-    }, 3000)
+      setTimeout(() => {
+        this.audio.goal.fade(0.3, 0, 5000, playNum);
+      }, 3000)
+    }
+
   }
 
   onGameOver() {
