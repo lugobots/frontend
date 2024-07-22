@@ -2,15 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/lugobots/frontend/cmd/tester/samples"
-	"github.com/lugobots/frontend/cmd/tester/server"
-	"github.com/lugobots/lugo4go/v2/proto"
+	"log"
+	"net"
+
+	"github.com/lugobots/lugo4go/v3/proto"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
-	"log"
-	"net"
+
+	"github.com/lugobots/frontend/cmd/tester/samples"
+	"github.com/lugobots/frontend/cmd/tester/server"
 )
 
 var zapLog *zap.SugaredLogger

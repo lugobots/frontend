@@ -3,11 +3,13 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/pkg/field"
-	"github.com/lugobots/lugo4go/v2/proto"
-	"go.uber.org/zap"
 	"sync"
 	"time"
+
+	lugo4go "github.com/lugobots/lugo4go/v3"
+	"github.com/lugobots/lugo4go/v3/proto"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 func NewServer(logger *zap.SugaredLogger) *Broadcaster {
@@ -30,6 +32,16 @@ type Broadcaster struct {
 
 	// gambiarra pra nao precisar fazer lista de conecoes. Nao vai funcionar se tiver mais de um front end connectado!
 	shortcutHole chan *proto.GameEvent
+}
+
+func (b *Broadcaster) ResumeListeningPhase(ctx context.Context, request *proto.ResumeListeningRequest) (*proto.ResumeListeningResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (b *Broadcaster) StartGame(ctx context.Context, request *proto.StartRequest) (*proto.GameSetup, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (b *Broadcaster) PauseOrResume(ctx context.Context, _ *proto.PauseResumeRequest) (*proto.CommandResponse, error) {
@@ -94,7 +106,12 @@ func (b *Broadcaster) SetBallProperties(ctx context.Context, properties *proto.B
 }
 
 func (b *Broadcaster) SetPlayerProperties(ctx context.Context, properties *proto.PlayerProperties) (*proto.CommandResponse, error) {
-	p := field.GetPlayer(b.lastSnap, properties.Side, properties.Number)
+	inspector, err := lugo4go.NewGameSnapshotInspector(properties.Side, int(properties.Number), b.lastSnap)
+	if err == nil {
+		return nil, errors.Wrap(err, "failed to create inspector when setting player property")
+	}
+
+	p := inspector.GetMe()
 	if p == nil {
 		return nil, fmt.Errorf("player not found: %s-%d", properties.Side, properties.Number)
 	}

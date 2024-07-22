@@ -2,7 +2,7 @@ package app
 
 import (
 	"encoding/json"
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v3/proto"
 )
 
 type EventsBroker interface {

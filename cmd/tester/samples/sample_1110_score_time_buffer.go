@@ -1,7 +1,7 @@
 package samples
 
 import (
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v3/proto"
 )
 
 func SampleScoreTime() Sample {

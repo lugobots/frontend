@@ -1,16 +1,16 @@
 module github.com/lugobots/frontend
 
-go 1.17
+go 1.21
 
 require (
 	github.com/gin-gonic/gin v1.6.2
 	github.com/golang/mock v1.4.3
 	github.com/golang/protobuf v1.4.0
-	github.com/lugobots/lugo4go/v2 v2.0.0-beta
+	github.com/lugobots/lugo4go/v3 v3.0.0-rc.6
 	github.com/pkg/errors v0.9.1
 	github.com/rubens21/srvmgr v0.0.1
 	github.com/spf13/cobra v1.0.0
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.13.0
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4
 	google.golang.org/grpc v1.31.0
@@ -29,7 +29,6 @@ require (
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
-	github.com/paulbellamy/ratecounter v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
@@ -46,5 +45,6 @@ require (
 	google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55 // indirect
 	google.golang.org/protobuf v1.21.0 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 	honnef.co/go/tools v0.0.1-2019.2.3 // indirect
 )

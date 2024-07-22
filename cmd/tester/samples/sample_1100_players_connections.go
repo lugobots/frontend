@@ -1,8 +1,9 @@
 package samples
 
 import (
-	"github.com/lugobots/lugo4go/v2/pkg/field"
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v3/field"
+	"github.com/lugobots/lugo4go/v3/proto"
+	"github.com/lugobots/lugo4go/v3/specs"
 )
 
 func newPlayerEvent(snap *proto.GameSnapshot, player *proto.Player) *proto.GameEvent {
@@ -27,7 +28,7 @@ func SamplePlayersConnect() Sample {
 
 	lastSnap := getLastSampleSnap(sample)
 
-	posHome := field.HomeTeamGoal().Center
+	posHome := field.HomeSideTeamGoal().Center
 	lookingEast := proto.NewZeroedVelocity(proto.East())
 	sample.Events = append(sample.Events, newPlayerEvent(lastSnap, &proto.Player{
 		Number:   1,
@@ -36,7 +37,7 @@ func SamplePlayersConnect() Sample {
 		Velocity: &lookingEast,
 	}))
 
-	for i := uint32(2); i <= field.MaxPlayers; i++ {
+	for i := uint32(2); i <= specs.MaxPlayers; i++ {
 		lastSnap = CopySnap(lastSnap)
 		lookingEast.Speed = float64(i)
 		newPlayer := &proto.Player{
@@ -48,7 +49,7 @@ func SamplePlayersConnect() Sample {
 		sample.Events = append(sample.Events, newPlayerEvent(lastSnap, newPlayer))
 	}
 
-	posAway := field.AwayTeamGoal().Center
+	posAway := field.AwaySideTeamGoal().Center
 	lookingWest := proto.NewZeroedVelocity(proto.West())
 	sample.Events = append(sample.Events, newPlayerEvent(lastSnap, &proto.Player{
 		Number:   1,
@@ -56,7 +57,7 @@ func SamplePlayersConnect() Sample {
 		Position: &posAway,
 		Velocity: &lookingWest,
 	}))
-	for i := uint32(2); i <= field.MaxPlayers; i++ {
+	for i := uint32(2); i <= specs.MaxPlayers; i++ {
 		lastSnap = CopySnap(lastSnap)
 		newPlayer := &proto.Player{
 			Number:   i,

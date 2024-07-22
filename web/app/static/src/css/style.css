@@ -8672,7 +8672,7 @@ li {
 }
 
 .btn.btn-main::before {
-  content: '\f04b';
+  content: '\1F41E';
 }
 
 .btn.btn-main:hover {

@@ -1887,12 +1887,25 @@ $team-away-color-2 : var(--team-away-color-secondary);
       // border: none;
 
       &::before {
-        content: '\f04b';
+        content: '\1F41E';
+        font-size: 24px;
+        margin-right: 5px;
+        filter: brightness(40%);
       }
 
       &:hover {
-        filter: brightness(120%);
+        filter: brightness(100%);
       }
+
+      &.debugging{
+       &::before {
+        filter: brightness(90%);
+       }
+      }
+
+      &:disabled::before {
+             content: '';
+       }
     }
 
     &#btn-grid {

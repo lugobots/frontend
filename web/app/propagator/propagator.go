@@ -3,7 +3,7 @@ package propagator
 import (
 	"context"
 	"github.com/lugobots/frontend/web/app"
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v3/proto"
 	"github.com/pkg/errors"
 )
 

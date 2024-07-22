@@ -1,7 +1,7 @@
 package samples
 
 import (
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v3/proto"
 )
 
 func SampleServerIsUp() Sample {
@@ -12,7 +12,7 @@ func SampleServerIsUp() Sample {
 		Events: events,
 		Setup: &proto.GameSetup{
 			DevMode:           false,
-			StartMode:         proto.GameSetup_DELAY,
+			StartMode:         proto.GameSetup_WAIT,
 			ListeningMode:     proto.GameSetup_REMOTE,
 			ListeningDuration: 50,
 			GameDuration:      5 * 60 * (1000 / 50),
