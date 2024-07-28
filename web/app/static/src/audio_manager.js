@@ -99,7 +99,11 @@ class AudioManager {
 
   stopAmbienceSound() {
     if(this.ambience_on) {
-      this.audio.background.fade(0.06, 0, 1000);
+      try {
+        this.audio.background.fade(0.06, 0, 1000);
+      } catch (e) {
+        console.error(`failed to fade sound out`, e)
+      }
       this.ambience_on = false
     }
   }
@@ -110,8 +114,12 @@ class AudioManager {
 
   onGameRestart() {
     if(this.__canPlay()) {
-      // console.log(`onGameRestart`)
-      this.audio.refereeStart.play()
+      try {
+        // console.log(`onGameRestart`)
+        this.audio.refereeStart.play();
+      } catch (e) {
+        console.error(`failed to play sound `, e)
+      }
       this.onGameResume()
     }
 
@@ -124,8 +132,11 @@ class AudioManager {
 
 
   onKick() {
-    if(this.__canPlay()) {
-      this.audio.kick.play()
+    if(this.__canPlay()) {    try {
+      this.audio.kick.play();
+    }catch (e) {
+      console.error(`error on kick`, e)
+    }
     }
 
   }
@@ -133,24 +144,33 @@ class AudioManager {
   onNewPlayer() {
     if(this.__canPlay()) {
 
-
-      this.audio.newPlayer.play()
+    try{
+      this.audio.newPlayer.play();
+    }catch (e) {
+      console.error(`error on newPlayer`, e)
+    }
     }
   }
 
   onLostPlayer() {
     if(this.__canPlay()) {
 
-
-      this.audio.lostPlayer.play()
+    try{
+      this.audio.lostPlayer.play();
+    }catch (e) {
+      console.error(`error on lostPlayer`, e)
+    }
     }
   }
 
   onDebugPressed() {
     if(this.__canPlay()) {
 
-
-      this.audio.debugPressed.play()
+    try{
+      this.audio.debugPressed.play();
+    }catch (e) {
+      console.error(`error on debugPressed`, e)
+    }
     }
   }
 

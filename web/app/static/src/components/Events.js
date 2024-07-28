@@ -18,7 +18,6 @@ class Events extends React.Component {
     let team_goal = ""
     let displayNone = {}
 
-
     let modal = null
     let is_over = false
     switch (this.props.stadium_status) {
@@ -44,7 +43,7 @@ class Events extends React.Component {
     return <section id="event-view" style={displayNone} className={classList.join(" ")}>
       <EventAlert modal={modal}/>
       <EventGoal team_goal={team_goal}/>
-      <EventGameOver show={is_over} />
+      <EventGameOver reason={this.props.game_over_reason?.reason} show={is_over} />
       <svg version="1.1" xmlns="http://www.w3.org/2000/svg" id="filter_blur">
         <filter id="blur">
           <feGaussianBlur stdDeviation="6"/>
@@ -59,6 +58,7 @@ Events.propTypes = {
   team_goal: PropTypes.string,
   title: PropTypes.string,
   text: PropTypes.object,
+  game_over_reason: PropTypes.string,
 }
 
 const mapStateToProps = state => {
@@ -67,6 +67,7 @@ const mapStateToProps = state => {
     team_goal: state.stadium.event_data?.team_goal,
     title: state.stadium.event_data?.modal?.title,
     text: state.stadium.event_data?.modal?.text,
+    game_over_reason: state.stadium.event_data,
   }
 }
 

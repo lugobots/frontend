@@ -1162,6 +1162,11 @@ $team-away-color-2 : var(--team-away-color-secondary);
         margin: 15px 0px 0px 0px;
       }
 
+       #icon-trophy {
+        max-width: 172px;
+       }
+
+
       .game-panel {
         @include model-flex(row,nowrap,center,false);
         position: relative;

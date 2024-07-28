@@ -55,9 +55,10 @@ function resume() {
   }
 }
 
-function over() {
+function over(reason) {
   return {
     type: OVER,
+    reason,
   }
 }
 

@@ -77,7 +77,7 @@ export default function match(state = initialState, action) {
     case OVER:
       return Object.assign({}, state, {
         status: StadiumStatus.OVER,
-        event_data: null,
+        event_data: action,
       })
     default:
       return state
