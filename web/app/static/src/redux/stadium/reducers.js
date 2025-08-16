@@ -1,5 +1,5 @@
-import {RESET, ALERT, DEBUG, GOAL, PANEL_UPDATE, RESUME, REARRANGE, OVER, BUFFERING} from './actionTypes'
-import {StadiumStatus} from "../../constants";
+import {RESET, ALERT, DEBUG, GOAL, PANEL_UPDATE, RESUME, REARRANGE, OVER, BUFFERING, OVERTIME} from './actionTypes'
+import {StadiumStatus, Periods} from "../../constants";
 
 
 const defaultPanel = {
@@ -34,6 +34,7 @@ const initialState = {
   event_data: null,
   snapshot: defaultSnapshot,
   lastSnapshot: null,
+  period: Periods.REGULAR_TIME,
 }
 
 export default function match(state = initialState, action) {
@@ -58,6 +59,12 @@ export default function match(state = initialState, action) {
       return Object.assign({}, state, {
         status: StadiumStatus.GOAL,
         event_data: {team_goal: action.team_side},
+      })
+    case OVERTIME:
+      console.log(`Event was dispatched!`)
+      return Object.assign({}, state, {
+        period: Periods.OVERTIME,
+        event_data: {},
       })
     case ALERT:
       return Object.assign({}, state, {

@@ -66,6 +66,12 @@ const StadiumStatus = {
   BUFFERING: "BUFFERING",
 }
 
+const Periods = {
+  REGULAR_TIME: "REGULAR_TIME",
+  OVERTIME: "OVERTIME",
+  SHOOTOUT: "SHOOTOUT"
+}
+
 const BreakpointType = {
   ORDERS: 'ORDERS',
   TURN: 'TURN',
@@ -82,4 +88,5 @@ export {
   AppStatus,
   // ModalModes,
   StadiumStatus,
+  Periods,
 };

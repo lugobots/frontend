@@ -9,6 +9,7 @@ import debugPressed from "./sounds/on-debug-pressed.wav";
 import goal from "./sounds/goal1.wav";
 import audioConnectionLost from "./sounds/connection-lost.mp3";
 import audioReconnected from "./sounds/reconnected.mp3";
+import overtime from "./sounds/extra-time3.wav";
 
 
 class AudioManager {
@@ -78,7 +79,9 @@ class AudioManager {
       debugPressed: new Howl({
         src: [debugPressed]
       }),
-
+      overtime: new Howl({
+        src: [overtime],
+      }),
       goal: new Howl({
         src: [goal],
         volume: 0.3,
@@ -213,6 +216,17 @@ class AudioManager {
       return
     }
     this.audio.reconnected.play()
+  }
+
+  onOvertime() {
+    if(!this.__canPlay()) {
+      return
+    }
+    try {
+      this.audio.overtime.play()
+    }catch (e) {
+      console.log("GOT IS")
+    }
   }
 }
 

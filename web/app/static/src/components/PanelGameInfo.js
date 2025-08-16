@@ -14,7 +14,8 @@ class PanelGameInfo extends React.Component {
     renderLogger(this.constructor.name)
     let homeTeamClass = ""
     let awayTeamClass = ""
-    let remainingStyle = {}
+    let remainingTimeStyle = {}
+    let remainingShotStyle = {}
     let bufferProgressStyle = {}
     let bufferStyle = {display: 'none'}
     switch (this.props.stadium_status) {
@@ -27,17 +28,23 @@ class PanelGameInfo extends React.Component {
         }
         break;
         case StadiumStatus.BUFFERING:
-          remainingStyle = {display: 'none'}
+          remainingTimeStyle = {display: 'none'}
           bufferStyle = {}
           bufferProgressStyle = {maxHeight: `${this.props.buffer_percentile}%` }
 
+    }
+    console.log(`COLO ${parseInt(this.props.shot_time)}`)
+    if(parseInt(this.props.shot_time) <= 5) {
+      remainingShotStyle = {
+        color: 'red',
+      }
     }
     return <div id="game-info">
         <span id="score-info">
           <span id="score-home-team" className={`score-team ${homeTeamClass}`}>{this.props.home_score}</span>
           <span id="timer">
-            <span id="remaining" style={remainingStyle} className="active">{this.props.time_remaining}</span>
-            <span id="shot-clock" style={remainingStyle}>
+            <span id="remaining" style={remainingTimeStyle} className="active">{this.props.time_remaining}</span>
+            <span id="shot-clock" style={remainingShotStyle}>
               <span id="shot-clock-label" >Shot clock: </span>
               <span id="shot-clock-timer">{this.props.shot_time}</span>
             </span>

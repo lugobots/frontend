@@ -8,6 +8,7 @@ import store from "./store";
 import Stadium from "./components/Stadium";
 import channel from "./channel";
 import audio from "./audio_manager";
+import {OVERTIME} from "./redux/stadium/actionTypes";
 // import {Howl} from "howler";
 // import audioKick from "./sounds/kick.mp3";
 // import audioNewPlayer from "./sounds/new-player.wav";
@@ -71,6 +72,11 @@ class App extends React.Component {
     // detecting game start or restart
     if (data.game_event.game_snapshot?.state === GameStates.LISTENING && this.previousGameState === GameStates.GET_READY) {
       this.audioManager.onGameRestart()
+      if(data.game_event.game_snapshot?.period === "OVERTIME") {
+        console.log(`changed the period`, data.game_event.game_snapshot?.period)
+        this.props.dispatch(stadiumAction.overtime())
+        this.audioManager.onOvertime()
+      }
       // } else if (data.game_event.game_snapshot?.state !== GameStates.WAITING && this.previousGameState === GameStates.WAITING) {
       //   this.audioManager.onGameStarts()
     }
@@ -151,6 +157,7 @@ class App extends React.Component {
       console.log("%cupstream connection reestablished", "color: green")
       this.props.dispatch(appAction.upstreamConnected())
     });
+
     this.evtSource.addEventListener(EventTypes.StateChange, (e) => this.onStateChange(this.parse(e)));
     this.evtSource.addEventListener(EventTypes.Goal, (e) => {
       this.audioManager.onGoal()

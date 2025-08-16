@@ -22,6 +22,7 @@ const (
 	EventGameOver      EventType = "game_over"
 	EventLostPlayer    EventType = "lost_player"
 	EventGoal          EventType = "goal"
+	EventPeriodChanged EventType = "period_changed"
 
 	//events between frontend server and frontend
 	EventConnectionLost          EventType = "connection_lots"

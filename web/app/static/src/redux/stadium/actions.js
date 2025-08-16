@@ -1,4 +1,4 @@
-import {ALERT, DEBUG, GOAL, OVER, PANEL_UPDATE, REARRANGE, RESET, RESUME, BUFFERING} from "./actionTypes";
+import {ALERT, DEBUG, GOAL, OVER, PANEL_UPDATE, REARRANGE, RESET, RESUME, BUFFERING, OVERTIME} from "./actionTypes";
 
 function reset() {
   return {
@@ -38,7 +38,11 @@ function displayGoal(team_side) {
     team_side,
   }
 }
-
+function overtime() {
+  return {
+    type: OVERTIME,
+  }
+}
 function displayAlert(title, text) {
   return {
     type: ALERT,
@@ -65,6 +69,7 @@ function over(reason) {
 export default {
   updatePanel,
   displayGoal,
+  overtime,
   displayAlert,
   resume,
   pauseForDebug,
