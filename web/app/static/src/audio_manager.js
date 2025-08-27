@@ -9,7 +9,9 @@ import debugPressed from "./sounds/on-debug-pressed.wav";
 import goal from "./sounds/goal1.wav";
 import audioConnectionLost from "./sounds/connection-lost.mp3";
 import audioReconnected from "./sounds/reconnected.mp3";
-import overtime from "./sounds/extra-time3.wav";
+import overtime from "./sounds/extra-time3.wav";//https://mixkit.co/free-sound-effects/countdown/
+import possessionEnding from "./sounds/ball-possesion-limit2.wav";//https://mixkit.co/free-sound-effects/countdown/
+import loseBallPossession from "./sounds/lose-ball-possession.wav";//https://mixkit.co/free-sound-effects/countdown/
 
 
 class AudioManager {
@@ -81,6 +83,12 @@ class AudioManager {
       }),
       overtime: new Howl({
         src: [overtime],
+      }),
+      possessionEnding: new Howl({
+        src: [possessionEnding],
+      }),
+      loseBallPossession: new Howl({
+        src: [loseBallPossession],
       }),
       goal: new Howl({
         src: [goal],
@@ -218,6 +226,27 @@ class AudioManager {
     this.audio.reconnected.play()
   }
 
+  onPossessionEnding() {
+    if(!this.__canPlay()) {
+      return
+    }
+    try {
+      this.audio.possessionEnding.play()
+    }catch (e) {
+      console.error(e)
+    }
+  }
+
+  onPossessionLost() {
+    if(!this.__canPlay()) {
+      return
+    }
+    try {
+      this.audio.loseBallPossession.play()
+    }catch (e) {
+      console.error(e)
+    }
+  }
   onOvertime() {
     if(!this.__canPlay()) {
       return
@@ -225,7 +254,7 @@ class AudioManager {
     try {
       this.audio.overtime.play()
     }catch (e) {
-      console.log("GOT IS")
+      console.error(e)
     }
   }
 }

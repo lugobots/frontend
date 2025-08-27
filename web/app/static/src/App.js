@@ -69,6 +69,10 @@ class App extends React.Component {
     //   console.log(data.game_event.game_snapshot?.state)
     // }
 
+
+    if (data.game_event.game_snapshot?.state === GameStates.SHIFTING ) {
+      this.audioManager.onPossessionLost()
+    }
     // detecting game start or restart
     if (data.game_event.game_snapshot?.state === GameStates.LISTENING && this.previousGameState === GameStates.GET_READY) {
       this.audioManager.onGameRestart()

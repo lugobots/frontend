@@ -160,7 +160,8 @@ func (b *Binder) connect() error {
 
 func (b *Binder) drainBuffer(ctx context.Context, caching chan app.FrontEndUpdate) {
 	limiter := rate.NewLimiter(40, 1)
-	shouldSleep := false
+	periodHasChanged := false
+	shouldPause := false
 	for {
 		select {
 		case <-ctx.Done():
@@ -176,19 +177,23 @@ func (b *Binder) drainBuffer(ctx context.Context, caching chan app.FrontEndUpdat
 			b.sendToAll(update)
 
 			if !b.gameSetup.DevMode {
+				if shouldPause {
+					shouldPause = false
+					time.Sleep(3 * time.Second)
+				}
 				switch update.Type {
 				case app.EventGoal:
 					time.Sleep(8 * time.Second)
 				case app.EventStateChange:
-					if shouldSleep {
-						time.Sleep(5 * time.Second)
-						shouldSleep = false
+					if periodHasChanged {
+						shouldPause = true
+						periodHasChanged = false
 					}
 					if err := limiter.Wait(context.Background()); err != nil {
 						b.Logger.With("error", err).Error("could not wait more to keep the rate")
 					}
 				case app.EventPeriodChanged:
-					shouldSleep = true
+					periodHasChanged = true
 				}
 			}
 			//if update.Type == app.EventGameOver {

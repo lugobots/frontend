@@ -34,7 +34,7 @@ class Stadium extends React.Component {
     this.setMainColor('--team-away-color-secondary', this.props.setup.away_team.colors.secondary);
 
     let stadium_class = this.props.stadium_status.toLowerCase()
-    console.log('RE_RENDER')
+
     let lugo_stadium_class = this.props.period.toLowerCase()
     document.getElementById("lugobot-view").classList = lugo_stadium_class;
     if (this.props.stadium_status === StadiumStatus.ALERT ||
