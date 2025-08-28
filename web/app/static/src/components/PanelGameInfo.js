@@ -56,6 +56,7 @@ class PanelGameInfo extends React.Component {
     if(globalPossessionEnding ) {
       if(timeToLosePossession > 5) {
         globalPossessionEnding = false
+        audio.stopPossessionLostCountDown()
       } else {
         remainingShotStyle = {
           color: 'red',

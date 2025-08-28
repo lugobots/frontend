@@ -237,16 +237,28 @@ class AudioManager {
     }
   }
 
+  stopPossessionLostCountDown() {
+    if(!this.__canPlay()) {
+      return
+    }
+    try {
+      this.audio.possessionEnding.stop();
+    } catch (e) {
+      console.error(`failed to fade sound out`, e)
+    }
+  }
+
   onPossessionLost() {
     if(!this.__canPlay()) {
       return
     }
     try {
-      this.audio.loseBallPossession.play()
+      this.audio.loseBallPossession.play();
     }catch (e) {
       console.error(e)
     }
   }
+
   onOvertime() {
     if(!this.__canPlay()) {
       return
