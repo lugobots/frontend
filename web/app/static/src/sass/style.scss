@@ -79,9 +79,23 @@ $team-away-color-2 : var(--team-away-color-secondary);
 
 #lugobot-view {
   @include model-display($display:block, $position:relative);
+  background-color: black;
+
+}
+#lugobot-view::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: url("../img/bg/bg-page.jpg") no-repeat center center;
   background-size: cover;
-  // max-height: 100vh;
+}
+
+#lugobot-view.overtime::before {
+  animation: bgFade 5s forwards;
+}
+
+@keyframes bgFade {
+  to { opacity: 0; }
 }
 
 #stadium {
@@ -703,8 +717,6 @@ $team-away-color-2 : var(--team-away-color-secondary);
     bottom: -14px;
   }
 
-
-
   .player-direction {
     @include model-display(block, absolute);
     @include model-square(calc(28px + 4px));
@@ -715,8 +727,6 @@ $team-away-color-2 : var(--team-away-color-secondary);
     box-shadow: 0 1px 3px 1px rgba(5, 6, 6, 0.44), 0 0 3px rgba($team-home-color-1, 0.54);
 
   }
-
-
 
   .player-number {
     @include model-square(18px);
@@ -747,6 +757,9 @@ $team-away-color-2 : var(--team-away-color-secondary);
     border: 0;
     border-radius: 20%;
     transform: translate(calc(-50%), calc(-50%));
+    transition-property: width,height,color;
+    transition-duration: 5s;
+    transition-timing-function: linear;
 
     &::after, &::before,  .player-direction, .player-number {
      display: none
@@ -869,6 +882,13 @@ $team-away-color-2 : var(--team-away-color-secondary);
     }
   }
 }
+.overtime {
+  #player-home-team-1, #player-away-team-1 {
+    background: #000000;
+    @include model-square(18px);
+  }
+}
+
 
 .rearranging  {
   .player {
@@ -1161,6 +1181,11 @@ $team-away-color-2 : var(--team-away-color-secondary);
         line-height: 20px;
         margin: 15px 0px 0px 0px;
       }
+
+       #icon-trophy {
+        max-width: 172px;
+       }
+
 
       .game-panel {
         @include model-flex(row,nowrap,center,false);

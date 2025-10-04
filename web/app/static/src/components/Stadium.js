@@ -34,13 +34,16 @@ class Stadium extends React.Component {
     this.setMainColor('--team-away-color-secondary', this.props.setup.away_team.colors.secondary);
 
     let stadium_class = this.props.stadium_status.toLowerCase()
+
+    let lugo_stadium_class = this.props.period.toLowerCase()
+    document.getElementById("lugobot-view").classList = lugo_stadium_class;
     if (this.props.stadium_status === StadiumStatus.ALERT ||
       this.props.stadium_status === StadiumStatus.OVER) {
       stadium_class = " active-modal"
     }
     return <div id="stadium" className={stadium_class}>
       <Panel/>
-      <main id="lugobot-stadium" className="container">
+      <main id="lugobot-stadium" className={`container test ${lugo_stadium_class}`}>
         <Field/>
       </main>
       {this.props.setup.dev_mode ? <ToolBar/> : null}
@@ -52,12 +55,14 @@ class Stadium extends React.Component {
 Stadium.propTypes = {
   setup: PropTypes.object,
   stadium_status: PropTypes.string,
+  period: PropTypes.string,
 }
 
 const mapStateToProps = state => {
   return {
     setup: state.app.setup,
     stadium_status: state.stadium.status,
+    period: state.stadium.period,
   }
 }
 

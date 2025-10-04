@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/lugobots/frontend/web/app"
 	"github.com/lugobots/lugo4go/v3/proto"
 	"github.com/pkg/errors"
@@ -14,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
 	"io"
 	"sync"
 	"time"
@@ -96,11 +96,12 @@ func (b *Binder) GetGameConfig(uuid string) (app.FrontEndSet, error) {
 		b.consumers[uuid] <- b.lastUpdate
 		b.Logger.Warn("sending last update")
 	}()
-	marshal := jsonpb.Marshaler{
-		OrigName:     true,
-		EmitDefaults: false,
+
+	marshal := protojson.MarshalOptions{
+		UseProtoNames:   true,
+		EmitUnpopulated: false,
 	}
-	raw, err := marshal.MarshalToString(b.gameSetup)
+	raw, err := marshal.Marshal(b.gameSetup)
 	if err != nil {
 		return app.FrontEndSet{}, fmt.Errorf("error marshalling event message: %w", err)
 	}
@@ -160,6 +161,8 @@ func (b *Binder) connect() error {
 
 func (b *Binder) drainBuffer(ctx context.Context, caching chan app.FrontEndUpdate) {
 	limiter := rate.NewLimiter(40, 1)
+	periodHasChanged := false
+	shouldPause := false
 	for {
 		select {
 		case <-ctx.Done():
@@ -173,14 +176,25 @@ func (b *Binder) drainBuffer(ctx context.Context, caching chan app.FrontEndUpdat
 			}
 			b.lastUpdate = update
 			b.sendToAll(update)
+
 			if !b.gameSetup.DevMode {
+				if shouldPause {
+					shouldPause = false
+					time.Sleep(3 * time.Second)
+				}
 				switch update.Type {
 				case app.EventGoal:
 					time.Sleep(8 * time.Second)
 				case app.EventStateChange:
+					if periodHasChanged {
+						shouldPause = true
+						periodHasChanged = false
+					}
 					if err := limiter.Wait(context.Background()); err != nil {
 						b.Logger.With("error", err).Error("could not wait more to keep the rate")
 					}
+				case app.EventPeriodChanged:
+					periodHasChanged = true
 				}
 			}
 			//if update.Type == app.EventGameOver {
@@ -340,19 +354,18 @@ func (b *Binder) createFrame(event *proto.GameEvent, debugging bool) (app.FrontE
 		return app.FrontEndUpdate{}, false, err
 	}
 
-	marshal := jsonpb.Marshaler{
-		OrigName:     true,
-		EmitDefaults: true,
+	marshal := protojson.MarshalOptions{
+		UseProtoNames:   true,
+		EmitUnpopulated: true,
 	}
-	raw, err := marshal.MarshalToString(event)
-	//raw, err := json.Marshal(event)
-
+	rawBytes, err := marshal.Marshal(event)
 	if err != nil {
 		return app.FrontEndUpdate{}, false, fmt.Errorf("error marshalling event message: %w", err)
 	}
+	raw := string(rawBytes)
 
 	frameTime := time.Duration(b.gameSetup.ListeningDuration) * time.Millisecond
-	remaining := time.Duration(b.gameSetup.GameDuration-event.GameSnapshot.Turn) * frameTime
+	remaining := time.Duration(int(b.gameSetup.GameDuration)-int(event.GameSnapshot.Turn)) * frameTime
 	shotRemaining := time.Duration(0)
 	if event.GameSnapshot.ShotClock != nil {
 		shotRemaining = time.Duration(event.GameSnapshot.ShotClock.RemainingTurns) * frameTime
@@ -368,13 +381,25 @@ func (b *Binder) createFrame(event *proto.GameEvent, debugging bool) (app.FrontE
 		GameEvent: event,
 		Update: app.UpdateData{
 			GameEvent:     json.RawMessage(raw),
-			TimeRemaining: fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),
+			TimeRemaining: formatMMSS(remaining.Truncate(time.Second)), // fmt.Sprintf("%02d:%02d", int(remaining.Minutes()), int(remaining.Seconds())%60),
 			ShotTime:      fmt.Sprintf("%02d", int(shotRemaining.Seconds())),
 			DebugMode:     debugging,
 		},
 		ConnectionState: app.ConnStateUp,
 	}
 	return update, debugging, nil
+}
+
+func formatMMSS(d time.Duration) string {
+	if d < 0 {
+		return "-" + formatMMSS(-d) // handle negatives
+	}
+
+	totalSeconds := int(d.Seconds())
+	minutes := totalSeconds / 60
+	seconds := totalSeconds % 60
+
+	return fmt.Sprintf("%02d:%02d", minutes, seconds)
 }
 
 //func (b *Binder) watchBufferNotifications(bufferLoad <-chan float32) {
@@ -417,6 +442,8 @@ func eventTypeTranslator(event interface{}) (app.EventType, error) {
 		return app.EventDebugReleased, nil
 	case *proto.GameEvent_GameOver:
 		return app.EventGameOver, nil
+	case *proto.GameEvent_PeriodChanged:
+		return app.EventPeriodChanged, nil
 	default:
 		return "unknown", app.ErrUnknownGameEvent
 	}

@@ -11,6 +11,7 @@ import (
 // the events are sent on the Frontend pace, that may be not the same as the backend due to different configurations,
 // e.g. listening time, frontend animations, etc.
 type Propagator struct {
+	proto.UnimplementedBroadcastServer
 	broker app.EventsBroker
 }
 

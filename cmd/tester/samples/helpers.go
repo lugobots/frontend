@@ -1,11 +1,9 @@
 package samples
 
 import (
-	"fmt"
-
-	"github.com/golang/protobuf/proto"
 	protoLugo "github.com/lugobots/lugo4go/v3/proto"
 	"github.com/lugobots/lugo4go/v3/specs"
+	"google.golang.org/protobuf/proto"
 )
 
 type Sample struct {
@@ -39,17 +37,7 @@ func getInitSnap() *protoLugo.GameSnapshot {
 }
 
 func CopySnap(snap *protoLugo.GameSnapshot) *protoLugo.GameSnapshot {
-	j, err := proto.Marshal(snap)
-	if err != nil {
-		panic(fmt.Sprintf("error marshalling snapshot: %s", err))
-	}
-
-	m := &protoLugo.GameSnapshot{}
-	err = proto.UnmarshalMerge(j, m)
-	if err != nil {
-		panic(fmt.Sprintf("error marshalling snapshot: %s", err))
-	}
-	return m
+	return proto.Clone(snap).(*protoLugo.GameSnapshot)
 }
 
 func makeInitialPosition(playerNumber uint32, side protoLugo.Team_Side) *protoLugo.Point {

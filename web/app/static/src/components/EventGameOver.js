@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from "prop-types";
 import {connect} from "react-redux";
-import trophy from '../img/bg/modals/icon-trophy.png'
+import trophy from '../img/bg/modals/icon-trophy.png';
+import knockout from '../img/bg/modals/knockout.svg';
 
 class EventGameOver extends React.Component {
   render() {
@@ -19,8 +20,8 @@ class EventGameOver extends React.Component {
     return <div id="modal-winner" className={`modal modal-bg active-modal zoom-In`}>
       <span className="close-modal" title="Close modal"><i className="fas fa-times"/></span>
       <span className="modal-content">
-        <img id="icon-trophy" className="icon-modal" src={trophy} alt="Icon trophy" />
-        <h2 className="modal-title">Final Scoreboard</h2>
+        <img id="icon-trophy" className="icon-modal" src={this.props.reason === 'KNOCKOUT' ? knockout: trophy} alt="Icon trophy" />
+        <h2 className="modal-title">{this.props.reason === 'KNOCKOUT' ? 'Knockout' : 'Final Scoreboard' }</h2>
       </span>
 
       <section className="game-panel">
@@ -57,6 +58,7 @@ EventGameOver.propTypes = {
   away_score: PropTypes.number,
   home_team_avatar: PropTypes.string,
   away_team_avatar: PropTypes.string,
+  reason: PropTypes.string
 }
 
 const mapStateToProps = state => {
