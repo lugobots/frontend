@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/lugobots/frontend/web/app"
 	"github.com/lugobots/lugo4go/v3/proto"
 	"github.com/pkg/errors"
@@ -14,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
 	"io"
 	"sync"
 	"time"
@@ -96,11 +96,12 @@ func (b *Binder) GetGameConfig(uuid string) (app.FrontEndSet, error) {
 		b.consumers[uuid] <- b.lastUpdate
 		b.Logger.Warn("sending last update")
 	}()
-	marshal := jsonpb.Marshaler{
-		OrigName:     true,
-		EmitDefaults: false,
+
+	marshal := protojson.MarshalOptions{
+		UseProtoNames:   true,
+		EmitUnpopulated: false,
 	}
-	raw, err := marshal.MarshalToString(b.gameSetup)
+	raw, err := marshal.Marshal(b.gameSetup)
 	if err != nil {
 		return app.FrontEndSet{}, fmt.Errorf("error marshalling event message: %w", err)
 	}
@@ -353,16 +354,15 @@ func (b *Binder) createFrame(event *proto.GameEvent, debugging bool) (app.FrontE
 		return app.FrontEndUpdate{}, false, err
 	}
 
-	marshal := jsonpb.Marshaler{
-		OrigName:     true,
-		EmitDefaults: true,
+	marshal := protojson.MarshalOptions{
+		UseProtoNames:   true,
+		EmitUnpopulated: true,
 	}
-	raw, err := marshal.MarshalToString(event)
-	//raw, err := json.Marshal(event)
-
+	rawBytes, err := marshal.Marshal(event)
 	if err != nil {
 		return app.FrontEndUpdate{}, false, fmt.Errorf("error marshalling event message: %w", err)
 	}
+	raw := string(rawBytes)
 
 	frameTime := time.Duration(b.gameSetup.ListeningDuration) * time.Millisecond
 	remaining := time.Duration(int(b.gameSetup.GameDuration)-int(event.GameSnapshot.Turn)) * frameTime
