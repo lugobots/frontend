@@ -197,9 +197,6 @@ func (b *Binder) drainBuffer(ctx context.Context, caching chan app.FrontEndUpdat
 					periodHasChanged = true
 				}
 			}
-			//if update.Type == app.EventGameOver {
-			//	b.Logger.Info("CABOOOO!!!!")
-			//}
 		}
 	}
 }
@@ -222,6 +219,12 @@ func (b *Binder) Start() error {
 
 			var err error
 			go func() {
+				defer func() {
+					if err := recover(); err != nil {
+						b.Logger.With("error", err).
+							Warn("broadcast panicked")
+					}
+				}()
 				err = b.broadcast(caching)
 				if grpcErr, ok := status.FromError(err); ok && grpcErr.Code() != codes.Canceled {
 					b.Logger.Warnf("broadcast interrupted: %s", err)
